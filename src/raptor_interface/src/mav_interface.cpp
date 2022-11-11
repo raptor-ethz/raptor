@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
   /* INITIALIZE ROS*/
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<MinimalPublisher>());
-  rclcpp::shutdown();
+
 
     /* INITIALIZE MAVSDK */
   if (argc != 2)
@@ -75,7 +75,7 @@ int main(int argc, char * argv[])
   const auto arm_result = action.arm();
 
   std::cout << "Initialize program. \n";
-
-
+  
+  rclcpp::shutdown();
   return 0;
 }
