@@ -2,17 +2,29 @@
 Raptor workspace for ROS 2 packages
 
 # Workspace Structure
+
+## General structure
 ```
-src/
-|-  package_1/
-    |-  include
-    |-  src
-    |-  srv
+RAPTOR
+|-  src/
+    |-  package_1/
+        |-  include
+        |-  src
+        |-  srv
 ```
 
+## Packages
+
+### quad_interface
+
+- Provides an clear interface for all other nodes to interact with the quadcopter/px4. 
+
+### raptor_interface
+
+- Provides custom messages and services for the raptor workspace.
 
 
-# Source, Build, Install, Run
+# Source, Build, Install, Launch
 
 ## Source
 
@@ -23,7 +35,7 @@ source /opt/ros/humble/setup.bash
 
 ## Build
 
-Build all packages, run the build command within the workspace's parent directory 'raptor'
+Build all packages, run the build command within the workspace's parent directory
 ```bash
 colcon build
 ```
@@ -33,13 +45,13 @@ colcon build --packages-select <package_name>
 ```
 
 ## Install
-For using executables, from inside the workspace's parent directory 'raptor'
+For using executables, run the installation script from inside the workspace's parent directory
 ```bash
 . install/local_setup.bash
 ```
 
-## Run
-To launch a ros-node
+## Launch
+To launch a ros-node, run
 ```bash
 ros2 run <package_name> <my_node>
 ```
