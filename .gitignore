@@ -1,3 +1,9 @@
+# Custom
+/build
+/log
+/install
+/.vscode
+
 # Prerequisites
 *.d
 
