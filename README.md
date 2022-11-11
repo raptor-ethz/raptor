@@ -10,20 +10,19 @@ src/
     |-  srv
 ```
 
-# ROS 2 cheatsheet
 
-## Source setup files
+
+# Source, Build, Install, Run
+
+## Source
+
 Run on every new shell to have access to ros2 commands
 ```bash
 source /opt/ros/humble/setup.bash
 ```
 
+## Build
 
-
-
-## Build, Install and Run
-
-### Build
 Build all packages, run the build command within the workspace's parent directory 'raptor'
 ```bash
 colcon build
@@ -33,29 +32,29 @@ To build only a specific package, run
 colcon build --packages-select <package_name>
 ```
 
-### Install
-To use executables, from inside the workspace's parent directory 'raptor'
+## Install
+For using executables, from inside the workspace's parent directory 'raptor'
 ```bash
 . install/local_setup.bash
 ```
 
-### Run
-Run
+## Run
+To launch a ros-node
 ```bash
 ros2 run <package_name> <my_node>
 ```
 
-## Create new package
+# Create new Packages and Nodes
+
+## Packages
+
 Within raptor/src run
 ```bash
 ros2 pkg create --build-type amend_cmake --dependencies rclcpp <package_name>
 ```
 Note: '--dependencies rclcpp' will automatically include rclcpp as a dependency in package.xml and CMakeLists.txt.
 
-
-
-
-## Create new node
+## Nodes
 
 ### XML
 Add dependencies in package.xml
@@ -64,48 +63,75 @@ Add dependencies in package.xml
 ```
 
 ### CMake
-Add dependencies
-```CMake
-find_package(rclcpp REQUIRED)
-```
+In CMakeLists.txt:
+- add dependencies 
+  ```CMake
+  find_package(rclcpp REQUIRED)
+  ```
 
-Add target/executable
-```CMake
-add_executable(my_programm src/my_programm_src.cpp)
-```
+- add target/executable
+  ```CMake
+  add_executable(my_programm src/my_programm_src.cpp)
+  ```
 
-Link libraries to target
-```CMake
-ament_target_dependencies(my_programm ros_package) # link ros dependencies
-target_link_libraries(my_programm external_package) # link standard dependencies
-```
+- link libraries to target
+  ```CMake
+  ament_target_dependencies(my_programm rclcpp) # link ros dependencies
+  target_link_libraries(my_programm external_package) # link standard dependencies
+  ```
 
-Add target to installation list
-```CMake
-install(TARGETS
-  my_programm
-  DESTINATION lib/${PROJECT_NAME})
-```
+- add target to installation list
+  ```CMake
+  install(TARGETS
+    my_programm
+    DESTINATION lib/${PROJECT_NAME})
+  ```
 
 ### CPP
 Include header files
 ```CPP
 #include "rclcpp/rclcpp.hpp" // ros2 client library
-#include "std_msgs/msg/string.hpp" // message definitions
+#include "std_msgs/msg/string.hpp" // message and service definitions
 ```
 
-## Create Interfaces
+# Interfaces
 
-Message and service definitions must be placed in directories called msg and srv respectively.
+## List and Call Interfaces from Commandline
 
-IMPORTANT: Naming convention for messages and services: CamelCased
+- List all active services
+  ```bash
+  ros2 service list
+  ```
 
-### Services
-Define request and response variables in a MyService.srv file (placed in the srv directory) using the following structure:
+- Show type of a service
+  ```bash
+  ros2 service type /my_service
+  ```
+
+- Show structure of a type
+  ```bash
+  ros2 interface show <TypeName>
+  ```
+
+- Call service from commandline
+  ```bash
+  ros2 service call /my_service <TypeName> "{request_variable_1: value, request_variable_2: value}"
+  ```
+
+## Custom Interfaces
+
+- Available messages and services: [ros2 common interfaces](https://github.com/ros2/common_interfaces)
+- Available types: [ros2 built in types](https://docs.ros.org/en/rolling/Concepts/About-ROS-Interfaces.html)
+
+Message and service should be provided in separate interface package. \
+Names **must** follow the *CamelCased* convention. \
+Definitions must be placed in directories called msg and srv respectively. \
+
+For services, define request and response variables in the **/srv/MyService.srv** file using the following structure:
 ```srv
-int64 request_variable
+type request_variable
 ---
-int64 response_variable
+type response_variable
 ```
 
 Add the required dependency in the CMakeLists.txt.
