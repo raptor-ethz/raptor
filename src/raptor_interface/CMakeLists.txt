@@ -12,17 +12,27 @@ endif()
 
 # DEPENDENCIES
 find_package(ament_cmake REQUIRED)
-# ADD REQUIRED DEPENDENCIES HERE
+# ros dependencies
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+# INTERFACES
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/request_arm.srv"
+  DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+)
 
 # TARGETS
 add_executable(talker src/talker_node.cpp)
 ament_target_dependencies(talker rclcpp std_msgs) # link libs to target in ros2 style I suppose?
+add_executable(service_arm src/service_arm.cpp)
+ament_target_dependencies(service_arm rclcpp)
 
 # INSTALLATION
 install(TARGETS
   talker
+  service_arm
   DESTINATION lib/${PROJECT_NAME})
 
 

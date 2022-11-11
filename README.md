@@ -5,7 +5,9 @@ Raptor workspace for ROS 2 packages
 ```
 src/
 |-  package_1/
+    |-  include
     |-  src
+    |-  srv
 ```
 
 # ROS 2 cheatsheet
@@ -46,8 +48,9 @@ ros2 run <package_name> <my_node>
 ## Create new package
 Within raptor/src run
 ```bash
-ros2 pkg create --build-type amend_cmake <package_name>
+ros2 pkg create --build-type amend_cmake --dependencies rclcpp <package_name>
 ```
+Note: '--dependencies rclcpp' will automatically include rclcpp as a dependency in package.xml and CMakeLists.txt.
 
 
 
@@ -88,4 +91,40 @@ Include header files
 ```CPP
 #include "rclcpp/rclcpp.hpp" // ros2 client library
 #include "std_msgs/msg/string.hpp" // message definitions
+```
+
+## Create Interfaces
+
+Message and service definitions must be placed in directories called msg and srv respectively.
+
+### Services
+Define request and response variables in a my_service.srv file (placed in the srv directory) using the following structure:
+```srv
+int64 request_variable
+---
+int64 response_variable
+```
+
+Add the required dependency in the CMakeLists.txt.
+```CMake
+# required package for generating custom services
+find_package(rosidl_default_generators REQUIRED)
+
+# define which services should be generated
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/my_service.srv"
+  DEPENDENCIES <ros_msg> # If custom messages depend on ros_msgs
+)
+```
+
+Add the required dependency in the package.xml.
+```XML
+<!-- build dependency -->
+<build_depend>rosidl_default_generators</build_depend>
+
+<!-- runtime dependency -->
+<exec_depend>rosidl_default_runtime</exec_depend> 
+
+<!-- name of dependency group to which the package belongs -->
+<member_of_group>rosidl_interface_packages</member_of_group>
 ```
