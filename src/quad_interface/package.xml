@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>raptor_interface</name>
+  <name>quad_interface</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="pstrauch@ethz.ch">pstrauch</maintainer>
@@ -9,13 +9,16 @@
 
   <!-- build dependencies -->
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>rosidl_default_generators</build_depend>
+  <!-- <build_depend>builtin_interfaces</build_depend>
+  <build_depend>rosidl_default_generators</build_depend> -->
   <!-- runtime dependencies -->
+  <!-- <exec_depend>builtin_interfaces</exec_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
-  <member_of_group>rosidl_interface_packages</member_of_group>
+  <member_of_group>rosidl_interface_packages</member_of_group> -->
   <!-- ros rependencies -->
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
