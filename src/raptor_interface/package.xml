@@ -7,14 +7,15 @@
   <maintainer email="pstrauch@ethz.ch">pstrauch</maintainer>
   <license>TODO: License declaration</license>
 
+  <!-- build dependencies -->
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>rosidl_default_generators</build_depend>
+  <!-- runtime dependencies -->
   <exec_depend>rosidl_default_runtime</exec_depend>
   <member_of_group>rosidl_interface_packages</member_of_group>
-  <!-- ADD REQUIRED DEPENDENCIES HERE -->
+  <!-- ros rependencies -->
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
-  <!-- <depend>MAVSDK::mavsdk</depend> -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

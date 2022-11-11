@@ -74,9 +74,10 @@ Add target/executable
 add_executable(my_programm src/my_programm_src.cpp)
 ```
 
-Link libraries to target (ROS style)
+Link libraries to target
 ```CMake
-ament_target_dependencies(my_programm rclcpp std_msgs)
+ament_target_dependencies(my_programm ros_package) # link ros dependencies
+target_link_libraries(my_programm external_package) # link standard dependencies
 ```
 
 Add target to installation list
@@ -97,8 +98,10 @@ Include header files
 
 Message and service definitions must be placed in directories called msg and srv respectively.
 
+IMPORTANT: Naming convention for messages and services: CamelCased
+
 ### Services
-Define request and response variables in a my_service.srv file (placed in the srv directory) using the following structure:
+Define request and response variables in a MyService.srv file (placed in the srv directory) using the following structure:
 ```srv
 int64 request_variable
 ---
@@ -112,7 +115,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 # define which services should be generated
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/my_service.srv"
+  "srv/MyService.srv"
   DEPENDENCIES <ros_msg> # If custom messages depend on ros_msgs
 )
 ```
@@ -127,4 +130,11 @@ Add the required dependency in the package.xml.
 
 <!-- name of dependency group to which the package belongs -->
 <member_of_group>rosidl_interface_packages</member_of_group>
+```
+
+### Testing custom interface
+Build and install package, then run
+```bash
+ros2 interface show my_package/msg/MyMessage
+ros2 interface show my_package/srv/MyService
 ```
