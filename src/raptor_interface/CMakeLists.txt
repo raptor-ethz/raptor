@@ -16,13 +16,25 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
+#THIRD-PARTY DEPENDENCIES
+find_package(MAVSDK REQUIRED)
+
 # TARGETS
 add_executable(talker src/talker_node.cpp)
 ament_target_dependencies(talker rclcpp std_msgs) # link libs to target in ros2 style I suppose?
+add_executable(mav_interface src/mav_interface.cpp)
+ament_target_dependencies(mav_interface rclcpp std_msgs ) # link libs to target in ros2 style I suppose?
+
+#LINK THIRD-PARTY TARGETS
+target_link_libraries(mav_interface MAVSDK::mavsdk)
+
+target_include_directories(mav_interface PUBLIC include)
+
 
 # INSTALLATION
 install(TARGETS
   talker
+  mav_interface
   DESTINATION lib/${PROJECT_NAME})
 
 
