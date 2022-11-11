@@ -23,9 +23,20 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES geometry_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
 )
 
+#THIRD-PARTY DEPENDENCIES
+find_package(MAVSDK REQUIRED)
+
 # TARGETS
 add_executable(talker src/talker_node.cpp)
 ament_target_dependencies(talker rclcpp std_msgs) # link libs to target in ros2 style I suppose?
+add_executable(mav_interface src/mav_interface.cpp)
+ament_target_dependencies(mav_interface rclcpp std_msgs ) # link libs to target in ros2 style I suppose?
+
+#LINK THIRD-PARTY TARGETS
+target_link_libraries(mav_interface MAVSDK::mavsdk)
+
+target_include_directories(mav_interface PUBLIC include)
+
 add_executable(service_arm src/service_arm.cpp)
 ament_target_dependencies(service_arm rclcpp)
 
@@ -33,6 +44,7 @@ ament_target_dependencies(service_arm rclcpp)
 install(TARGETS
   talker
   service_arm
+  mav_interface
   DESTINATION lib/${PROJECT_NAME})
 
 
