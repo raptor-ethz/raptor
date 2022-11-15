@@ -6,6 +6,8 @@
 #include "std_msgs/msg/string.hpp" // include std_msg type
 #include "std_srvs/srv/trigger.hpp"
 
+#include "geometry_msgs/msg/point.hpp"
+
 // MAVSDK
 #include <mavsdk/mavsdk.h>
 #include <mavsdk/plugins/action/action.h>
@@ -20,26 +22,28 @@
 
 // class MinimalPublisher : public rclcpp::Node
 // {
-//   public:
-//     MinimalPublisher()
-//     : Node("minimal_publisher"), count_(0)
-//     {
-//       publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
-//       timer_ = this->create_wall_timer(
-//       std::chrono::milliseconds(500), std::bind(&MinimalPublisher::timer_callback, this));
-//     }
+// public:
+//   MinimalPublisher()
+//       : Node("minimal_publisher"), count_(0)
+//   {
+//     publisher_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
+//     timer_ = this->create_wall_timer(
+//         std::chrono::milliseconds(500), std::bind(&MinimalPublisher::timer_callback, this));
+//   }
 
-//   private:
-//     void timer_callback()
-//     {
-//       auto message = std_msgs::msg::String();
-//       message.data = "Hello, world! " + std::to_string(count_++);
-//       RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-//       publisher_->publish(message);
-//     }
-//     rclcpp::TimerBase::SharedPtr timer_;
-//     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-//     size_t count_;
+// private:
+//   void timer_callback()
+//   {
+//     auto message = geometry_msgs::msg::Point();
+//     message.x = 1.0;
+//     message.y = 2.5;
+//     message.z = -2.1;
+//     RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
+//     publisher_->publish(message);
+//   }
+//   rclcpp::TimerBase::SharedPtr timer_;
+//   rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr publisher_;
+//   size_t count_;
 // };
 
 int main(int argc, char *argv[])
@@ -75,8 +79,12 @@ int main(int argc, char *argv[])
   auto offboard = mavsdk::Offboard{system};   // for offboard control
   auto telemetry = mavsdk::Telemetry{system}; // for telemetry services
 
+  // start service node
   auto node = std::make_shared<Quad>(&action, &offboard, &telemetry);
 
+  // auto test_node = std::make_shared<MinimalPublisher>();
+
+  // rclcpp::spin(test_node);
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

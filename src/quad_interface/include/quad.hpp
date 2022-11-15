@@ -14,12 +14,15 @@
 #include "std_msgs/msg/string.hpp" // include std_msg type
 #include "std_srvs/srv/trigger.hpp"
 
+#include "geometry_msgs/msg/point.hpp"
+
 class Quad : public rclcpp::Node
 {
 public:
     Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry *telemetry);
 
 private:
+    // Services
     void arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
              std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
@@ -35,6 +38,10 @@ private:
     void runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
+    // Publisher
+    void position_pub_callback();
+
+    // Helpers
     std::string actionResultToString(mavsdk::Action::Result index);
 
     // mavsdk
@@ -50,4 +57,9 @@ private:
 
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_takeoff_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_land_;
+
+    rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr position_pub_;
+
+    rclcpp::TimerBase::SharedPtr timer_;
+    size_t count_;
 };

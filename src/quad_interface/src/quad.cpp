@@ -1,5 +1,9 @@
 #include "quad.hpp"
 
+// TODO read these values from a yaml file
+const int pos_pub_t = 50;
+
+// Constructor
 Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry *telemetry) : Node("quad_interface")
 {
     // init mavsdk variables
@@ -18,8 +22,13 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
                                                                     std::bind(&Quad::takeoff, this, std::placeholders::_1, std::placeholders::_2));
     service_land_ = this->create_service<std_srvs::srv::Trigger>("land",
                                                                  std::bind(&Quad::takeoff, this, std::placeholders::_1, std::placeholders::_2));
+    // create publishers
+    position_pub_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
+    timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(pos_pub_t), std::bind(&Quad::position_pub_callback, this));
 }
 
+// Services
 void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
@@ -96,6 +105,18 @@ void Quad::runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> re
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
 }
 
+// Publishers
+void Quad::position_pub_callback()
+{
+    auto message = geometry_msgs::msg::Point();
+    message.x = telemetry_->position_velocity_ned().position.north_m;
+    message.y = telemetry_->position_velocity_ned().position.east_m;
+    message.z = telemetry_->position_velocity_ned().position.down_m;
+    RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
+    position_pub_->publish(message);
+}
+
+// Helpers
 std::string Quad::actionResultToString(mavsdk::Action::Result index)
 {
     std::string val[] =

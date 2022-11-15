@@ -16,6 +16,7 @@ find_package(ament_cmake REQUIRED)
 # ros dependencies
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 # find_package(builtin_interfaces REQUIRED)
 # find_package(rosidl_default_generators REQUIRED)
@@ -38,7 +39,7 @@ find_package(MAVSDK REQUIRED)
 
 #interface
 add_executable(mav_interface src/mav_interface.cpp)
-ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs)
+ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs geometry_msgs)
 target_include_directories(mav_interface PUBLIC include)
 target_link_libraries(mav_interface MAVSDK::mavsdk)
 
