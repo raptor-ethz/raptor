@@ -4,6 +4,7 @@
 
 #include "rclcpp/rclcpp.hpp" // ros2 client library
 #include "std_msgs/msg/string.hpp" // include std_msg type
+#include "std_srvs/srv/set_bool.hpp"
 
 // MAVSDK
 #include <mavsdk/mavsdk.h>
@@ -14,49 +15,77 @@
 // helpers
 #include "mavsdk/mavsdk_helper.h"
 
-class MinimalPublisher : public rclcpp::Node
+// class MinimalPublisher : public rclcpp::Node
+// {
+//   public:
+//     MinimalPublisher()
+//     : Node("minimal_publisher"), count_(0)
+//     {
+//       publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
+//       timer_ = this->create_wall_timer(
+//       std::chrono::milliseconds(500), std::bind(&MinimalPublisher::timer_callback, this));
+//     }
+
+//   private:
+//     void timer_callback()
+//     {
+//       auto message = std_msgs::msg::String();
+//       message.data = "Hello, world! " + std::to_string(count_++);
+//       RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
+//       publisher_->publish(message);
+//     }
+//     rclcpp::TimerBase::SharedPtr timer_;
+//     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+//     size_t count_;
+// };
+
+class Quad : public rclcpp::Node
 {
-  public:
-    MinimalPublisher()
-    : Node("minimal_publisher"), count_(0)
-    {
-      publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
-      timer_ = this->create_wall_timer(
-      std::chrono::milliseconds(500), std::bind(&MinimalPublisher::timer_callback, this));
-    }
-
-  private:
-    void timer_callback()
-    {
-      auto message = std_msgs::msg::String();
-      message.data = "Hello, world! " + std::to_string(count_++);
-      RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-      publisher_->publish(message);
-    }
-    rclcpp::TimerBase::SharedPtr timer_;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-    size_t count_;
-};
-
-class Quad 
-{
-private:
-  mavsdk::Action* action_;
-  mavsdk::Offboard* offboard_;
-  mavsdk::Telemetry* telemetry_;
-
 public:
-  Quad(mavsdk::Action* action, mavsdk::Offboard* offboard, mavsdk::Telemetry* telemetry) {
+  Quad(mavsdk::Action* action, mavsdk::Offboard* offboard, mavsdk::Telemetry* telemetry)
+  : Node("quad_interface")
+  {
+    // init mavsdk variables
     action_ = action;
     offboard_ = offboard;
     telemetry_ = telemetry;
+
+    // create services
+    service_arm_ = this->create_service<std_srvs::srv::SetBool>("arm_quad", 
+      std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
+    service_preflight_check_ = this->create_service<std_srvs::srv::SetBool>("preflight_check", 
+      std::bind(&Quad::runPreflightCheck, this, std::placeholders::_1, std::placeholders::_2));
   }
 
-  bool arm() {
-    const auto arm_result = action_->arm();
-    return true;
+
+private:
+  void arm( std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+            std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request: [%d]", request->data);
+    const auto arm_result = action_->arm();  
+    // TODO check result
+    if(request->data) response->success = true;
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: [%d]", response->success);
   }
+
+  void runPreflightCheck( std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                          std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request: [%d]", request->data);
+    if(request->data) response->success = true;
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: [%d]", response->success);
+  }
+  
+  // mavsdk
+  mavsdk::Action* action_;
+  mavsdk::Offboard* offboard_;
+  mavsdk::Telemetry* telemetry_;
+  // ros
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr service_arm_;
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr service_preflight_check_;
 };
+
 
 
 
@@ -64,10 +93,11 @@ int main(int argc, char * argv[])
 { 
   /* INITIALIZE ROS*/
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MinimalPublisher>());
+  // rclcpp::spin(std::make_shared<MinimalPublisher>());
+  // std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("quad_interface");
 
 
-    /* INITIALIZE MAVSDK */
+  // init mavsdk
   if (argc != 2)
   {
     usage(argv[0]);
@@ -93,12 +123,10 @@ int main(int argc, char * argv[])
   auto offboard = mavsdk::Offboard{system};          // for offboard control
   auto telemetry = mavsdk::Telemetry{system};        // for telemetry services
 
-  Quad quad(&action, &offboard, &telemetry);
+  auto node = std::make_shared<Quad>(&action, &offboard, &telemetry);
 
-  /* ARM QUADCOPTER */
-  quad.arm();
-  std::cout << "Initialize program. \n";
   
+  rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
 }
