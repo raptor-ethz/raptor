@@ -38,6 +38,28 @@ class MinimalPublisher : public rclcpp::Node
     size_t count_;
 };
 
+class Quad 
+{
+private:
+  mavsdk::Action* action_;
+  mavsdk::Offboard* offboard_;
+  mavsdk::Telemetry* telemetry_;
+
+public:
+  Quad(mavsdk::Action* action, mavsdk::Offboard* offboard, mavsdk::Telemetry* telemetry) {
+    action_ = action;
+    offboard_ = offboard;
+    telemetry_ = telemetry;
+  }
+
+  bool arm() {
+    const auto arm_result = action_->arm();
+    return true;
+  }
+};
+
+
+
 int main(int argc, char * argv[])
 { 
   /* INITIALIZE ROS*/
@@ -71,9 +93,10 @@ int main(int argc, char * argv[])
   auto offboard = mavsdk::Offboard{system};          // for offboard control
   auto telemetry = mavsdk::Telemetry{system};        // for telemetry services
 
-  /* ARM QUADCOPTER */
-  const auto arm_result = action.arm();
+  Quad quad(&action, &offboard, &telemetry);
 
+  /* ARM QUADCOPTER */
+  quad.arm();
   std::cout << "Initialize program. \n";
   
   rclcpp::shutdown();
