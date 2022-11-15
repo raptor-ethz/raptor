@@ -42,6 +42,7 @@ ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs)
 target_include_directories(mav_interface PUBLIC include)
 target_link_libraries(mav_interface MAVSDK::mavsdk)
 
+target_sources(mav_interface PUBLIC src/quad.cpp)
 #service
 # add_executable(service_arm src/service_arm.cpp)
 # ament_target_dependencies(service_arm rclcpp std_srvs)

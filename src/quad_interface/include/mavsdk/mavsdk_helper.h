@@ -11,12 +11,6 @@ void usage(const std::string &bin_name)
       << "For example, to connect to the simulator use URL: udp://:14540\n";
 }
 
-std::string ActionResultToString(mavsdk::Action::Result index){
-  std::string val[] =
-      {"Unknown", "Success", "NoSystem", "ConnectionError", "Busy", "CommandDenied", "CommandDeniedLandedStateUnknown", "CommandDeniedNotLanded", "Timeout", "VtolTransitionSupportUnknown", "NoVtolTransitionSupport", "ParameterError", "Unsupported"};
-  return val[int(index)];
-}
-
 std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk)
 {
   std::cout << "Waiting to discover system...\n";
