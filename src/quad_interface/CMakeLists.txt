@@ -34,8 +34,8 @@ find_package(MAVSDK REQUIRED)
 # TARGETS
 
 #talker
-# add_executable(talker src/talker_node.cpp)
-# ament_target_dependencies(talker rclcpp std_msgs)
+add_executable(reference_generator src/reference_generator.cpp)
+ament_target_dependencies(reference_generator rclcpp std_srvs geometry_msgs)
 
 #interface
 add_executable(mav_interface src/mav_interface.cpp)
@@ -51,7 +51,7 @@ target_sources(mav_interface PUBLIC src/quad.cpp)
 
 # INSTALLATION
 install(TARGETS
-  # talker
+  reference_generator
   # service_arm
   mav_interface
   DESTINATION lib/${PROJECT_NAME})
