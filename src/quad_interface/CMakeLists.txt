@@ -31,21 +31,25 @@ find_package(MAVSDK REQUIRED)
 
 
 # TARGETS
-add_executable(talker src/talker_node.cpp)
-ament_target_dependencies(talker rclcpp std_msgs)
 
+#talker
+# add_executable(talker src/talker_node.cpp)
+# ament_target_dependencies(talker rclcpp std_msgs)
+
+#interface
 add_executable(mav_interface src/mav_interface.cpp)
 ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs)
 target_include_directories(mav_interface PUBLIC include)
 target_link_libraries(mav_interface MAVSDK::mavsdk)
 
+#service
 # add_executable(service_arm src/service_arm.cpp)
 # ament_target_dependencies(service_arm rclcpp std_srvs)
 
 
 # INSTALLATION
 install(TARGETS
-  talker
+  # talker
   # service_arm
   mav_interface
   DESTINATION lib/${PROJECT_NAME})

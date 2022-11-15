@@ -4,7 +4,7 @@
 
 #include "rclcpp/rclcpp.hpp" // ros2 client library
 #include "std_msgs/msg/string.hpp" // include std_msg type
-#include "std_srvs/srv/set_bool.hpp"
+#include "std_srvs/srv/trigger.hpp"
 
 // MAVSDK
 #include <mavsdk/mavsdk.h>
@@ -51,39 +51,45 @@ public:
     telemetry_ = telemetry;
 
     // create services
-    service_arm_ = this->create_service<std_srvs::srv::SetBool>("arm_quad", 
+    service_arm_ = this->create_service<std_srvs::srv::Trigger>("arm_quad", 
       std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
-    service_preflight_check_ = this->create_service<std_srvs::srv::SetBool>("preflight_check", 
+    service_preflight_check_ = this->create_service<std_srvs::srv::Trigger>("preflight_check", 
       std::bind(&Quad::runPreflightCheck, this, std::placeholders::_1, std::placeholders::_2));
   }
 
 
 private:
-  void arm( std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-            std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+  void arm( std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+            std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request: [%d]", request->data);
-    const auto arm_result = action_->arm();  
-    // TODO check result
-    if(request->data) response->success = true;
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: [%d]", response->success);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request");
+    const mavsdk::Action::Result arm_result = action_->arm();  
+    response->message = ActionResultToString(arm_result);
+    if(arm_result == mavsdk::Action::Result::Success){
+      response->success = true;
+      
+    }else{
+      response->success = false;
+    }
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]",response->message.c_str());
   }
 
-  void runPreflightCheck( std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                          std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+  void runPreflightCheck( std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request: [%d]", request->data);
-    if(request->data) response->success = true;
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back response: [%d]", response->success);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request");
+    //if(request->data) response->success = true;
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
   }
   
   // mavsdk
   mavsdk::Action* action_;
   mavsdk::Offboard* offboard_;
   mavsdk::Telemetry* telemetry_;
+
   // ros
-  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr service_arm_;
-  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr service_preflight_check_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_arm_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_preflight_check_;
 };
 
 
