@@ -2,7 +2,7 @@
 #include <iostream>
 #include <chrono>
 
-#include "rclcpp/rclcpp.hpp" // ros2 client library
+#include "rclcpp/rclcpp.hpp"       // ros2 client library
 #include "std_msgs/msg/string.hpp" // include std_msg type
 #include "std_srvs/srv/trigger.hpp"
 
@@ -42,8 +42,8 @@
 class Quad : public rclcpp::Node
 {
 public:
-  Quad(mavsdk::Action* action, mavsdk::Offboard* offboard, mavsdk::Telemetry* telemetry)
-  : Node("quad_interface")
+  Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry *telemetry)
+      : Node("quad_interface")
   {
     // init mavsdk variables
     action_ = action;
@@ -51,57 +51,116 @@ public:
     telemetry_ = telemetry;
 
     // create services
-    service_arm_ = this->create_service<std_srvs::srv::Trigger>("arm_quad", 
-      std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
-    service_preflight_check_ = this->create_service<std_srvs::srv::Trigger>("preflight_check", 
-      std::bind(&Quad::runPreflightCheck, this, std::placeholders::_1, std::placeholders::_2));
+    service_arm_ = this->create_service<std_srvs::srv::Trigger>("arm",
+                                                                std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
+    service_preflight_check_ = this->create_service<std_srvs::srv::Trigger>("preflight_check",
+                                                                            std::bind(&Quad::runPreflightCheck, this, std::placeholders::_1, std::placeholders::_2));
+    service_disarm_ = this->create_service<std_srvs::srv::Trigger>("disarm",
+                                                                   std::bind(&Quad::disarm, this, std::placeholders::_1, std::placeholders::_2));
+    service_takeoff_ = this->create_service<std_srvs::srv::Trigger>("takeoff",
+                                                                    std::bind(&Quad::takeoff, this, std::placeholders::_1, std::placeholders::_2));
+    service_land_ = this->create_service<std_srvs::srv::Trigger>("land",
+                                                                 std::bind(&Quad::takeoff, this, std::placeholders::_1, std::placeholders::_2));
   }
-
 
 private:
-  void arm( std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-            std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+  void arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request");
-    const mavsdk::Action::Result arm_result = action_->arm();  
+    const mavsdk::Action::Result arm_result = action_->arm();
     response->message = ActionResultToString(arm_result);
-    if(arm_result == mavsdk::Action::Result::Success){
+    if (arm_result == mavsdk::Action::Result::Success)
+    {
       response->success = true;
-      
-    }else{
+    }
+    else
+    {
       response->success = false;
     }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]",response->message.c_str());
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]", response->message.c_str());
   }
 
-  void runPreflightCheck( std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+  void disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received disarming request");
+    const mavsdk::Action::Result disarm_result = action_->disarm();
+    response->message = ActionResultToString(disarm_result);
+    if (disarm_result == mavsdk::Action::Result::Success)
+    {
+      response->success = true;
+    }
+    else
+    {
+      response->success = false;
+    }
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Disarming result: [%s]", response->message.c_str());
+  }
+
+  void takeoff(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+               std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received takeoff request");
+    const mavsdk::Action::Result takeoff_result = action_->takeoff();
+    response->message = ActionResultToString(takeoff_result);
+    if (takeoff_result == mavsdk::Action::Result::Success)
+    {
+      response->success = true;
+    }
+    else
+    {
+      response->success = false;
+    }
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff result: [%s]", response->message.c_str());
+  }
+
+  void land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+            std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received land request");
+    const mavsdk::Action::Result land_result = action_->land();
+    response->message = ActionResultToString(land_result);
+    if (land_result == mavsdk::Action::Result::Success)
+    {
+      response->success = true;
+    }
+    else
+    {
+      response->success = false;
+    }
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Land result: [%s]", response->message.c_str());
+  }
+
+  void runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                         std::shared_ptr<std_srvs::srv::Trigger::Response> response)
   {
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request");
-    //if(request->data) response->success = true;
+    // if(request->data) response->success = true;
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
   }
-  
+
   // mavsdk
-  mavsdk::Action* action_;
-  mavsdk::Offboard* offboard_;
-  mavsdk::Telemetry* telemetry_;
+  mavsdk::Action *action_;
+  mavsdk::Offboard *offboard_;
+  mavsdk::Telemetry *telemetry_;
 
   // ros
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_arm_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_disarm_;
+
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_preflight_check_;
+
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_takeoff_;
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_land_;
 };
 
-
-
-
-int main(int argc, char * argv[])
-{ 
+int main(int argc, char *argv[])
+{
   /* INITIALIZE ROS*/
   rclcpp::init(argc, argv);
   // rclcpp::spin(std::make_shared<MinimalPublisher>());
   // std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("quad_interface");
-
 
   // init mavsdk
   if (argc != 2)
@@ -125,13 +184,12 @@ int main(int argc, char * argv[])
     return 1;
   }
 
-  auto action = mavsdk::Action{system};              // for arming / disarming etc
-  auto offboard = mavsdk::Offboard{system};          // for offboard control
-  auto telemetry = mavsdk::Telemetry{system};        // for telemetry services
+  auto action = mavsdk::Action{system};       // for arming / disarming etc
+  auto offboard = mavsdk::Offboard{system};   // for offboard control
+  auto telemetry = mavsdk::Telemetry{system}; // for telemetry services
 
   auto node = std::make_shared<Quad>(&action, &offboard, &telemetry);
 
-  
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
