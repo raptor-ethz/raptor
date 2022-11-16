@@ -41,12 +41,12 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
                       std::placeholders::_1, 
                       std::placeholders::_2));
   start_pos_offboard_ = this->create_service<std_srvs::srv::Trigger>(
-    "start_pos_offboard", std::bind(&Quad::start_pos_offboard, 
+    "start_pos_offboard", std::bind(&Quad::startPosOffboard, 
                                     this, 
                                     std::placeholders::_1, 
                                     std::placeholders::_2));
   stop_pos_offboard_ = this->create_service<std_srvs::srv::Trigger>(
-    "stop_pos_offboard", std::bind( &Quad::stop_pos_offboard, 
+    "stop_pos_offboard", std::bind( &Quad::stopPosOffboard, 
                                     this, 
                                     std::placeholders::_1, 
                                     std::placeholders::_2));
@@ -54,11 +54,11 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
   // create publishers
   position_pub_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
   timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(pos_pub_t), std::bind(&Quad::position_pub_callback, this));
+    std::chrono::milliseconds(pos_pub_t), std::bind(&Quad::positionPubCallback, this));
 
   // create subscribers
   position_ref_sub_ = this->create_subscription<geometry_msgs::msg::Point>(
-    "position_ref", 10, std::bind(&Quad::position_ref_sub_callback, 
+    "position_ref", 10, std::bind(&Quad::positionRefSubCallback, 
                                   this, 
                                   std::placeholders::_1));
 }
@@ -98,7 +98,7 @@ void Quad::disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Disarming result: [%s]", response->message.c_str());
 }
 
-void Quad::start_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+void Quad::startPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                               std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard starting request");
@@ -124,7 +124,7 @@ void Quad::start_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> r
     "Position offboard start result: [%s]", response->message.c_str());
 }
 
-void Quad::stop_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+void Quad::stopPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard stopping request");
@@ -185,7 +185,7 @@ void Quad::runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> re
 }
 
 // Publishers
-void Quad::position_pub_callback()
+void Quad::positionPubCallback()
 {
   auto message = geometry_msgs::msg::Point();
   message.x = telemetry_->position_velocity_ned().position.north_m;
@@ -196,7 +196,7 @@ void Quad::position_pub_callback()
 }
 
 // Subscribers
-void Quad::position_ref_sub_callback(const geometry_msgs::msg::Point &msg)
+void Quad::positionRefSubCallback(const geometry_msgs::msg::Point &msg)
 {
   if (pos_offboard_active_ = true)
   {

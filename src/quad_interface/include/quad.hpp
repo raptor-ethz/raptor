@@ -29,10 +29,10 @@ private:
     void disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                 std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-    void start_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    void startPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                             std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-    void stop_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+    void stopPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
     void takeoff(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
@@ -45,10 +45,10 @@ private:
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
     // Publisher
-    void position_pub_callback();
+    void positionPubCallback();
 
     // Subscriber
-    void position_ref_sub_callback(const geometry_msgs::msg::Point &msg);
+    void positionRefSubCallback(const geometry_msgs::msg::Point &msg);
 
     // Helpers
     std::string actionResultToString(mavsdk::Action::Result index);

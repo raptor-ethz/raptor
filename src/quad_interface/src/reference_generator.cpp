@@ -26,7 +26,7 @@ public:
         disarm_client_ = this->create_client<std_srvs::srv::Trigger>("disarm");
         takeoff_client_ = this->create_client<std_srvs::srv::Trigger>("takeoff");
         land_client_ = this->create_client<std_srvs::srv::Trigger>("land");
-        start_offboard_client_ = this->create_client<std_srvs::srv::Trigger>("start_pos_offboard");
+        start_offboard_client_ = this->create_client<std_srvs::srv::Trigger>("startPosOffboard");
         stop_offboard_client_ = this->create_client<std_srvs::srv::Trigger>("stop_pos_offboard");
 
         timer_ = this->create_wall_timer(
