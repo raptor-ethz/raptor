@@ -36,7 +36,7 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
                           this, std::placeholders::_1, 
                           std::placeholders::_2));
   service_land_ = this->create_service<std_srvs::srv::Trigger>(
-    "land", std::bind(&Quad::takeoff, 
+    "land", std::bind(&Quad::land, 
                       this, 
                       std::placeholders::_1, 
                       std::placeholders::_2));
