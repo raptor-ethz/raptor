@@ -28,9 +28,9 @@ public:
     client_start_offboard_ = this->create_client<std_srvs::srv::Trigger>("start_pos_offboard");
     client_stop_offboard_ = this->create_client<std_srvs::srv::Trigger>("stop_pos_offboard");
 
-    timer_ = this->create_wall_timer( std::chrono::milliseconds(pos_ref_pub_t), 
-                                      std::bind(&ReferenceGenerator::timer_callback, 
-                                      this));
+    // timer_ = this->create_wall_timer( std::chrono::milliseconds(pos_ref_pub_t), 
+    //                                   std::bind(&ReferenceGenerator::timer_callback, 
+    //                                   this));
   }
   void setPos(double x, double y, double z)
   {
@@ -43,7 +43,6 @@ public:
   {
     // check if service is available
     if (!client_arm_->wait_for_service(std::chrono::seconds(1))) {
-      // TODO
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arming service not found.");
       return false;
     }
@@ -55,47 +54,169 @@ public:
     if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
       rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad successfully armed.");
+      // check response
+      if (result.get()->success) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad armed.");
+        return true;
+      }
+      // mavsdk command failed
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to arm: %s", result.get()->message.c_str());
       return true;
     } else {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to arm quad.");
+      // service call unsuccessfull
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arm service failed.");
       return false;
     }
   }
 
   bool disarm()
   {
+    // check if service is available
+    if (!client_disarm_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Disarming service not found.");
+      return false;
+    }
+    // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
     auto result = client_disarm_->async_send_request(request);
-    // TODO return value.
+    // wait until service completedtakeoff
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // check response
+      if (result.get()->success) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad disarmed.");
+        return true;
+      }
+      // mavsdk command failed
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to disarm: %s", result.get()->message.c_str());
+      return true;
+    } else {
+      // service call unsuccessfull
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Disarm service failed.");
+      return false;
+    }
   }
 
   bool takeoff()
   {
+    // check if service is available
+    if (!client_takeoff_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Takeoff service not found.");
+      return false;
+    }
+    // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
     auto result = client_takeoff_->async_send_request(request);
-    // TODO return value.
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // check response
+      if (result.get()->success) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff initiated.");
+        return true;
+      }
+      // mavsdk command failed
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to takeoff: %s", result.get()->message.c_str());
+      return true;
+    } else {
+      // service call unsuccessfull
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Takeoff service failed.");
+      return false;
+    }
   }
 
   bool land()
   {
+    // check if service is available
+    if (!client_land_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Land service not found.");
+      return false;
+    }
+    // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
     auto result = client_land_->async_send_request(request);
-    // TODO return value.
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // check response
+      if (result.get()->success) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Landing initiated.");
+        return true;
+      }
+      // mavsdk command failed
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to land: %s", result.get()->message.c_str());
+      return true;
+    } else {
+      // service call unsuccessfull
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Landing service failed.");
+      return false;
+    }
   }
 
   bool startOffboard()
   {
+    // check if service is available
+    if (!client_start_offboard_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Start offboard service not found.");
+      return false;
+    }
+    // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
     auto result = client_start_offboard_->async_send_request(request);
-    // TODO return value.
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // check response
+      if (result.get()->success) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Started offboard.");
+        return true;
+      }
+      // mavsdk command failed
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to start offboard: %s", result.get()->message.c_str());
+      return true;
+    } else {
+      // service call failed
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Start offboard service failed.");
+      return false;
+    }
   }
 
   bool stopOffboard()
   {
+    // check if service is available
+    if (!client_stop_offboard_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Stop offboard service not found.");
+      return false;
+    }
+    // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
     auto result = client_stop_offboard_->async_send_request(request);
-    // TODO return value.
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // check response
+      if (result.get()->success) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Stopped offboard.");
+        return true;
+      }
+      // mavsdk command failed
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to stop offboard: %s", result.get()->message.c_str());
+      return true;
+    } else {
+      // service call failed
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Stop offboard service failed.");
+      return false;
+    }
   }
 
 private:
@@ -131,6 +252,12 @@ int main(int argc, char *argv[])
   auto node = std::make_shared<ReferenceGenerator>();
 
   node->arm();
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  node->takeoff();
+  std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+  node->land();
+  std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+  node->disarm();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
   rclcpp::shutdown();
