@@ -21,18 +21,18 @@ public:
     pos_ref_ = {0.0, 0.0, 0.0};
     publisher_ = this->create_publisher<geometry_msgs::msg::Point>("position_ref", 10);
 
-    arm_client_ = this->create_client<std_srvs::srv::Trigger>("arm");
-    disarm_client_ = this->create_client<std_srvs::srv::Trigger>("disarm");
-    takeoff_client_ = this->create_client<std_srvs::srv::Trigger>("takeoff");
-    land_client_ = this->create_client<std_srvs::srv::Trigger>("land");
-    start_offboard_client_ = this->create_client<std_srvs::srv::Trigger>("start_pos_offboard");
-    stop_offboard_client_ = this->create_client<std_srvs::srv::Trigger>("stop_pos_offboard");
+    client_arm_ = this->create_client<std_srvs::srv::Trigger>("arm");
+    client_disarm_ = this->create_client<std_srvs::srv::Trigger>("disarm");
+    client_takeoff_ = this->create_client<std_srvs::srv::Trigger>("takeoff");
+    client_land_ = this->create_client<std_srvs::srv::Trigger>("land");
+    client_start_offboard_ = this->create_client<std_srvs::srv::Trigger>("start_pos_offboard");
+    client_stop_offboard_ = this->create_client<std_srvs::srv::Trigger>("stop_pos_offboard");
 
     timer_ = this->create_wall_timer( std::chrono::milliseconds(pos_ref_pub_t), 
                                       std::bind(&ReferenceGenerator::timer_callback, 
                                       this));
   }
-  void set_pos(double x, double y, double z)
+  void setPos(double x, double y, double z)
   {
     pos_ref_.at(0) = x;
     pos_ref_.at(1) = y;
@@ -42,42 +42,42 @@ public:
   bool arm()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    auto result = arm_client_->async_send_request(request);
+    auto result = client_arm_->async_send_request(request);
     // TODO return value.
   }
 
   bool disarm()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    auto result = disarm_client_->async_send_request(request);
+    auto result = client_disarm_->async_send_request(request);
     // TODO return value.
   }
 
   bool takeoff()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    auto result = takeoff_client_->async_send_request(request);
+    auto result = client_takeoff_->async_send_request(request);
     // TODO return value.
   }
 
   bool land()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    auto result = land_client_->async_send_request(request);
+    auto result = client_land_->async_send_request(request);
     // TODO return value.
   }
 
   bool startOffboard()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    auto result = start_offboard_client_->async_send_request(request);
+    auto result = client_start_offboard_->async_send_request(request);
     // TODO return value.
   }
 
   bool stopOffboard()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-    auto result = stop_offboard_client_->async_send_request(request);
+    auto result = client_stop_offboard_->async_send_request(request);
     // TODO return value.
   }
 
@@ -95,12 +95,12 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr publisher_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr arm_client_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr disarm_client_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr takeoff_client_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr land_client_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr start_offboard_client_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr stop_offboard_client_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_arm_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_disarm_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_takeoff_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_land_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_start_offboard_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_stop_offboard_;
 
   size_t count_;
   std::vector<double> pos_ref_;
