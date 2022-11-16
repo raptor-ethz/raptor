@@ -219,8 +219,7 @@ public:
     }
   }
 
-private:
-  void timer_callback()
+  void goToPos()
   {
     auto message = geometry_msgs::msg::Point();
     message.x = pos_ref_.at(0);
@@ -228,7 +227,9 @@ private:
     message.z = pos_ref_.at(2);
     RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
     publisher_->publish(message);
+    rclcpp::spin_some(this->get_node_base_interface());
   }
+private:
 
   rclcpp::TimerBase::SharedPtr timer_;
 
@@ -255,6 +256,17 @@ int main(int argc, char *argv[])
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   node->takeoff();
   std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+
+  // node->startOffboard();
+  // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  // node->setPos(2, 2, 2);
+  // node->goToPos();
+  // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
+  // node->setPos(0, 0, 1);
+  // node->goToPos();
+  // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
   node->land();
   std::this_thread::sleep_for(std::chrono::milliseconds(8000));
   node->disarm();
