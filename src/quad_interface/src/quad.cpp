@@ -191,7 +191,7 @@ void Quad::positionPubCallback()
   message.x = telemetry_->position_velocity_ned().position.north_m;
   message.y = telemetry_->position_velocity_ned().position.east_m;
   message.z = -telemetry_->position_velocity_ned().position.down_m;
-  RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
+  // RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
   pub_position_->publish(message);
 }
 
