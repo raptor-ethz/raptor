@@ -200,7 +200,7 @@ void Quad::positionPubCallback()
 // Subscribers
 void Quad::positionRefSubCallback(const geometry_msgs::msg::Point &msg)
 {
-  if (pos_offboard_active_ = true)
+  if (pos_offboard_active_ == true)
   {
     mavsdk::Offboard::PositionNedYaw pos_msg{};
     pos_msg.north_m = msg.x;
