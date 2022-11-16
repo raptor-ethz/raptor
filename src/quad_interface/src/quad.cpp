@@ -4,203 +4,227 @@
 const int pos_pub_t = 50;
 
 // Constructor
-Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry *telemetry) : Node("quad_interface")
+Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry *telemetry) 
+  : Node("quad_interface")
 {
-    // init mavsdk variables
-    action_ = action;
-    offboard_ = offboard;
-    telemetry_ = telemetry;
+  // init mavsdk variables
+  action_ = action;
+  offboard_ = offboard;
+  telemetry_ = telemetry;
 
-    // create services
-    service_arm_ = this->create_service<std_srvs::srv::Trigger>("arm",
-                                                                std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
-    service_preflight_check_ = this->create_service<std_srvs::srv::Trigger>("preflight_check",
-                                                                            std::bind(&Quad::runPreflightCheck, this, std::placeholders::_1, std::placeholders::_2));
-    service_disarm_ = this->create_service<std_srvs::srv::Trigger>("disarm",
-                                                                   std::bind(&Quad::disarm, this, std::placeholders::_1, std::placeholders::_2));
-    service_takeoff_ = this->create_service<std_srvs::srv::Trigger>("takeoff",
-                                                                    std::bind(&Quad::takeoff, this, std::placeholders::_1, std::placeholders::_2));
-    service_land_ = this->create_service<std_srvs::srv::Trigger>("land",
-                                                                 std::bind(&Quad::takeoff, this, std::placeholders::_1, std::placeholders::_2));
-    start_pos_offboard_ = this->create_service<std_srvs::srv::Trigger>("start_pos_offboard",
-                                                                       std::bind(&Quad::start_pos_offboard, this, std::placeholders::_1, std::placeholders::_2));
-    stop_pos_offboard_ = this->create_service<std_srvs::srv::Trigger>("stop_pos_offboard",
-                                                                      std::bind(&Quad::stop_pos_offboard, this, std::placeholders::_1, std::placeholders::_2));
+  // initialize member variables
+  pos_offboard_active_ = false;
 
-    // create publishers
-    position_pub_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
-    timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(pos_pub_t), std::bind(&Quad::position_pub_callback, this));
+  // create services
+  service_arm_ = this->create_service<std_srvs::srv::Trigger>(
+    "arm", std::bind( &Quad::arm, 
+                      this, 
+                      std::placeholders::_1, 
+                      std::placeholders::_2));
+  service_preflight_check_ = this->create_service<std_srvs::srv::Trigger>(
+    "preflight_check", std::bind( &Quad::runPreflightCheck, 
+                                  this, 
+                                  std::placeholders::_1, 
+                                  std::placeholders::_2));
+  service_disarm_ = this->create_service<std_srvs::srv::Trigger>(
+    "disarm", std::bind(&Quad::disarm, 
+                        this, 
+                        std::placeholders::_1, 
+                        std::placeholders::_2));
+  service_takeoff_ = this->create_service<std_srvs::srv::Trigger>(
+    "takeoff", std::bind( &Quad::takeoff, 
+                          this, std::placeholders::_1, 
+                          std::placeholders::_2));
+  service_land_ = this->create_service<std_srvs::srv::Trigger>(
+    "land", std::bind(&Quad::takeoff, 
+                      this, 
+                      std::placeholders::_1, 
+                      std::placeholders::_2));
+  start_pos_offboard_ = this->create_service<std_srvs::srv::Trigger>(
+    "start_pos_offboard", std::bind(&Quad::start_pos_offboard, 
+                                    this, 
+                                    std::placeholders::_1, 
+                                    std::placeholders::_2));
+  stop_pos_offboard_ = this->create_service<std_srvs::srv::Trigger>(
+    "stop_pos_offboard", std::bind( &Quad::stop_pos_offboard, 
+                                    this, 
+                                    std::placeholders::_1, 
+                                    std::placeholders::_2));
 
-    // create subscribers
-    position_ref_sub_ = this->create_subscription<geometry_msgs::msg::Point>(
-        "position_ref", 10, std::bind(&Quad::position_ref_sub_callback, this, std::placeholders::_1));
+  // create publishers
+  position_pub_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
+  timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(pos_pub_t), std::bind(&Quad::position_pub_callback, this));
 
-    // other
-    pos_offboard_active_ = false;
+  // create subscribers
+  position_ref_sub_ = this->create_subscription<geometry_msgs::msg::Point>(
+    "position_ref", 10, std::bind(&Quad::position_ref_sub_callback, 
+                                  this, 
+                                  std::placeholders::_1));
 }
 
 // Services
 void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request");
-    const mavsdk::Action::Result arm_result = action_->arm();
-    response->message = this->actionResultToString(arm_result);
-    if (arm_result == mavsdk::Action::Result::Success)
-    {
-        response->success = true;
-    }
-    else
-    {
-        response->success = false;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request");
+  const mavsdk::Action::Result arm_result = action_->arm();
+  response->message = this->actionResultToString(arm_result);
+  if (arm_result == mavsdk::Action::Result::Success)
+  {
+      response->success = true;
+  }
+  else
+  {
+      response->success = false;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]", response->message.c_str());
 }
 
 void Quad::disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                   std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received disarming request");
-    const mavsdk::Action::Result disarm_result = action_->disarm();
-    response->message = this->actionResultToString(disarm_result);
-    if (disarm_result == mavsdk::Action::Result::Success)
-    {
-        response->success = true;
-    }
-    else
-    {
-        response->success = false;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Disarming result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received disarming request");
+  const mavsdk::Action::Result disarm_result = action_->disarm();
+  response->message = this->actionResultToString(disarm_result);
+  if (disarm_result == mavsdk::Action::Result::Success)
+  {
+      response->success = true;
+  }
+  else
+  {
+      response->success = false;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Disarming result: [%s]", response->message.c_str());
 }
 
 void Quad::start_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                               std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard starting request");
-    // send offboard message once before starting
-    mavsdk::Offboard::PositionNedYaw pos_msg{};
-    pos_msg.north_m = telemetry_->position_velocity_ned().position.north_m;
-    pos_msg.east_m = telemetry_->position_velocity_ned().position.east_m;
-    pos_msg.down_m = telemetry_->position_velocity_ned().position.down_m;
-    pos_msg.yaw_deg = 0.0; // TODO
-    // starting offboard
-    const mavsdk::Offboard::Result offboard_result = offboard_->start();
-    response->message = this->offboardResultToString(offboard_result);
-    if (offboard_result == mavsdk::Offboard::Result::Success)
-    {
-        pos_offboard_active_ = true;
-        response->success = true;
-    }
-    else
-    {
-        response->success = false;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Position offboard start result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard starting request");
+  // send offboard message once before starting
+  mavsdk::Offboard::PositionNedYaw pos_msg{};
+  pos_msg.north_m = telemetry_->position_velocity_ned().position.north_m;
+  pos_msg.east_m = telemetry_->position_velocity_ned().position.east_m;
+  pos_msg.down_m = telemetry_->position_velocity_ned().position.down_m;
+  pos_msg.yaw_deg = 0.0; // TODO
+  // starting offboard
+  const mavsdk::Offboard::Result offboard_result = offboard_->start();
+  response->message = this->offboardResultToString(offboard_result);
+  if (offboard_result == mavsdk::Offboard::Result::Success)
+  {
+      pos_offboard_active_ = true;
+      response->success = true;
+  }
+  else
+  {
+      response->success = false;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
+    "Position offboard start result: [%s]", response->message.c_str());
 }
 
 void Quad::stop_pos_offboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard stopping request");
-    const mavsdk::Offboard::Result offboard_result = offboard_->stop();
-    response->message = this->offboardResultToString(offboard_result);
-    if (offboard_result == mavsdk::Offboard::Result::Success)
-    {
-        pos_offboard_active_ = false;
-        response->success = true;
-    }
-    else
-    {
-        response->success = false;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Position offboard stop result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard stopping request");
+  const mavsdk::Offboard::Result offboard_result = offboard_->stop();
+  response->message = this->offboardResultToString(offboard_result);
+  if (offboard_result == mavsdk::Offboard::Result::Success)
+  {
+      pos_offboard_active_ = false;
+      response->success = true;
+  }
+  else
+  {
+      response->success = false;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Position offboard stop result: [%s]", response->message.c_str());
 }
 
 void Quad::takeoff(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                    std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received takeoff request");
-    const mavsdk::Action::Result takeoff_result = action_->takeoff();
-    response->message = this->actionResultToString(takeoff_result);
-    if (takeoff_result == mavsdk::Action::Result::Success)
-    {
-        response->success = true;
-    }
-    else
-    {
-        response->success = false;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received takeoff request");
+  const mavsdk::Action::Result takeoff_result = action_->takeoff();
+  response->message = this->actionResultToString(takeoff_result);
+  if (takeoff_result == mavsdk::Action::Result::Success)
+  {
+      response->success = true;
+  }
+  else
+  {
+      response->success = false;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff result: [%s]", response->message.c_str());
 }
 
 void Quad::land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                 std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received land request");
-    const mavsdk::Action::Result land_result = action_->land();
-    response->message = this->actionResultToString(land_result);
-    if (land_result == mavsdk::Action::Result::Success)
-    {
-        response->success = true;
-    }
-    else
-    {
-        response->success = false;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Land result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received land request");
+  const mavsdk::Action::Result land_result = action_->land();
+  response->message = this->actionResultToString(land_result);
+  if (land_result == mavsdk::Action::Result::Success)
+  {
+      response->success = true;
+  }
+  else
+  {
+      response->success = false;
+  }
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Land result: [%s]", response->message.c_str());
 }
 
 void Quad::runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request");
-    // if(request->data) response->success = true;
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request");
+  // if(request->data) response->success = true;
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
 }
 
 // Publishers
 void Quad::position_pub_callback()
 {
-    auto message = geometry_msgs::msg::Point();
-    message.x = telemetry_->position_velocity_ned().position.north_m;
-    message.y = telemetry_->position_velocity_ned().position.east_m;
-    message.z = -telemetry_->position_velocity_ned().position.down_m;
-    RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
-    position_pub_->publish(message);
+  auto message = geometry_msgs::msg::Point();
+  message.x = telemetry_->position_velocity_ned().position.north_m;
+  message.y = telemetry_->position_velocity_ned().position.east_m;
+  message.z = -telemetry_->position_velocity_ned().position.down_m;
+  RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
+  position_pub_->publish(message);
 }
 
 // Subscribers
 void Quad::position_ref_sub_callback(const geometry_msgs::msg::Point &msg)
 {
-    if (pos_offboard_active_ = true)
-    {
-        mavsdk::Offboard::PositionNedYaw pos_msg{};
-        pos_msg.north_m = msg.x;
-        pos_msg.east_m = msg.y;
-        pos_msg.down_m = -msg.z;
-        pos_msg.yaw_deg = 0.0; // TODO
-        offboard_->set_position_ned(pos_msg);
-        RCLCPP_INFO(this->get_logger(), "Received, and sent: [%f,%f,%f]", msg.x, msg.y, msg.z);
-    }
-    else
-    {
-        RCLCPP_INFO(this->get_logger(), "Received, but offboard not active: [%f,%f,%f]", msg.x, msg.y, msg.z);
-    }
+  if (pos_offboard_active_ = true)
+  {
+      mavsdk::Offboard::PositionNedYaw pos_msg{};
+      pos_msg.north_m = msg.x;
+      pos_msg.east_m = msg.y;
+      pos_msg.down_m = -msg.z;
+      pos_msg.yaw_deg = 0.0; // TODO
+      offboard_->set_position_ned(pos_msg);
+      RCLCPP_INFO(this->get_logger(), "Received, and sent: [%f,%f,%f]", msg.x, msg.y, msg.z);
+  }
+  else
+  {
+      RCLCPP_INFO(this->get_logger(), "Received, but offboard not active: [%f,%f,%f]", msg.x, msg.y, msg.z);
+  }
 }
 
 // Helpers
 std::string Quad::actionResultToString(mavsdk::Action::Result index)
 {
-    std::string val[] =
-        {"Unknown", "Success", "NoSystem", "ConnectionError", "Busy", "CommandDenied", "CommandDeniedLandedStateUnknown", "CommandDeniedNotLanded", "Timeout", "VtolTransitionSupportUnknown", "NoVtolTransitionSupport", "ParameterError", "Unsupported"};
-    return val[int(index)];
+  std::string val[] =
+      {"Unknown", "Success", "NoSystem", "ConnectionError", "Busy", "CommandDenied", "CommandDeniedLandedStateUnknown", "CommandDeniedNotLanded", "Timeout", "VtolTransitionSupportUnknown", "NoVtolTransitionSupport", "ParameterError", "Unsupported"};
+  return val[int(index)];
 }
 
 std::string Quad::offboardResultToString(mavsdk::Offboard::Result index)
 {
-    std::string val[] =
-        {"Unknown", "Success", "NoSystem", "ConnectionError", "Busy", "CommandDenied", "Timeout", "NoSetpointSet"};
-    return val[int(index)];
+  std::string val[] =
+      {"Unknown", "Success", "NoSystem", "ConnectionError", "Busy", "CommandDenied", "Timeout", "NoSetpointSet"};
+  return val[int(index)];
 }
