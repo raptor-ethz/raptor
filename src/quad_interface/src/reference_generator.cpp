@@ -67,14 +67,14 @@ public:
     // TODO return value.
   }
 
-  bool start_offboard()
+  bool startOffboard()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto result = start_offboard_client_->async_send_request(request);
     // TODO return value.
   }
 
-  bool stop_offboard()
+  bool stopOffboard()
   {
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
     auto result = stop_offboard_client_->async_send_request(request);
@@ -117,11 +117,11 @@ int main(int argc, char *argv[])
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   node->takeoff();
   std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  node->start_offboard();
+  node->startOffboard();
 
   rclcpp::spin(node);
   // TODO better timing etc and error handling
-  node->stop_offboard();
+  node->stopOffboard();
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   node->land();
   std::this_thread::sleep_for(std::chrono::milliseconds(5000));
