@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
   // start service node
   auto node = std::make_shared<Quad>(&action, &offboard, &telemetry);
-
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Mavsdk interface server is ready.");
   // spin node
   rclcpp::spin(node);
   rclcpp::shutdown();
