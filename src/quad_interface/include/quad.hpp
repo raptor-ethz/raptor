@@ -72,9 +72,9 @@ private:
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_takeoff_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_land_;
 
-    rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr position_pub_;
+    rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr pub_position_;
 
-    rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr position_ref_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr sub_ref_position_;
 
     rclcpp::TimerBase::SharedPtr timer_;
     size_t count_;
