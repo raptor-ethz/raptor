@@ -41,9 +41,26 @@ public:
 
   bool arm()
   {
+    // check if service is available
+    if (!client_arm_->wait_for_service(std::chrono::seconds(1))) {
+      // TODO
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arming service not found.");
+      return false;
+    }
+    // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
     auto result = client_arm_->async_send_request(request);
-    // TODO return value.
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad successfully armed.");
+      return true;
+    } else {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to arm quad.");
+      return false;
+    }
   }
 
   bool disarm()
@@ -115,29 +132,6 @@ int main(int argc, char *argv[])
 
   node->arm();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-  node->takeoff();
-  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  node->startOffboard();
-
-  rclcpp::spin(node);
-  // TODO better timing etc and error handling
-  node->stopOffboard();
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  node->land();
-  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  node->disarm();
-  // auto result = client->async_send_request(request);
-
-  // // Wait for the result.
-  // if (rclcpp::spin_until_future_complete(node, result) ==
-  //     rclcpp::FutureReturnCode::SUCCESS)
-  // {
-  //     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sum: %ld", result.get()->sum);
-  // }
-  // else
-  // {
-  //     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service add_two_ints");
-  // }
 
   rclcpp::shutdown();
   return 0;
