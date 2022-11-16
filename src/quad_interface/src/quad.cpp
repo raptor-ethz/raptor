@@ -72,6 +72,8 @@ void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   response->message = this->actionResultToString(arm_result);
   if (arm_result == mavsdk::Action::Result::Success)
   {
+    // wait for drone to stabilize
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     response->success = true;
   }
   else
