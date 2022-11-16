@@ -22,19 +22,20 @@
 
 int main(int argc, char *argv[])
 {
-  /* INITIALIZE ROS*/
+  // initialize ros
   rclcpp::init(argc, argv);
 
-  /* INITIALIZE MAVSDK*/
+  // check input
   if (argc != 2)
   {
     usage(argv[0]);
     return 1;
   }
 
+  // initialize mavsdk, connect to px4
   mavsdk::Mavsdk mavsdk;
   mavsdk::ConnectionResult connection_result = mavsdk.add_any_connection(argv[1]);
-
+  // check connection
   if (connection_result != mavsdk::ConnectionResult::Success)
   {
     std::cerr << "Connection failed: " << connection_result << '\n';
@@ -44,9 +45,12 @@ int main(int argc, char *argv[])
   auto system = get_system(mavsdk);
   if (!system)
   {
+    // TODO error msg
+    std::cerr << "System not found.\n";
     return 1;
   }
 
+  // initialize mavsdk plugins
   auto action = mavsdk::Action{system};       // for arming / disarming etc
   auto offboard = mavsdk::Offboard{system};   // for offboard control
   auto telemetry = mavsdk::Telemetry{system}; // for telemetry services
