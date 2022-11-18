@@ -176,3 +176,11 @@ Build and install package, then run
 ros2 interface show my_package/msg/MyMessage
 ros2 interface show my_package/srv/MyService
 ```
+
+
+
+### ERRORS
+
+terminate called after throwing an instance of 'std::future_error'
+  what():  std::future_error: No associated state
+[ros2run]: Aborted
