@@ -56,11 +56,16 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(position_pub_interval), std::bind(&Quad::positionPubCallback, this));
 
-  // create subscribers
-  sub_ref_position_ = this->create_subscription<geometry_msgs::msg::Point>(
-    "position_ref", 10, std::bind(&Quad::positionRefSubCallback, 
-                                  this, 
-                                  std::placeholders::_1));
+
+  //   this->action_server_ = rclcpp_action::create_server<Fibonacci>(
+  //     this,
+  //     "fibonacci",
+  //     std::bind(&FibonacciActionServer::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+  //     std::bind(&FibonacciActionServer::handle_cancel, this, std::placeholders::_1),
+  //     std::bind(&FibonacciActionServer::handle_accepted, this, std::placeholders::_1));
+  // }
+
+
 }
 
 // Services
@@ -197,23 +202,9 @@ void Quad::positionPubCallback()
   pub_position_->publish(message);
 }
 
-// Subscribers
-void Quad::positionRefSubCallback(const geometry_msgs::msg::Point &msg)
-{
-  if (pos_offboard_active_ == true)
-  {
-    mavsdk::Offboard::PositionNedYaw pos_msg{};
-    pos_msg.north_m = msg.x;
-    pos_msg.east_m = msg.y;
-    pos_msg.down_m = -msg.z;
-    pos_msg.yaw_deg = 0.0; // TODO
-    offboard_->set_position_ned(pos_msg);
-    RCLCPP_INFO(this->get_logger(), "Received, and sent: [%f,%f,%f]", msg.x, msg.y, msg.z);
-  }
-  else
-  {
-    RCLCPP_INFO(this->get_logger(), "Received, but offboard not active: [%f,%f,%f]", msg.x, msg.y, msg.z);
-  }
+// Actions
+void Quad::GoToPos(){
+  
 }
 
 // Helpers

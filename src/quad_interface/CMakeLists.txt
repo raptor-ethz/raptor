@@ -18,6 +18,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 # find_package(builtin_interfaces REQUIRED)
 # find_package(rosidl_default_generators REQUIRED)
 # external dependencies
@@ -39,7 +40,7 @@ ament_target_dependencies(reference_generator rclcpp std_srvs geometry_msgs)
 
 #interface
 add_executable(mav_interface src/mav_interface.cpp)
-ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs geometry_msgs)
+ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs geometry_msgs rclcpp_action)
 target_include_directories(mav_interface PUBLIC include)
 target_link_libraries(mav_interface MAVSDK::mavsdk)
 

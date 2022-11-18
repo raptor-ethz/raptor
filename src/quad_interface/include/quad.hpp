@@ -13,6 +13,7 @@
 #include "rclcpp/rclcpp.hpp"       // ros2 client library
 #include "std_msgs/msg/string.hpp" // include std_msg type
 #include "std_srvs/srv/trigger.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 
 #include "geometry_msgs/msg/point.hpp"
 
@@ -44,11 +45,11 @@ private:
     void runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                            std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
+    //Actions
+    void GoToPos();
+
     // Publisher
     void positionPubCallback();
-
-    // Subscriber
-    void positionRefSubCallback(const geometry_msgs::msg::Point &msg);
 
     // Helpers
     std::string actionResultToString(mavsdk::Action::Result index);
@@ -59,7 +60,7 @@ private:
     mavsdk::Offboard *offboard_;
     mavsdk::Telemetry *telemetry_;
 
-    // ros
+    // ros Service Servers
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_arm_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_disarm_;
 
@@ -72,9 +73,12 @@ private:
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_takeoff_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_land_;
 
+    //ros Publishers
     rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr pub_position_;
+    
+    //ros action server
+    //rclcpp_action::Server<Fibonacci>::SharedPtr action_server_;
 
-    rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr sub_ref_position_;
 
     rclcpp::TimerBase::SharedPtr timer_;
     size_t count_;
