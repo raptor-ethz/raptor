@@ -15,36 +15,40 @@ endif()
 find_package(ament_cmake REQUIRED)
 # ros dependencies
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED) # TODO
+# std interface
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
-find_package(rclcpp_action REQUIRED)
-# find_package(builtin_interfaces REQUIRED)
-# find_package(rosidl_default_generators REQUIRED)
+# custom interface
+find_package(raptor_interface REQUIRED)
 # external dependencies
 find_package(MAVSDK REQUIRED)
 
 
-# INTERFACES
-# rosidl_generate_interfaces(${PROJECT_NAME}
-#   "srv/RequestArm.srv"
-#   DEPENDENCIES builtin_interfaces
-# )
-
-
 # TARGETS
 
-#talker
+# ref gen
 add_executable(reference_generator src/reference_generator.cpp)
-ament_target_dependencies(reference_generator rclcpp std_srvs geometry_msgs)
+ament_target_dependencies(reference_generator 
+  rclcpp 
+  std_srvs 
+  geometry_msgs
+  raptor_interface)
 
-#interface
+# mav interface
 add_executable(mav_interface src/mav_interface.cpp)
-ament_target_dependencies(mav_interface rclcpp std_msgs std_srvs geometry_msgs rclcpp_action)
+ament_target_dependencies(mav_interface 
+  rclcpp 
+  std_msgs 
+  std_srvs 
+  geometry_msgs 
+  rclcpp_action # TODO
+  raptor_interface)
 target_include_directories(mav_interface PUBLIC include)
+target_sources(mav_interface PUBLIC src/quad.cpp)
 target_link_libraries(mav_interface MAVSDK::mavsdk)
 
-target_sources(mav_interface PUBLIC src/quad.cpp)
 #service
 # add_executable(service_arm src/service_arm.cpp)
 # ament_target_dependencies(service_arm rclcpp std_srvs)

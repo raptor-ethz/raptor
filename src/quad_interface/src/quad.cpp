@@ -50,11 +50,16 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
                                     this, 
                                     std::placeholders::_1, 
                                     std::placeholders::_2));
+  service_go_to_pos_ = this->create_service<raptor_interface::srv::GoToPos>(
+    "go_to_pos", std::bind( &Quad::goToPos, 
+                                    this, 
+                                    std::placeholders::_1, 
+                                    std::placeholders::_2));
 
-  // create publishers
-  pub_position_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
-  timer_ = this->create_wall_timer(
-    std::chrono::milliseconds(position_pub_interval), std::bind(&Quad::positionPubCallback, this));
+  // // create publishers
+  // pub_position_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
+  // timer_ = this->create_wall_timer(
+  //   std::chrono::milliseconds(position_pub_interval), std::bind(&Quad::positionPubCallback, this));
 
 
   //   this->action_server_ = rclcpp_action::create_server<Fibonacci>(
@@ -109,15 +114,17 @@ void Quad::startPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> req
                               std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received position offboard starting request");
-  // send offboard message once before starting
+  // send offboard message once before starting TODO
   mavsdk::Offboard::PositionNedYaw pos_msg{};
   pos_msg.north_m = telemetry_->position_velocity_ned().position.north_m;
   pos_msg.east_m = telemetry_->position_velocity_ned().position.east_m;
   pos_msg.down_m = telemetry_->position_velocity_ned().position.down_m;
   pos_msg.yaw_deg = 0.0; // TODO
   // starting offboard
+  offboard_->set_position_ned(pos_msg);
   const mavsdk::Offboard::Result offboard_result = offboard_->start();
   response->message = this->offboardResultToString(offboard_result);
+  offboard_->set_position_ned(pos_msg);
   if (offboard_result == mavsdk::Offboard::Result::Success)
   {
     pos_offboard_active_ = true;
@@ -186,12 +193,33 @@ void Quad::land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
 void Quad::runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
+  // TODO
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request");
   // if(request->data) response->success = true;
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
 }
 
-// Publishers
+void Quad::goToPos(std::shared_ptr<raptor_interface::srv::GoToPos::Request> request,
+                  std::shared_ptr<raptor_interface::srv::GoToPos::Response> response)
+{
+  // TODO
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received GoToPos request: [%f, %f, %f]",
+              request->x_ref, request->y_ref, request->z_ref);
+  // create message
+  mavsdk::Offboard::PositionNedYaw pos_msg{};
+  pos_msg.north_m = request->x_ref;
+  pos_msg.east_m = request->y_ref;
+  pos_msg.down_m = -request->z_ref;
+  pos_msg.yaw_deg = 0.0; // TODO
+  // send message to quad
+  offboard_->set_position_ned(pos_msg);
+  // wait
+  std::this_thread::sleep_for(std::chrono::milliseconds(request->time_ms));
+  // TODO
+  response->reached = true;
+}
+
+// Publishers TODO
 void Quad::positionPubCallback()
 {
   auto message = geometry_msgs::msg::Point();
@@ -200,11 +228,6 @@ void Quad::positionPubCallback()
   message.z = -telemetry_->position_velocity_ned().position.down_m;
   // RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
   pub_position_->publish(message);
-}
-
-// Actions
-void Quad::GoToPos(){
-  
 }
 
 // Helpers

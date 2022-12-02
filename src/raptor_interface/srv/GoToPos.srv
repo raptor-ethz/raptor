@@ -1,0 +1,6 @@
+float32 x_ref
+float32 y_ref
+float32 z_ref
+int64 time_ms
+---
+bool reached

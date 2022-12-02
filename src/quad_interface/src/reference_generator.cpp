@@ -5,9 +5,12 @@
 #include <vector>
 #include <thread>
 
+// std interface
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "geometry_msgs/msg/point.hpp"
+// custom interface
+#include "raptor_interface/srv/go_to_pos.hpp"
 
 // Todo make this into yaml file
 const int pos_ref_pub_t = 50;
@@ -18,20 +21,18 @@ class ReferenceGenerator : public rclcpp::Node
 public:
   ReferenceGenerator() : Node("reference_generator"), count_(0)
   {
-    pos_ref_ = {0.0, 0.0, 0.0};
-    publisher_ = this->create_publisher<geometry_msgs::msg::Point>("position_ref", 10);
-
+    pos_ref_ = {0.0, 0.0, 2.0};
+    // initialize service clients
     client_arm_ = this->create_client<std_srvs::srv::Trigger>("arm");
     client_disarm_ = this->create_client<std_srvs::srv::Trigger>("disarm");
     client_takeoff_ = this->create_client<std_srvs::srv::Trigger>("takeoff");
     client_land_ = this->create_client<std_srvs::srv::Trigger>("land");
     client_start_offboard_ = this->create_client<std_srvs::srv::Trigger>("start_pos_offboard");
     client_stop_offboard_ = this->create_client<std_srvs::srv::Trigger>("stop_pos_offboard");
-
-    // timer_ = this->create_wall_timer( std::chrono::milliseconds(pos_ref_pub_t), 
-    //                                   std::bind(&ReferenceGenerator::timer_callback, 
-    //                                   this));
+    client_go_to_pos_ = this->create_client<raptor_interface::srv::GoToPos>("go_to_pos");
   }
+
+  //  TODO
   void setPos(double x, double y, double z)
   {
     pos_ref_.at(0) = x;
@@ -54,14 +55,16 @@ public:
     if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
       rclcpp::FutureReturnCode::SUCCESS)
     {
+      // get response from future
+      auto response = result.get();
       // check response
-      if (result.get()->success) {
+      if (response->success) {
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad armed.");
         return true;
       }
-      // mavsdk command failed
-      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to arm: %s", result.get()->message.c_str());
-      return true;
+      // mavsdk command failed TODO
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to arm: [%s]", response->message.c_str());
+      return false;
     } else {
       // service call unsuccessfull
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arm service failed.");
@@ -117,6 +120,7 @@ public:
       // check response
       if (result.get()->success) {
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff initiated.");
+        std::this_thread::sleep_for(std::chrono::milliseconds(8000)); // TODO
         return true;
       }
       // mavsdk command failed
@@ -147,6 +151,7 @@ public:
       // check response
       if (result.get()->success) {
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Landing initiated.");
+        std::this_thread::sleep_for(std::chrono::milliseconds(8000));
         return true;
       }
       // mavsdk command failed
@@ -219,15 +224,39 @@ public:
     }
   }
 
-  void goToPos()
+  bool goToPos(float x_ref, float y_ref, float z_ref, int time_ms)
   {
-    auto message = geometry_msgs::msg::Point();
-    message.x = pos_ref_.at(0);
-    message.y = pos_ref_.at(1);
-    message.z = pos_ref_.at(2);
-    RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
-    publisher_->publish(message);
-    rclcpp::spin_some(this->get_node_base_interface());
+    // check if service is available
+    if (!client_go_to_pos_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service not found.");
+      return false;
+    }
+    // create request
+    auto request = std::make_shared<raptor_interface::srv::GoToPos::Request>();
+    request->x_ref = x_ref;
+    request->y_ref = y_ref;
+    request->z_ref = z_ref;
+    request->time_ms = time_ms;
+    RCLCPP_INFO(this->get_logger(), "Requesting GoToPos: [%f,%f,%f]", 
+      x_ref, y_ref, z_ref);
+    // send request
+    auto result = client_go_to_pos_->async_send_request(request);
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // check response
+      if (result.get()->reached) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Position reached.");
+        return true;
+      }
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Position not reached.");
+      return false;
+    } else {
+      // service call unsuccessfull
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service failed.");
+      return false;
+    }
   }
 private:
 
@@ -240,6 +269,7 @@ private:
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_land_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_start_offboard_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_stop_offboard_;
+  rclcpp::Client<raptor_interface::srv::GoToPos>::SharedPtr client_go_to_pos_;
 
   size_t count_;
   std::vector<double> pos_ref_;
@@ -252,23 +282,20 @@ int main(int argc, char *argv[])
   // start pos_ref publisher
   auto node = std::make_shared<ReferenceGenerator>();
 
-  node->arm();
+  if (!node->arm() ) {
+    exit(0);
+  }
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   node->takeoff();
-  std::this_thread::sleep_for(std::chrono::milliseconds(8000));
 
-  // node->startOffboard();
-  // std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  // node->setPos(2, 2, 2);
-  // node->goToPos();
-  // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  node->startOffboard();
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-  // node->setPos(0, 0, 1);
-  // node->goToPos();
-  // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  node->goToPos(2,2,2,4000);
+  node->goToPos(0,0,1,4000);
 
   node->land();
-  std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+  
   node->disarm();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
