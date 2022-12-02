@@ -56,6 +56,19 @@ To launch a ros-node, run
 ros2 run <package_name> <my_node>
 ```
 
+To set the verbosity level to debug, run
+```bash
+ros2 run <package_name> <my_node> --log-level debug
+```
+
+## Verbosity
+
+To set the default verbosity level, run
+```bash
+export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({function_name}() at {file_name}:{line_number})"
+```
+
+
 # Create new Packages and Nodes
 
 ## Packages

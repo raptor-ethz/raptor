@@ -7,7 +7,7 @@ const int position_pub_interval = 50;
 Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry *telemetry) 
   : Node("quad_interface")
 {
-  // init mavsdk variables
+  // init mavsdk variables TODO
   action_ = action;
   offboard_ = offboard;
   telemetry_ = telemetry;
@@ -56,10 +56,10 @@ Quad::Quad(mavsdk::Action *action, mavsdk::Offboard *offboard, mavsdk::Telemetry
                                     std::placeholders::_1, 
                                     std::placeholders::_2));
 
-  // // create publishers
-  // pub_position_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
-  // timer_ = this->create_wall_timer(
-  //   std::chrono::milliseconds(position_pub_interval), std::bind(&Quad::positionPubCallback, this));
+  // create publishers
+  pub_position_ = this->create_publisher<geometry_msgs::msg::Point>("position", 10);
+  timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(position_pub_interval), std::bind(&Quad::positionPubCallback, this));
 
 
   //   this->action_server_ = rclcpp_action::create_server<Fibonacci>(
@@ -82,15 +82,14 @@ void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   response->message = this->actionResultToString(arm_result);
   if (arm_result == mavsdk::Action::Result::Success)
   {
-    // wait for drone to stabilize
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     response->success = true;
   }
   else
   {
     response->success = false;
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]", response->message.c_str());
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]", 
+                response->message.c_str());
 }
 
 void Quad::disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
@@ -193,10 +192,62 @@ void Quad::land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
 void Quad::runPreflightCheck(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  // TODO
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received preflight check request");
-  // if(request->data) response->success = true;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflicht response: [%d]", response->success);
+  // TODO
+  std::string message = "";
+  float battery = -1;
+  // only run battery and local_pos checks if not in simulation TODO
+  // if (!simulation) {
+    // battery check
+    battery = telemetry_->battery().remaining_percent * 100.0;
+    if (battery < 60) {
+      // warn
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Battery level low. Charge soon.");
+      message = "Battery level low(";
+      message += std::to_string(battery) + "%). Charge soon. \n";
+      response->message = message.c_str();
+      // console_helper::warn("Battery low(" + std::to_string(battery) 
+      //                       + "%). Charge soon.");
+    } else if (battery < 55) {
+      // block takeoff
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Battery level critical:");
+      // console_helper::error("Battery level critical(" 
+      //                       + std::to_string(battery) + "%).");
+      response->success = false;
+      message = "Battery level critical: ";
+      message += std::to_string(battery) + "%";
+      response->message = message.c_str();
+      return;
+    }
+    // check local position
+    if (!telemetry_->health().is_local_position_ok) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "No local position available. Check mocap_px4_publisher.");
+      response->success = false;
+      response->message = "No local position available. Check mocap_px4_publisher.";
+      return;
+    }
+  // } TODO simulation
+
+  // check if quad is killed (max 3 times)
+  for (int i = 0; i < 3; ++i)
+  {
+    if (telemetry_->health().is_armable) {break;} // status ok
+    RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Quad is killed. Check remote.");
+    if (i == 2) {
+      response->message = "Quad is killed.";
+      response->success = false; 
+      return; // exit after 3rd try
+    } 
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Checking again in 3 seconds.");
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+  }
+  
+  message += "Preflight checks complete (battery:";
+  message += std::to_string(battery) + "%).";
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), message.c_str());
+  response->message = message.c_str();
+  response->success = true;
+  // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back preflight response: [%d]", response->success);
 }
 
 void Quad::goToPos(std::shared_ptr<raptor_interface::srv::GoToPos::Request> request,
@@ -208,7 +259,7 @@ void Quad::goToPos(std::shared_ptr<raptor_interface::srv::GoToPos::Request> requ
   // create message
   mavsdk::Offboard::PositionNedYaw pos_msg{};
   pos_msg.north_m = request->x_ref;
-  pos_msg.east_m = request->y_ref;
+  pos_msg.east_m = -request->y_ref;
   pos_msg.down_m = -request->z_ref;
   pos_msg.yaw_deg = 0.0; // TODO
   // send message to quad
@@ -219,12 +270,12 @@ void Quad::goToPos(std::shared_ptr<raptor_interface::srv::GoToPos::Request> requ
   response->reached = true;
 }
 
-// Publishers TODO
+// Publishers
 void Quad::positionPubCallback()
 {
   auto message = geometry_msgs::msg::Point();
   message.x = telemetry_->position_velocity_ned().position.north_m;
-  message.y = telemetry_->position_velocity_ned().position.east_m;
+  message.y = -telemetry_->position_velocity_ned().position.east_m;
   message.z = -telemetry_->position_velocity_ned().position.down_m;
   // RCLCPP_INFO(this->get_logger(), "Publishing: [%f,%f,%f]", message.x, message.y, message.z);
   pub_position_->publish(message);

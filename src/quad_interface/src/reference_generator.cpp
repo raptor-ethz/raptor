@@ -23,6 +23,7 @@ public:
   {
     pos_ref_ = {0.0, 0.0, 2.0};
     // initialize service clients
+    client_preflight_check_ = this->create_client<std_srvs::srv::Trigger>("preflight_check");
     client_arm_ = this->create_client<std_srvs::srv::Trigger>("arm");
     client_disarm_ = this->create_client<std_srvs::srv::Trigger>("disarm");
     client_takeoff_ = this->create_client<std_srvs::srv::Trigger>("takeoff");
@@ -40,35 +41,74 @@ public:
     pos_ref_.at(2) = z;
   }
 
-  bool arm()
+  int doPreflightCheck()
+  {
+    // check if service is available
+    if (!client_preflight_check_->wait_for_service(std::chrono::seconds(1))) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), 
+                    "Preflight Check service not found.");
+      return 404; // ros service not found
+    }
+    // create request (empty)
+    auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
+    // send request
+    auto result = client_preflight_check_->async_send_request(request);
+    // wait until service completed
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) 
+        == rclcpp::FutureReturnCode::SUCCESS)
+    {
+      // get response from future
+      auto response = result.get();
+      // check response
+      if (response->success) {
+        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Preflight checks complete.");
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), response->message.c_str());
+        return 0; // success
+      }
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), 
+                  "Preflight checks failed: [%s]", 
+                  response->message.c_str());
+      return 301; // mavsdk command denied
+    } else {
+      // service call unsuccessfull
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Preflight Check service failed.");
+      return 401; // ros error
+    }
+  }
+
+  int arm()
   {
     // check if service is available
     if (!client_arm_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arming service not found.");
-      return false;
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), 
+                    "Arming service not found.");
+      return 404; // ros service not found
     }
     // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
     // send request
     auto result = client_arm_->async_send_request(request);
     // wait until service completed
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-      rclcpp::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) 
+        == rclcpp::FutureReturnCode::SUCCESS)
     {
       // get response from future
       auto response = result.get();
       // check response
       if (response->success) {
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad armed.");
-        return true;
+        // wait for propellers to stabilise
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        return 0; // success
       }
-      // mavsdk command failed TODO
-      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to arm: [%s]", response->message.c_str());
-      return false;
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), 
+                  "Failed to arm: [%s]", 
+                  response->message.c_str());
+      return 301; // mavsdk command denied
     } else {
       // service call unsuccessfull
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arm service failed.");
-      return false;
+      return 401; // ros error
     }
   }
 
@@ -76,25 +116,29 @@ public:
   {
     // check if service is available
     if (!client_disarm_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Disarming service not found.");
-      return false;
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), 
+                    "Disarming service not found.");
+      return 404; // ros service not found
     }
     // create request (empty)
     auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
     // send request
     auto result = client_disarm_->async_send_request(request);
     // wait until service completedtakeoff
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
-      rclcpp::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) 
+        == rclcpp::FutureReturnCode::SUCCESS)
     {
+      // get response from future
+      auto response = result.get();
       // check response
-      if (result.get()->success) {
+      if (response->success) {
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad disarmed.");
-        return true;
+        return 0; // success
       }
-      // mavsdk command failed
-      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to disarm: %s", result.get()->message.c_str());
-      return true;
+      RCLCPP_WARN(rclcpp::get_logger("rclcpp"), 
+                                      "Failed to disarm: [%s]", 
+                                      response->message.c_str());
+      return 301; // mavsdk command denied
     } else {
       // service call unsuccessfull
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Disarm service failed.");
@@ -263,6 +307,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
 
   rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr publisher_;
+
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_preflight_check_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_arm_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_disarm_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_takeoff_;
@@ -282,17 +328,27 @@ int main(int argc, char *argv[])
   // start pos_ref publisher
   auto node = std::make_shared<ReferenceGenerator>();
 
-  if (!node->arm() ) {
+  if (node->doPreflightCheck() ) {
     exit(0);
   }
-  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+  // TODO
+  // exit(0);
+
+  if (node->arm() ) {
+    exit(0);
+  }
   node->takeoff();
 
   node->startOffboard();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-  node->goToPos(2,2,2,4000);
+  node->goToPos(0,-1,1,4000);
+  node->goToPos(1,-1,1,4000);
+  node->goToPos(1,0,1,4000);
   node->goToPos(0,0,1,4000);
+  // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  // node->goToPos(0,0,1,4000);
 
   node->land();
   

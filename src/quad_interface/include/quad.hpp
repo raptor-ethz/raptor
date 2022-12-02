@@ -64,14 +64,14 @@ private:
     mavsdk::Telemetry *telemetry_;
 
     // ros Service Servers
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_preflight_check_;
+
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_arm_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_disarm_;
 
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_pos_offboard_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_pos_offboard_;
     bool pos_offboard_active_;
-
-    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_preflight_check_;
 
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_takeoff_;
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_land_;
