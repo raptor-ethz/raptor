@@ -1,6 +1,7 @@
 float32 x_ref
 float32 y_ref
 float32 z_ref
-int64 time_ms
+float32 yaw_ref
 ---
-bool reached
+bool success
+string message
