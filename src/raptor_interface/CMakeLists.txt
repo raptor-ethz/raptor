@@ -12,6 +12,7 @@ find_package(rosidl_default_generators REQUIRED)
 set(srv_files
   "srv/GoToPos.srv"
   "srv/QuadStatus.srv"
+  "srv/GripperAngle.srv"
 )
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
