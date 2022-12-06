@@ -310,13 +310,16 @@ public:
     }
   }
 
-  bool goToPos(float x_ref, float y_ref, float z_ref, float yaw_ref)
+  bool goToPos(float x_ref, float y_ref, float z_ref, float yaw_ref, int time_ms)
   {
     // check if service is available
     if (!client_go_to_pos_->wait_for_service(std::chrono::seconds(1))) {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service not found.");
       return false;
     }
+
+    // TODO check reference
+
     // create request
     auto request = std::make_shared<raptor_interface::srv::GoToPos::Request>();
     request->x_ref = x_ref;
@@ -325,10 +328,11 @@ public:
     request->yaw_ref = yaw_ref;
     RCLCPP_INFO(this->get_logger(), "Requesting GoToPos: [%f,%f,%f,%f]", 
       x_ref, y_ref, z_ref, yaw_ref);
+    
     // send request
     auto result = client_go_to_pos_->async_send_request(request);
+
     // wait until service completed
-    
     if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) ==
       rclcpp::FutureReturnCode::SUCCESS)
     {
@@ -343,6 +347,7 @@ public:
       }
       RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "GoToPos sent.");
       // TODO wait
+      std::this_thread::sleep_for(std::chrono::milliseconds(time_ms));
       return 0; // success
       
     } else {
@@ -391,12 +396,12 @@ int main(int argc, char *argv[])
   node->startOffboard();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-  node->goToPos(0,-1,1,4000);
-  node->goToPos(1,-1,1,4000);
-  node->goToPos(1,0,1,4000);
-  node->goToPos(0,0,1,4000);
+  node->goToPos(0,-1,1,0,4000);
+  node->goToPos(1,-1,1,0,4000);
+  node->goToPos(1,0,1,0,4000);
+  node->goToPos(0,0,1,0,4000);
   // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  // node->goToPos(0,0,1,4000);
+  // node->goToPos(0,0,1,0,4000);
 
   node->land();
   
