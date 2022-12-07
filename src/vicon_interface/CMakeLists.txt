@@ -18,4 +18,9 @@ ament_target_dependencies(vicon_interface
   rclcpp
   raptor_interface)
 
+# installation
+install(TARGETS
+  vicon_interface
+  DESTINATION lib/${PROJECT_NAME})
+
 ament_package()
