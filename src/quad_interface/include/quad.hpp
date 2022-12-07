@@ -28,6 +28,9 @@ public:
     Quad();
     ~Quad();
 
+  // public methods
+  bool initialize(const std::string &port);
+
 private:
   // state
   bool initialized_{false};
@@ -41,9 +44,6 @@ private:
   mavsdk::Offboard *offboard_;
   mavsdk::Telemetry *telemetry_;
   mavsdk::MavlinkPassthrough *passthrough_;
-
-  // methods
-  bool initialize(const std::string &port);
 
   // services
   void getStatus(std::shared_ptr<raptor_interface::srv::QuadStatus::Request> request,

@@ -16,9 +16,6 @@
 #include <mavsdk/plugins/offboard/offboard.h>
 #include <mavsdk/plugins/telemetry/telemetry.h>
 
-// helpers
-// #include "mavsdk/mavsdk_helper.h"
-
 // Quad library
 #include "quad.hpp"
 
@@ -58,11 +55,18 @@ int main(int argc, char *argv[])
   // auto offboard = mavsdk::Offboard{system};   // for offboard control
   // auto telemetry = mavsdk::Telemetry{system}; // for telemetry services
 
-  // // start service node
+
   // auto node = std::make_shared<Quad>(&action, &offboard, &telemetry);
-  // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Mavsdk interface server is ready.");
-  // // spin node
-  // rclcpp::spin(node);
-  // rclcpp::shutdown();
+
+  // // start service node
+  auto interface = std::make_shared<Quad>();
+  if ( !(interface->initialize(argv[1])) ) {
+    return 1;
+  }
+
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MavSDK interface server is ready.");
+  // spin node
+  rclcpp::spin(interface);
+  rclcpp::shutdown();
   return 0;
 }
