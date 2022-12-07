@@ -71,7 +71,7 @@ bool Quad::initialize(const std::string &port) {
 
   // connect to system
   system_ = get_system(*mavsdk_);
-  if (!system) {
+  if (!system_) {
     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
                  "Initialisation failed: System connection failed.");
     return false;
@@ -294,7 +294,7 @@ std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk) {
   // system after around 3 seconds max, surely.
   if (fut.wait_for(std::chrono::seconds(3)) == std::future_status::timeout) {
     std::cerr << "No autopilot found.\n";
-    return {};
+    return nullptr;
   }
 
   // Get discovered system now.
