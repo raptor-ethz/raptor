@@ -22,10 +22,12 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-add_executable(gripper_interface src/gripper_interface.cpp)
+add_executable(gripper_interface src/gripper_interface.cpp src/serialib.cpp)
 ament_target_dependencies(gripper_interface
   rclcpp 
   raptor_interface)
+
+target_include_directories(gripper_interface PUBLIC include)
 
 install(TARGETS
   gripper_interface
