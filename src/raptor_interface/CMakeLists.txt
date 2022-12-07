@@ -9,14 +9,18 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
+set(msg_files
+  "msg/Pose.msg"
+)
 set(srv_files
   "srv/GoToPos.srv"
   "srv/QuadStatus.srv"
   "srv/SetServo.srv"
 )
+
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
+  ${msg_files}
 )
-
 
 ament_package()
