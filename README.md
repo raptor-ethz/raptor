@@ -75,7 +75,7 @@ export RCUTILS_CONSOLE_OUTPUT_FORMAT="[{severity} {time}] [{name}]: {message} ({
 
 Within raptor/src run
 ```bash
-ros2 pkg create package_name> --build-type ament_cmake --dependencies rclcpp 
+ros2 pkg create <package_name> --build-type ament_cmake --dependencies rclcpp 
 ```
 Note: '--dependencies rclcpp' will automatically include rclcpp as a dependency in package.xml and CMakeLists.txt.
 
