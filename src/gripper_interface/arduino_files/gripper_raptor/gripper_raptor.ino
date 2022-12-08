@@ -5,20 +5,23 @@
 #define SRV_PORT_2 5
 
 // define boundary constraints
-#define SRV_1_MAX 180
-#define SRV_1_MIN 0
-#define SRV_1_INIT 100
+#define SRV_1_CLOSE 111
+#define SRV_1_OPEN 34
+#define SRV_1_INIT 34
 
-#define SRV_2_MAX 180
-#define SRV_2_MIN 0
-#define SRV_2_INIT 100
+// OPEN:34 CLOSE:110
+
+#define SRV_2_CLOSE 60
+#define SRV_2_OPEN 137
+#define SRV_2_INIT 138
+// OPEN:138 CLOSE: 60
 
 // Declare Servo Objects
 Servo Servo_1;
 Servo Servo_2;
 
 // create buffer for Serial receiving (RX)
-const int RX_BUFFER_SIZE = 1;
+const int RX_BUFFER_SIZE = 2;
 uint8_t rx_buffer[RX_BUFFER_SIZE];
 
 void setup() {
@@ -26,9 +29,8 @@ void setup() {
   Servo_1.attach(SRV_PORT_1);
   Servo_2.attach(SRV_PORT_2);
 
-
   Servo_1.write(SRV_1_INIT);
-  Servo_1.write(SRV_2_INIT);
+  Servo_2.write(SRV_2_INIT);
   //  initialize Serial
   Serial.begin(115200);
 }
@@ -57,11 +59,13 @@ void loop() {
   // Servo_2.write(170);
   // delay(1000);
 
+  float factor = 77.0 / 90.0;
   /* SERIAL CONNECTION */
-  /*if (Serial.available()) {
+  if (Serial.available()) {
     // read in command
     Serial.readBytes(rx_buffer, RX_BUFFER_SIZE);
     // write command to servo
-    Servo_1.write(cap(rx_buffer[0], SRV_1_MIN, SRV_1_MAX));
-  }*/
+    Servo_1.write(SRV_1_CLOSE - float(rx_buffer[0]) * factor);
+    Servo_2.write(SRV_2_CLOSE + float(rx_buffer[1]) * factor);
+  }
 }

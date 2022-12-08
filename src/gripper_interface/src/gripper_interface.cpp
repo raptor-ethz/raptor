@@ -6,7 +6,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Serial data packet
-unsigned char cmd[] = {100, 100};
+unsigned char cmd[] = {90, 90};
 
 // serialib
 #include "serialib.h"
