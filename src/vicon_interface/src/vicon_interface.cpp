@@ -37,11 +37,13 @@ constexpr static float y_offset = 0.5;
 class ViconPublisher : public rclcpp::Node
 {
 public:
-  ViconPublisher()
+  ViconPublisher(const std::string &vicon_identifier)
   : Node("vicon_publisher"), count_(0)
   {
+    std::string topic_name = "mocap_";
+    topic_name += vicon_identifier;
     publisher_ =
-      this->create_publisher<raptor_interface::msg::Pose>("pose", 10);
+      this->create_publisher<raptor_interface::msg::Pose>(topic_name, 10);
     
     // timer_ = this->create_wall_timer(
     //   std::chrono::milliseconds(PUBLISHER_INTERVAL_MS),
@@ -50,13 +52,12 @@ public:
 
   void publish(raptor_interface::msg::Pose &message) 
   {
-    // auto message = raptor_interface::msg::Pose();
-    // message.x = 1;
-
     // DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Publishing: [%f,%f,%f]", 
                 message.x, message.y, message.z);
+
     publisher_->publish(message);
+    rclcpp::spin_some(this->get_node_base_interface());
   }
 
 private:
@@ -69,15 +70,24 @@ private:
 
 int main(int argc, char *argv[])
 {
+  // TODO check argument
+  if (argc < 2) {
+    std::cout << "No command line argument given. Required: Vicon Identifier.\n";
+    return 1;
+  }
+  
   // initialize ros
   rclcpp::init(argc, argv);
 
   // create node
-  auto node = std::make_shared<ViconPublisher>();
+  auto node = std::make_shared<ViconPublisher>(argv[1]);
 
   raptor_interface::msg::Pose message = raptor_interface::msg::Pose();
+  std::string vicon_identifier = argv[1];
 
-  std::string vicon_identifier = "srl_falcon"; // TODO
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Initializing publisher for '%s' with topic 'mocap_%s'.",
+      vicon_identifier.c_str(), vicon_identifier.c_str());
+  
 
   /* VICON Datastream Settings */
   std::vector<std::string> Hosts;
@@ -128,14 +138,12 @@ int main(int argc, char *argv[])
 
   std::cout << "Connecting to " << HostName << " ...\n" << std::flush;
 
-  // inform
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Vicon interface server is ready.");
-
   while (!DirectClient.IsConnected().Connected)
   {
     // Direct connection
     const Output_Connect ConnectResult = DirectClient.Connect(HostName);
     const bool ok = (ConnectResult.Result == Result::Success);
+
 
     if (!ok)
     {
@@ -156,9 +164,11 @@ int main(int argc, char *argv[])
                   << std::endl;
         break;
       }
+      return 1;
     }
-
+    
     std::cout << ".";
+
 #ifdef WIN32
     Sleep(1000);
 #else
@@ -213,9 +223,13 @@ int main(int argc, char *argv[])
 
     ViconDataStreamSDK::CPP::Client &MyClient(DirectClient);
 
+    // inform
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Vicon interface server is ready.");
+
     size_t Counter = 0;
     const std::chrono::high_resolution_clock::time_point StartTime =
         std::chrono::high_resolution_clock::now();
+
     // Loop until a key is pressed
 #ifdef WIN32
     while (!Hit())
@@ -336,11 +350,34 @@ int main(int argc, char *argv[])
       unsigned int SubjectCount = MyClient.GetSubjectCount().SubjectCount;
       // OutputStream << "Subjects (" << SubjectCount << "):" << std::endl;
 
+      // find requested subject
+      bool subjectFound = false;
+      unsigned int SubjectIndex = 0;
+      for (unsigned int i = 0; i < SubjectCount;
+           ++i)
+      {
+        std::string SubjectName =
+            MyClient.GetSubjectName(SubjectIndex).SubjectName;
+
+        if (SubjectName.compare(vicon_identifier) == 0)
+        {
+          SubjectIndex = i;
+          subjectFound = true;
+          break;
+        }
+      }
+
+      // exit if no subject can be found
+      if (!subjectFound) {
+        std::cout << "Subject '" << vicon_identifier << "' not found.\n";
+        return 1;
+      }
+
 
       // loop over all subject
-      for (unsigned int SubjectIndex = 0; SubjectIndex < SubjectCount;
-           ++SubjectIndex)
-      { ////////////////////////////////////////////for
+      // for (unsigned int SubjectIndex = 0; SubjectIndex < SubjectCount;
+      //      ++SubjectIndex)
+      // { ////////////////////////////////////////////for
         /// loop starts here
         // OutputStream << "  Subject #" << SubjectIndex << std::endl;
 
@@ -530,19 +567,22 @@ int main(int argc, char *argv[])
           //   }
           // }
 
-          if (SubjectName.compare(vicon_identifier) == 0)
-          {
-            message.x =
-                (_Output_GetSegmentGlobalTranslation.Translation[0] /
-                  1000.0) -
-                x_offset;
-            message.y =
-                ((_Output_GetSegmentGlobalTranslation.Translation[1] /
-                  1000.0) +
-                  y_offset) *
-                (-1.0);
-            message.z =
-                _Output_GetSegmentGlobalTranslation.Translation[2] / 1000.0;
+
+          message.x =
+              (_Output_GetSegmentGlobalTranslation.Translation[0] /
+                1000.0) -
+              x_offset;
+          message.y =
+              ((_Output_GetSegmentGlobalTranslation.Translation[1] /
+                1000.0) +
+                y_offset) *
+              (-1.0);
+          message.z =
+              _Output_GetSegmentGlobalTranslation.Translation[2] / 1000.0;
+
+          // check data, skip if bad
+          if (message.z < 0.00001) {
+            continue;
           }
 
           ////////////////////////////////////////////
@@ -759,10 +799,12 @@ int main(int argc, char *argv[])
           }
         } */
 
+        // check data TODO
+
         // publish
         node->publish(message);
-        rclcpp::spin_some(node);
-      }
+        // rclcpp::spin_some(node);
+      // }
       // rate TODO
       std::this_thread::sleep_for(std::chrono::milliseconds(PUBLISHER_INTERVAL_MS));
     }
