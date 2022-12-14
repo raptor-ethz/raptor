@@ -27,6 +27,7 @@ void set_left_angle(
   response->success = true;
 }
 
+// command line argument: serial port, i.e. /dev/ttyUSB0
 int main(int argc, char **argv) {
 
   if (argc != 2) {

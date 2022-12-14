@@ -218,6 +218,8 @@ void Quad::goToPos(
   pos_msg.yaw_deg = request->yaw_ref;
   // send message to quad
   offboard_->set_position_ned(pos_msg);
+
+  response->success = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

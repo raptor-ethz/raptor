@@ -31,8 +31,10 @@
 
 // parameters TODO
 const int PUBLISHER_INTERVAL_MS = 20;
-constexpr static float x_offset = 0.5;
-constexpr static float y_offset = 0.5;
+// constexpr static float x_offset = 0.5;
+// constexpr static float y_offset = 0.5;
+constexpr static float x_offset = 0.;
+constexpr static float y_offset = 0.;
 
 class ViconPublisher : public rclcpp::Node
 {

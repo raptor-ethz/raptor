@@ -123,14 +123,15 @@ Include header files
 
 ## List and Call Interfaces from Commandline
 
-- List all active services
+- List all active topics and services
   ```bash
+  ros2 topic list
   ros2 service list
   ```
 
-- Show type of a service
+- Show type of a topic or service
   ```bash
-  ros2 service type /my_service
+  ros2 service type /topic_or_service_name
   ```
 
 - Show structure of a type
@@ -193,7 +194,3 @@ ros2 interface show my_package/srv/MyService
 
 
 ### ERRORS
-
-terminate called after throwing an instance of 'std::future_error'
-  what():  std::future_error: No associated state
-[ros2run]: Aborted
