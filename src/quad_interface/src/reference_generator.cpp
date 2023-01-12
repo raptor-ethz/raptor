@@ -493,15 +493,20 @@ int main(int argc, char *argv[]) {
   node->startOffboard();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-  node->goToObject(0,0,0.4,0,4000);
+  // position demo
+  node->goToPos(1,0,0.5,0,4000);
+  node->goToPos(1,-1,0.5,0,4000);
+  node->goToPos(0,-1,0.5,0,4000);
 
-  node->goToObject(0,0,0.18,0,2000);
+  // GRASP DEMO
+  // node->goToObject(0,0,0.4,0,4000);
+  // node->goToObject(0,0,0.18,0,2000);
 
-  node->setGripperAngle(10.0, 10.0);
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  node->goToObject(0,0,0.6,0,4000);
-  node->setGripperAngle(90.0, 90.0);
-  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  // node->setGripperAngle(10.0, 10.0);
+  // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  // node->goToObject(0,0,0.6,0,4000);
+  // node->setGripperAngle(90.0, 90.0);
+  // std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
   // node->goToPos(1, 1, 1, 0, 4000);
   // node->goToPos(1, 0, 1, 0, 4000);
@@ -510,6 +515,7 @@ int main(int argc, char *argv[]) {
   // node->goToPos(0,0,1,0,4000);
 
 
+  // go home
   node->goToPos(0,0,0.5,0,4000);
   node->goToPos(0,0,0.2,0,2000);
 
