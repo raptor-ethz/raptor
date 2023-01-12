@@ -1,7 +1,8 @@
 # Custom
-/build
-/log
-/install
+build
+log
+logs
+install
 /.vscode
 
 # Prerequisites
