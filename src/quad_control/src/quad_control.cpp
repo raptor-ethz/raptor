@@ -11,7 +11,7 @@
 #include <mavsdk/plugins/telemetry/telemetry.h>
 
 // Quad library
-#include "quad.hpp"
+#include "quad_control/quad_control.hpp"
 
 int main(int argc, char *argv[])
 {

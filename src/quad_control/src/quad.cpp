@@ -1,4 +1,4 @@
-#include "quad.hpp"
+#include "quad_control/quad_control.hpp"
 
 // TODO read these values from a yaml file
 const int position_pub_interval = 50;
