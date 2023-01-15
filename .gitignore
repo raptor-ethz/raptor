@@ -1,9 +1,9 @@
 # Custom
 build
 log
+logs
 install
 .vscode
-bags
 
 # Prerequisites
 *.d
