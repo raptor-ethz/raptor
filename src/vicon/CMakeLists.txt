@@ -23,10 +23,10 @@ endif()
 
 
 # TARGETS
-# vicon_datastream
+# vicon datastream
 add_subdirectory(vicon_datastream)
 
-# vicon
+# vicon publisher
 add_executable(vicon_publisher src/vicon_publisher.cpp)
 target_include_directories(vicon_publisher PUBLIC include)
 ament_target_dependencies(vicon_publisher 
