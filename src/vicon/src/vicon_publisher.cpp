@@ -11,11 +11,13 @@
 #include <time.h>
 #include <thread>
 
-// Vicon Datastream
-#include "DataStreamClient.h"
-// vicon helper functions
+// ros default
+#include "rclcpp/rclcpp.hpp"
+#include "raptor_interface/msg/pose.hpp"
+
+// vicon
 #include "vicon_helper.h"
-// vicon stuff
+#include "DataStreamClient.h"
 #ifdef WIN32
 #include <conio.h>   // For _kbhit()
 #include <windows.h> // For Sleep()
@@ -23,10 +25,6 @@
 #else
 #include <unistd.h> // For sleep()
 #endif              // WIN32
-
-// ros dependencies
-#include "rclcpp/rclcpp.hpp" // ros2 client library
-#include "raptor_interface/msg/pose.hpp" // custom ros interface
 
 
 // parameters TODO

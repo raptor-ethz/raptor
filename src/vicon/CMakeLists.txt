@@ -27,17 +27,17 @@ endif()
 add_subdirectory(vicon_datastream)
 
 # vicon
-add_executable(vicon src/vicon.cpp)
-target_include_directories(vicon PUBLIC include)
-ament_target_dependencies(vicon 
+add_executable(vicon_publisher src/vicon_publisher.cpp)
+target_include_directories(vicon_publisher PUBLIC include)
+ament_target_dependencies(vicon_publisher 
   rclcpp
   raptor_interface)
-target_link_libraries(vicon ViconDataStreamSDK_lib)
+target_link_libraries(vicon_publisher ViconDataStreamSDK_lib)
 
 
 # INSTALLATION
 install(TARGETS
-  vicon
+  vicon_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 
