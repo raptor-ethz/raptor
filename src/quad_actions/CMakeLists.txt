@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 project(quad_actions)
 
+
+# DEPENDENCIES
 # ros default
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -13,6 +15,8 @@ find_package(raptor_interface REQUIRED)
 # external
 find_package(MAVSDK REQUIRED)
 
+
+# Compiler options
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
