@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(quad_actions)
+project(quad_control)
 
 
 # DEPENDENCIES
@@ -28,19 +28,19 @@ endif()
 
 
 # TARGETS
-# mav interface
-add_executable(mav_interface src/mav_interface.cpp)
-target_include_directories(mav_interface PUBLIC 
+# quad actions
+add_executable(quad_control src/quad_control.cpp)
+target_include_directories(quad_control PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-target_sources(mav_interface PUBLIC src/quad.cpp)
-ament_target_dependencies(mav_interface 
+target_sources(quad_control PUBLIC src/quad.cpp)
+ament_target_dependencies(quad_control 
   rclcpp 
   std_msgs 
   std_srvs 
   geometry_msgs 
   raptor_interface)
-target_link_libraries(mav_interface MAVSDK::mavsdk)
+target_link_libraries(quad_control MAVSDK::mavsdk)
 
 # ref gen
 add_executable(reference_generator src/reference_generator.cpp)
@@ -53,8 +53,8 @@ ament_target_dependencies(reference_generator
 
 # INSTALLATION
 install(TARGETS
+  quad_control
   reference_generator
-  mav_interface
   DESTINATION lib/${PROJECT_NAME})
 
 
