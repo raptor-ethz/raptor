@@ -3,25 +3,71 @@ Raptor workspace for ROS 2 packages
 
 # Workspace Structure
 
-## General structure
-```
-RAPTOR
-|-  src/
-    |-  package_1/
-        |-  include
-        |-  src
-        |-  srv
-```
-
 ## Packages
 
-### quad_interface
+### Quad Control
 
-- Provides an clear interface for all other nodes to interact with the quadcopter/px4. 
+- API for interactions with the PX4
 
-### raptor_interface
+### Vicon
 
-- Provides custom messages and services for the raptor workspace.
+- Publish motion capture data from the vicon system to the ROS 2 network
+
+### Gripper Interface
+
+- API for interactions with the gripper. 
+
+### Raptor Interface
+
+- Custom ROS interface definitions for the raptor workspace.
+
+# Conventions
+
+## CMakeLists.txt
+
+```CMake
+cmake_minimum_required(VERSION 3.13)
+
+project(my_project)
+
+
+# DEPENDENCIES
+# ros default
+find_package(ament_cmake REQUIRED)
+# ros custom
+find_package(custom_ros_package REQUIRED)
+# external
+find_package(external_package REQUIRED)
+
+
+# Compiler options
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+# Compile flags
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+
+# TARGETS
+# my_target
+add_executable(my_target src/my_target.cpp)
+
+# another_target
+add_executable(another_target src/another_target.cpp)
+
+
+# INSTALLATION
+install(TARGETS
+  my_target
+  another_target
+  DESTINATION lib/${PROJECT_NAME})
+
+
+ament_package()
+```
 
 
 # Source, Build, Install, Launch
