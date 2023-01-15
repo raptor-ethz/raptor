@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(gripper_interface)
+project(gripper_control)
 
 
 # DEPENDENCIES
@@ -24,16 +24,16 @@ endif()
 
 # TARGETS
 # gripper interface
-add_executable(gripper_interface src/gripper_interface.cpp src/serialib.cpp)
-ament_target_dependencies(gripper_interface
+add_executable(gripper_control src/gripper_control.cpp src/serialib.cpp)
+ament_target_dependencies(gripper_control
   rclcpp 
   raptor_interface)
-  target_include_directories(gripper_interface PUBLIC include)
+  target_include_directories(gripper_control PUBLIC include)
 
 
 # INSTALLATION
 install(TARGETS
-  gripper_interface
+  gripper_control
   DESTINATION lib/${PROJECT_NAME})
 
 
