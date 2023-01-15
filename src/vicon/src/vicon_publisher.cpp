@@ -17,7 +17,7 @@
 
 // vicon
 #include "DataStreamClient.h"
-#include "vicon_helper.h"
+#include "vicon/vicon_helper.h"
 #ifdef WIN32
 #include <conio.h>   // For _kbhit()
 #include <windows.h> // For Sleep()
