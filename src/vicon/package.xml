@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>vicon_interface</name>
+  <name>vicon</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>This package provides an interface between the vicon motion capture system and ROS 2. Motion capture data can be published to ROS 2 under a corresponding topic.</description>
   <maintainer email="pstrauch@ethz.ch">pstrauch</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <!-- ros dependencies -->
   <depend>rclcpp</depend>
-  <!-- custom packages -->
+  <!-- custom ros packages -->
   <depend>raptor_interface</depend>
 
   <test_depend>ament_lint_auto</test_depend>

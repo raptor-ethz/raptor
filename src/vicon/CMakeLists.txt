@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(vicon_interface)
-
-add_subdirectory(vicon_datastream)
+project(vicon)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -15,17 +13,18 @@ find_package(raptor_interface REQUIRED)
 
 
 # targets
-add_executable(vicon_interface src/vicon_interface.cpp)
-ament_target_dependencies(vicon_interface 
+add_subdirectory(vicon_datastream)
+add_executable(vicon src/vicon.cpp)
+ament_target_dependencies(vicon 
   rclcpp
   raptor_interface)
 
-target_include_directories(vicon_interface PUBLIC include)
-target_link_libraries(vicon_interface ViconDataStreamSDK_lib)
+target_include_directories(vicon PUBLIC include)
+target_link_libraries(vicon ViconDataStreamSDK_lib)
 
 # installation
 install(TARGETS
-  vicon_interface
+  vicon
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
