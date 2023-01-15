@@ -2,13 +2,9 @@
 #include <iostream>
 #include <chrono>
 
-#include "rclcpp/rclcpp.hpp"       // ros2 client library
-// #include "std_msgs/msg/string.hpp" // include std_msg type
-// #include "std_srvs/srv/trigger.hpp"
+#include "rclcpp/rclcpp.hpp"
 
-// #include "geometry_msgs/msg/point.hpp"
-
-// MAVSDK
+// mavsdk
 #include <mavsdk/mavsdk.h>
 #include <mavsdk/plugins/action/action.h>
 #include <mavsdk/plugins/offboard/offboard.h>
@@ -37,9 +33,8 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MavSDK interface server is ready.");
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad actions server is ready.");
 
-  // spin node
   rclcpp::spin(interface);
   rclcpp::shutdown();
   return 0;
