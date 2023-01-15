@@ -28,7 +28,7 @@ endif()
 
 
 # TARGETS
-# quad actions
+# quad control
 add_executable(quad_control src/quad_control.cpp)
 target_include_directories(quad_control PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
