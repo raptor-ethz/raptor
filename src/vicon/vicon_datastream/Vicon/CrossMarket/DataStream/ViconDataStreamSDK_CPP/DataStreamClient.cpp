@@ -24,7 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 // We are going to export these from a DLL
-#define _EXPORTING
+// #define _EXPORTING TODO
 
 #include "DataStreamClient.h"
 #include <memory>

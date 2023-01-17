@@ -40,7 +40,7 @@ Vicon/CrossMarket/DataStream
 Vicon/CrossMarket/include
 )
 
-add_subdirectory(vicon_datastream_app)
+# add_subdirectory(vicon_datastream_app)
 
 
 
