@@ -435,9 +435,9 @@ public:
     //     msg.x,
     //     msg.y,
     //     msg.z);
-    object_x = msg.x;
-    object_y = -msg.y; // TODO
-    object_z = msg.z;
+    object_x = msg.x_m;
+    object_y = -msg.y_m; // TODO
+    object_z = msg.z_m;
   }
 
 private:

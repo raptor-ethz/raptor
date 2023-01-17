@@ -1,6 +1,6 @@
-float32 x
-float32 y
-float32 z
-float32 roll
-float32 pitch
-float32 yaw
+float32 x_m
+float32 y_m
+float32 z_m
+float32 roll_deg
+float32 pitch_deg
+float32 yaw_deg

@@ -569,20 +569,20 @@ int main(int argc, char *argv[])
         // }
 
         // POI
-        message.x =
+        message.x_m =
             (_Output_GetSegmentGlobalTranslation.Translation[0] /
               1000.0) -
             x_offset;
-        message.y =
+        message.y_m =
             ((_Output_GetSegmentGlobalTranslation.Translation[1] /
               1000.0) +
               y_offset) *
             (-1.0);
-        message.z =
+        message.z_m =
             _Output_GetSegmentGlobalTranslation.Translation[2] / 1000.0;
 
         // check data, skip if bad
-        if (message.z < 0.00001) {
+        if (message.z_m < 0.00001) {
           continue;
         }
 
