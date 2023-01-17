@@ -54,6 +54,9 @@ endif()
 # TARGETS
 # my_target
 add_executable(my_target src/my_target.cpp)
+ament_target_dependencies(my_target 
+  ros_package)
+target_link_libraries(my_target external_package)
 
 # another_target
 add_executable(another_target src/another_target.cpp)
