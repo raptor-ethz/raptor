@@ -9,6 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 # ros custom
 find_package(raptor_interface REQUIRED)
+# external
+find_package(MAVSDK REQUIRED)
 
 
 # Compiler options
@@ -34,10 +36,21 @@ ament_target_dependencies(vicon_publisher
   raptor_interface)
 target_link_libraries(vicon_publisher ViconDataStreamSDK_lib)
 
+# vicon px4 publisher
+add_executable(vicon_px4_publisher src/vicon_px4_publisher.cpp)
+target_include_directories(vicon_px4_publisher PUBLIC include)
+ament_target_dependencies(vicon_px4_publisher 
+  rclcpp
+  raptor_interface)
+target_link_libraries(vicon_px4_publisher 
+  ViconDataStreamSDK_lib 
+  MAVSDK::mavsdk)
+
 
 # INSTALLATION
 install(TARGETS
   vicon_publisher
+  vicon_px4_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 
