@@ -11,6 +11,8 @@ find_package(rosidl_default_generators REQUIRED)
 
 set(msg_files
   "msg/Pose.msg"
+  "msg/Velocity.msg"
+  "msg/Acceleration.msg"
 )
 set(srv_files
   "srv/GoToPos.srv"
