@@ -11,7 +11,9 @@ Raptor workspace for ROS 2 packages
 
 ### Vicon
 
-- Publish motion capture data from the vicon system to the ROS 2 network
+- Publish motion capture pose data from the Vicon system to the ROS 2 network
+- Forward motion capture pose data from the Vicon system to the PX4 controller
+- Publish telemetry data from the PX4 controller to the ROS 2 network
 
 ### Gripper Interface
 
