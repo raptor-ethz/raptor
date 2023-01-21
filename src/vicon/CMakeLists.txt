@@ -46,11 +46,20 @@ target_link_libraries(vicon_px4_publisher
   ViconDataStreamSDK_lib 
   MAVSDK::mavsdk)
 
+# px4 publisher
+add_executable(px4_publisher src/px4_publisher.cpp)
+target_include_directories(px4_publisher PUBLIC include)
+ament_target_dependencies(px4_publisher 
+  rclcpp
+  raptor_interface)
+target_link_libraries(px4_publisher MAVSDK::mavsdk)
+
 
 # INSTALLATION
 install(TARGETS
   vicon_publisher
   vicon_px4_publisher
+  px4_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 
