@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
   
   // initialize ros
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ViconPublisher>("quad_vicon_pose");
+  auto node = std::make_shared<ViconPublisher>("vicon_quad_pose_nwu");
 
   raptor_interface::msg::Pose message = raptor_interface::msg::Pose();
   std::string vicon_identifier = argv[1];
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-      "Initializing publisher for '%s' using the topic 'quad_vicon_pose'.",
+      "Initializing publisher for '%s' using the topic 'vicon_quad_pose_nwu'.",
       vicon_identifier.c_str());
   
 
@@ -570,14 +570,9 @@ int main(int argc, char *argv[])
 
         // POI
         message.x_m =
-            (_Output_GetSegmentGlobalTranslation.Translation[0] /
-              1000.0) -
-            x_offset;
+            _Output_GetSegmentGlobalTranslation.Translation[0] / 1000.0;
         message.y_m =
-            ((_Output_GetSegmentGlobalTranslation.Translation[1] /
-              1000.0) +
-              y_offset) *
-            (-1.0);
+            _Output_GetSegmentGlobalTranslation.Translation[1] /1000.0;
         message.z_m =
             _Output_GetSegmentGlobalTranslation.Translation[2] / 1000.0;
 
