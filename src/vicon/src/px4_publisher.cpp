@@ -96,8 +96,8 @@ public:
     pose_msg.y_m = - pos_vel.position.east_m;
     pose_msg.z_m = - pos_vel.position.down_m;
     pose_msg.roll_deg = attitude_euler.roll_deg;
-    pose_msg.pitch_deg = attitude_euler.pitch_deg;
-    pose_msg.yaw_deg = attitude_euler.yaw_deg;
+    pose_msg.pitch_deg = - attitude_euler.pitch_deg;
+    pose_msg.yaw_deg = - attitude_euler.yaw_deg;
 
     vel_msg.x_m_s = pos_vel.velocity.north_m_s;
     vel_msg.y_m_s = - pos_vel.velocity.east_m_s;
