@@ -65,7 +65,7 @@ std::shared_ptr<System> get_system(Mavsdk &mavsdk)
 
 const int INTERVAL_RATE_HZ = 100;
 const int INTERVAL_MS = 1000. / INTERVAL_RATE_HZ;
-const int TELEMETRY_RATE_HZ = 200;
+const int TELEMETRY_RATE_HZ = 150;
 
 ////////////////////////////////////////////////////////////////////////////////
 // ROS publisher
@@ -76,9 +76,9 @@ public:
   PX4Publisher(Telemetry* telemetry)
   : Node("px4_publisher"), telemetry_(telemetry)
   {
-    pose_publisher_ = this->create_publisher<raptor_interface::msg::Pose>("px4_pose_ned", 10);
-    velocity_publisher_ = this->create_publisher<raptor_interface::msg::Velocity>("px4_vel_ned", 10);
-    acceleration_publisher_ = this->create_publisher<raptor_interface::msg::Acceleration>("px4_acc_frd", 10);
+    pose_publisher_ = this->create_publisher<raptor_interface::msg::Pose>("px4_pose_nwu", 10);
+    velocity_publisher_ = this->create_publisher<raptor_interface::msg::Velocity>("px4_vel_nwu", 10);
+    acceleration_publisher_ = this->create_publisher<raptor_interface::msg::Acceleration>("px4_acc_flu", 10);
     timer_ = this->create_wall_timer(std::chrono::milliseconds(INTERVAL_MS), 
               std::bind(&PX4Publisher::publish, this));
   }
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PX4Publisher>(&telemetry);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-      "PX4-telemetry publisher ready using the topics 'px4_pose_ned', 'px4_vel_ned' and 'px4_acc_frd'.");
+      "PX4-telemetry publisher ready using the topics 'px4_pose_nwu', 'px4_vel_nwu' and 'px4_acc_flu'.");
 
   rclcpp::spin(node);
 

@@ -129,11 +129,11 @@ class PX4Publisher : public rclcpp::Node
 {
 public:
   PX4Publisher()
-  : Node("px4_publisher")
+  : Node("px4_vicon_publisher")
   {
-    pose_publisher_ = this->create_publisher<raptor_interface::msg::Pose>("px4_pose_ned", 10);
-    velocity_publisher_ = this->create_publisher<raptor_interface::msg::Velocity>("px4_vel_ned", 10);
-    acceleration_publisher_ = this->create_publisher<raptor_interface::msg::Acceleration>("px4_acc_frd", 10);
+    pose_publisher_ = this->create_publisher<raptor_interface::msg::Pose>("px4_pose_nwu", 10);
+    velocity_publisher_ = this->create_publisher<raptor_interface::msg::Velocity>("px4_vel_nwu", 10);
+    acceleration_publisher_ = this->create_publisher<raptor_interface::msg::Acceleration>("px4_acc_flu", 10);
   }
 
   void publish_pose(raptor_interface::msg::Pose &message) 
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
   auto node = std::make_shared<PX4Publisher>();
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-      "Initializing Vicon-to-PX4 publisher for '%s' and PX4-telemetry publisher using the topics 'quad_px4_pose_ned', 'quad_px4_vel_ned' and 'quad_px4_acc_frd'.",
+      "Initializing Vicon-to-PX4 publisher for '%s' and PX4-telemetry publisher using the topics 'quad_px4_pose_nwu', 'quad_px4_vel_nwu' and 'quad_px4_acc_flu'.",
       VICON_IDENTIFIER.c_str());
 
 
@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
     else if (AxisMapping == "XUp")
     {
       DirectClient.SetAxisMapping(Direction::Up, Direction::Forward,
-                                  Direction::Left); // Y-up
+                                  Direction::Left); // Z-up
     }
 
     // Output_GetAxisMapping _Output_GetAxisMapping = DirectClient.GetAxisMapping();
