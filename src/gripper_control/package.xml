@@ -2,16 +2,23 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>gripper_control</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="appiusa@student.ethz.ch">aurel</maintainer>
-  <license>TODO: License declaration</license>
+  <version>0.9.0</version>
+  <description>Communication with arduino, that controls gripper</description>
+  <maintainer email="raptor@ethz.ch">RAPTOR</maintainer>
+  <license>http://www.apache.org/licenses/LICENSE-2.0</license>
+  <license file="LICENSE">Apache 2.0</license>
 
+  <url type="website">https://raptor.ethz.ch/</url>
+  <url type="repository">https://github.com/raptor-ethz/raptor</url>
+  <url type="bugtracker">https://github.com/raptor-ethz/raptor/issues</url>
+  <author>RAPTOR</author>
+  <author email="raptor@ethz.ch">RAPTOR</author>
+
+  <!-- ros dependencies -->
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
   <depend>raptor_interface</depend>
-
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
