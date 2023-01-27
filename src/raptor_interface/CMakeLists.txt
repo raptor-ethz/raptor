@@ -13,6 +13,7 @@ set(msg_files
   "msg/Pose.msg"
   "msg/Velocity.msg"
   "msg/Acceleration.msg"
+  "msg/Force.msg"
 )
 set(srv_files
   "srv/GoToPos.srv"

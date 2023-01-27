@@ -1,0 +1,25 @@
+/festo/phand/arm/init_pose:
+- 0.475
+- 0.1
+- 0.5
+- 90
+- -45
+- 0
+/festo/phand/baudrate: 500000
+/festo/phand/baudrate_f: 1000000
+/festo/phand/camera/extrinsics/rvec:
+- 0.0485 1.5246 0.0377
+/festo/phand/camera/extrinsics/tvec:
+- -0.2488  0.0023  0.6249
+/festo/phand/camera/intrinsics/coeffs:
+- 1.45716057e-01 -9.97132731e-01  7.82129317e-04 -5.92024154e-03 2.19327208e+00
+/festo/phand/camera/intrinsics/fx: 1443.9852553494954
+/festo/phand/camera/intrinsics/fy: 1443.1754714570125
+/festo/phand/camera/intrinsics/ppx: 565.0069245118557
+/festo/phand/camera/intrinsics/ppy: 913.1080032496994
+/festo/phand/camera/intrinsics/tvec:
+- -0.2383  0.085   0.6023
+/festo/phand/local_ip: 192.168.2.106
+/festo/phand/measurement: Flex8
+/festo/phand/port: /dev/ttyACM0
+/festo/phand/port_f: /dev/ttyACM0
