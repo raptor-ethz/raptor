@@ -4,15 +4,11 @@
 #include <stdio.h>
 #include <string>
 
-// #include "ros/ros.h"
 #include "rclcpp/rclcpp.hpp"
 #include "ftconfig.h"
+#include "std_msgs/msg/float32_multi_array.hpp"
 
-// #include "soft_robot_hand/FloatVector.h"
-#include "raptor_interface/msg/force.hpp"
-
-class FTConverter
-{
+class FTConverter: public rclcpp::Node {
 public:
     FTConverter(char *calfilepath);
     ~FTConverter();
@@ -23,8 +19,8 @@ public:
     // int setTransfromation(std::array<float, 6>& transform);
     void getMeasurement(std::array<float, 6> &measurement);
 
-    void u3Callback(raptor_interface::msg::Force msg);
-    void adcCallback(raptor_interface::msg::Force msg);
+    void u3Callback(std_msgs::msg::Float32MultiArray::SharedPtr msg);
+    void adcCallback(std_msgs::msg::Float32MultiArray::SharedPtr msg);
 
 private:
     // std::string calfilepath_;  // path to the calibration files
@@ -36,6 +32,9 @@ private:
     std::array<float, 6> transformation_{0, 0, 0, 0, 0, 0}; // transform includes a translation along the Z-axis and a rotation about the X-axis.
 
     std::mutex voltage_mtx_;
+
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr u3Sub;
+    rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr adcSub;
 };
 
 #endif

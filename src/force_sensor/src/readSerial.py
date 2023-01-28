@@ -8,9 +8,8 @@ import sys
 import time
 import numpy as np
 
-from std_msgs.msg import Float32
 import click
-from raptor_interface.msg import force
+from std_msgs.msg import Float32MultiArray
 
 from threading import Lock, Thread
 
@@ -28,8 +27,6 @@ def read_serial_node(node, port, baudrate):
         baudrate (int): baudrate for serial port
     """
 
-    # rospy.init_node('sensor_reading_node', anonymous=True)
-
     ser_lock = Lock()
 
     print(f"About to init connection to serial port: {port} with baudrate: {baudrate}")
@@ -39,11 +36,9 @@ def read_serial_node(node, port, baudrate):
         ser.flushInput()
         ser.flushOutput()
     measurement_type = ""
-    # pub_voltage = rospy.Publisher(
-    #     "/force_torque_sensor_raw/adc", FloatVector, queue_size=10)
-    pub_voltage = node.create_publisher(Force,
-        "/force_torque_sensor_raw/adc")
-    msgVoltage = Force()
+    pub_voltage = node.create_publisher(Float32MultiArray,
+        "/force_torque_sensor_raw/adc", 10)
+    msgVoltage = Float32MultiArray()
     measurement_type += "V"
 
 
@@ -77,7 +72,6 @@ def read_serial_node(node, port, baudrate):
                 line = ser.readline().decode('utf8')
             except UnicodeDecodeError:
                 print("Error processing the serial messages")
-
         with ser_lock:
             ser.flush()   # flush serial port to get most recent sensor reading
         # process serial input and publish messages
@@ -108,4 +102,6 @@ if __name__ == '__main__':
     else:
         node.get_logger().error("Please set baudrate in launch file")
 
+    port = "/dev/ttyACM0"
+    baudrate = 1000000
     read_serial_node(node, port, baudrate)

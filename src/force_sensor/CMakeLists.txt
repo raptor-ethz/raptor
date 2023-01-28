@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 
 project(force_sensor)
 
+# Fix issue with .c file in libATIDAQ
+add_compile_options(-fcommon)
+
 add_subdirectory(U3)
 add_subdirectory(libATIDAQ)
 
@@ -14,7 +17,6 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 # ros custom
-find_package(raptor_interface REQUIRED)
 
 
 # Compiler options
@@ -36,7 +38,6 @@ ament_target_dependencies(readLabjack
   std_msgs 
   std_srvs 
   geometry_msgs
-  raptor_interface
 )
 target_include_directories(readLabjack PUBLIC
 "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/U3>"
@@ -53,7 +54,6 @@ ament_target_dependencies(ftConverter
   std_msgs 
   std_srvs 
   geometry_msgs
-  raptor_interface
 )
 target_include_directories(ftConverter PUBLIC
 "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libATIDAQ>"
@@ -64,8 +64,8 @@ target_link_libraries(ftConverter
 
 # INSTALLATION
 install(TARGETS
+  ftConverter
   readLabjack
   DESTINATION lib/${PROJECT_NAME})
-
 
 ament_package()
