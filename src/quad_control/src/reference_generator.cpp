@@ -319,7 +319,7 @@ public:
   }
 
   int goToPos(float x_ref, float y_ref, float z_ref, float yaw_ref,
-               int time_ms) {
+               float accuracy = 0.5) {
     // check if service is available
     if (!client_go_to_pos_->wait_for_service(std::chrono::seconds(1))) {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service not found.");
@@ -334,12 +334,12 @@ public:
     request->y_ref = y_ref;
     request->z_ref = z_ref;
     request->yaw_ref = yaw_ref;
-    RCLCPP_INFO(this->get_logger(), "Requesting GoToPos: [%f,%f,%f,%f]", x_ref,
-                y_ref, z_ref, yaw_ref);
+    request->accuracy = accuracy;
+    RCLCPP_INFO(this->get_logger(), "Requesting GoToPos: [%f,%f,%f,%f,%f]", x_ref,
+                y_ref, z_ref, yaw_ref, accuracy);
 
     // send request
     auto result = client_go_to_pos_->async_send_request(request);
-
     // wait until service completed
     if (rclcpp::spin_until_future_complete(this->get_node_base_interface(),
                                            result) ==
@@ -352,9 +352,7 @@ public:
                     response->message.c_str());
         return 301; // mavsdk command denied
       }
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "GoToPos sent.");
-      // TODO wait
-      std::this_thread::sleep_for(std::chrono::milliseconds(time_ms));
+      RCLCPP_INFO(this->get_logger(), "GoToPos sent.");
       return 0; // success
 
     } else {
@@ -365,7 +363,7 @@ public:
   }
 
   int goToObject(float x_offset, float y_offset, float z_offset, float yaw_ref,
-               int time_ms) {
+               float accuracy = 0.5) {
     // check if service is available
     if (!client_go_to_pos_->wait_for_service(std::chrono::seconds(1))) {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service not found.");
@@ -380,11 +378,13 @@ public:
     request->y_ref = object_y + y_offset;
     request->z_ref = object_z + z_offset;
     request->yaw_ref = yaw_ref;
-    RCLCPP_INFO(this->get_logger(), "Requesting GoToPos: [%f,%f,%f,%f]", 
+    request->accuracy = accuracy;
+    RCLCPP_INFO(this->get_logger(), "Requesting GoToPos: [%f,%f,%f,%f,%f]", 
         request->x_ref,
         request->y_ref,
         request->z_ref,
-        yaw_ref);
+        yaw_ref,
+        accuracy);
 
     // send request
     auto result = client_go_to_pos_->async_send_request(request);
@@ -401,9 +401,7 @@ public:
                     response->message.c_str());
         return 301; // mavsdk command denied
       }
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "GoToPos sent.");
-      // TODO wait
-      std::this_thread::sleep_for(std::chrono::milliseconds(time_ms));
+      RCLCPP_INFO(this->get_logger(), "GoToPos sent.");
       return 0; // success
 
     } else {
@@ -493,31 +491,23 @@ int main(int argc, char *argv[]) {
   node->startOffboard();
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-  // position demo
-  node->goToPos(1,0,0.5,0,4000);
-  node->goToPos(1,-1,0.5,0,4000);
-  node->goToPos(0,-1,0.5,0,4000);
+  node->setGripperAngle(90.0, 90.0);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  
+  // grasp Object
+  node->goToPos(-1,0,0.5,90,0.1);
+  node->goToPos(-1,0,0.15,90,0.05);
+  node->setGripperAngle(10.0, 10.0);
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+  node->goToPos(-1, 0, 1, 90);
 
-  // GRASP DEMO
-  // node->goToObject(0,0,0.4,0,4000);
-  // node->goToObject(0,0,0.18,0,2000);
-
-  // node->setGripperAngle(10.0, 10.0);
-  // std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  // node->goToObject(0,0,0.6,0,4000);
-  // node->setGripperAngle(90.0, 90.0);
-  // std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
-  // node->goToPos(1, 1, 1, 0, 4000);
-  // node->goToPos(1, 0, 1, 0, 4000);
-  // node->goToPos(0, 0, 1, 0, 4000);
-  // std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  // node->goToPos(0,0,1,0,4000);
-
+  // drop off object
+  node->goToPos(0, 1, 1, 0);
+  node->setGripperAngle(90.0, 90.0);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
   // go home
-  node->goToPos(0,0,0.5,0,4000);
-  node->goToPos(0,0,0.2,0,2000);
+  node->goToPos(0,0,1,0);
 
   node->land();
 
@@ -526,4 +516,4 @@ int main(int argc, char *argv[]) {
 
   rclcpp::shutdown();
   return 0;
-}
+ }
