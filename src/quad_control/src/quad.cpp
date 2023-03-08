@@ -57,13 +57,13 @@ Quad::~Quad() {
 
 // methods
 bool Quad::initialize(const std::string &port) {
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Initializing MavSDK interface.");
+  RCLCPP_INFO(this->get_logger(), "Initializing MavSDK interface.");
   // create connection
   mavsdk_ = new mavsdk::Mavsdk;
   mavsdk::ConnectionResult connection_result =
       mavsdk_->add_any_connection(port);
   if (connection_result != mavsdk::ConnectionResult::Success) {
-    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+    RCLCPP_ERROR(this->get_logger(),
                  "Initialisation failed: MavLink connection failed [%i].",
                  (int)connection_result);
     return false;
@@ -72,7 +72,7 @@ bool Quad::initialize(const std::string &port) {
   // connect to system
   system_ = get_system(*mavsdk_);
   if (!system_) {
-    RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+    RCLCPP_ERROR(this->get_logger(),
                  "Initialisation failed: System connection failed.");
     return false;
   }
@@ -84,7 +84,7 @@ bool Quad::initialize(const std::string &port) {
   passthrough_ = new mavsdk::MavlinkPassthrough{system_};
 
   initialized_ = true;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Initialization successful.");
+  RCLCPP_INFO(this->get_logger(), "Initialization successful.");
   return true;
 }
 
@@ -95,19 +95,19 @@ void Quad::getStatus(
     std::shared_ptr<raptor_interface::srv::QuadStatus::Request> request,
     std::shared_ptr<raptor_interface::srv::QuadStatus::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received status request.");
+  RCLCPP_INFO(this->get_logger(), "Received status request.");
   response->battery = telemetry_->battery().remaining_percent * 100.0;
   response->local_pos_ok = telemetry_->health().is_local_position_ok;
   response->armable = telemetry_->health().is_armable;
   // debug
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sending back status: [%f, %i, %i]",
+  RCLCPP_INFO(this->get_logger(), "Sending back status: [%f, %i, %i]",
               response->battery, response->local_pos_ok, response->armable);
 }
 
 void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request.");
+  RCLCPP_INFO(this->get_logger(), "Received arming request.");
   const mavsdk::Action::Result arm_result = action_->arm();
   response->message = actionResultToString(arm_result);
   if (arm_result == mavsdk::Action::Result::Success) {
@@ -116,14 +116,14 @@ void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     response->success = false;
   }
   // debug
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]",
+  RCLCPP_INFO(this->get_logger(), "Arming result: [%s]",
               response->message.c_str());
 }
 
 void Quad::disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                   std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received disarming request.");
+  RCLCPP_INFO(this->get_logger(), "Received disarming request.");
   const mavsdk::Action::Result disarm_result = action_->disarm();
   response->message = actionResultToString(disarm_result);
   if (disarm_result == mavsdk::Action::Result::Success) {
@@ -131,7 +131,7 @@ void Quad::disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   } else {
     response->success = false;
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Disarming result: [%s]",
+  RCLCPP_INFO(this->get_logger(), "Disarming result: [%s]",
               response->message.c_str());
 }
 
@@ -139,7 +139,7 @@ void Quad::startPosOffboard(
     std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+  RCLCPP_INFO(this->get_logger(),
               "Received position offboard starting request.");
   // send offboard message once before starting TODO
   mavsdk::Offboard::PositionNedYaw pos_msg{};
@@ -158,7 +158,7 @@ void Quad::startPosOffboard(
   } else {
     response->success = false;
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+  RCLCPP_INFO(this->get_logger(),
               "Position offboard start result: [%s]",
               response->message.c_str());
 }
@@ -167,7 +167,7 @@ void Quad::stopPosOffboard(
     std::shared_ptr<std_srvs::srv::Trigger::Request> request,
     std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+  RCLCPP_INFO(this->get_logger(),
               "Received position offboard stopping request.");
   const mavsdk::Offboard::Result offboard_result = offboard_->stop();
   response->message = offboardResultToString(offboard_result);
@@ -177,14 +177,14 @@ void Quad::stopPosOffboard(
   } else {
     response->success = false;
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+  RCLCPP_INFO(this->get_logger(),
               "Position offboard stop result: [%s]", response->message.c_str());
 }
 
 void Quad::takeoff(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                    std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received takeoff request.");
+  RCLCPP_INFO(this->get_logger(), "Received takeoff request.");
   const mavsdk::Action::Result takeoff_result = action_->takeoff();
   response->message = actionResultToString(takeoff_result);
   if (takeoff_result == mavsdk::Action::Result::Success) {
@@ -192,14 +192,14 @@ void Quad::takeoff(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   } else {
     response->success = false;
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff result: [%s]",
+  RCLCPP_INFO(this->get_logger(), "Takeoff result: [%s]",
               response->message.c_str());
 }
 
 void Quad::land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                 std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
   (void)request;
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received land request.");
+  RCLCPP_INFO(this->get_logger(), "Received land request.");
   const mavsdk::Action::Result land_result = action_->land();
   response->message = actionResultToString(land_result);
   if (land_result == mavsdk::Action::Result::Success) {
@@ -207,14 +207,14 @@ void Quad::land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   } else {
     response->success = false;
   }
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Land result: [%s]",
+  RCLCPP_INFO(this->get_logger(), "Land result: [%s]",
               response->message.c_str());
 }
 
 void Quad::goToPos(
     std::shared_ptr<raptor_interface::srv::GoToPos::Request> request,
     std::shared_ptr<raptor_interface::srv::GoToPos::Response> response) {
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+  RCLCPP_INFO(this->get_logger(),
               "Received GoToPos request: [%f, %f, %f, %f]", request->x_ref,
               request->y_ref, request->z_ref, request->yaw_ref);
   // create message

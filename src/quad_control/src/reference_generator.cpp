@@ -62,7 +62,7 @@ public:
   int doPreflightCheck() {
     // check if service is available
     if (!client_quad_status_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+      RCLCPP_ERROR(this->get_logger(),
                    "Quad Status service not found.");
       return 404; // ros service not found
     }
@@ -84,7 +84,7 @@ public:
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+      RCLCPP_ERROR(this->get_logger(),
                    "Preflight Check service failed.");
       return 401; // ros error
     }
@@ -93,7 +93,7 @@ public:
   int arm() {
     // check if service is available
     if (!client_arm_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arming service not found.");
+      RCLCPP_ERROR(this->get_logger(), "Arming service not found.");
       return 404; // ros service not found
     }
 
@@ -111,19 +111,19 @@ public:
 
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to arm: [%s]",
+        RCLCPP_WARN(this->get_logger(), "Failed to arm: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command failed
       }
 
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad armed.");
+      RCLCPP_INFO(this->get_logger(), "Quad armed.");
       // wait for propellers to stabilise
       std::this_thread::sleep_for(std::chrono::milliseconds(2000));
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arm service failed.");
+      RCLCPP_ERROR(this->get_logger(), "Arm service failed.");
       return 401; // ros error
     }
   }
@@ -131,7 +131,7 @@ public:
   int disarm() {
     // check if service is available
     if (!client_disarm_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+      RCLCPP_ERROR(this->get_logger(),
                    "Disarming service not found.");
       return 404; // ros service not found
     }
@@ -150,17 +150,17 @@ public:
 
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to disarm: [%s]",
+        RCLCPP_WARN(this->get_logger(), "Failed to disarm: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command failed
       }
 
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad disarmed.");
+      RCLCPP_INFO(this->get_logger(), "Quad disarmed.");
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Disarm service failed.");
+      RCLCPP_ERROR(this->get_logger(), "Disarm service failed.");
       return 401; // ros error
     }
   }
@@ -168,7 +168,7 @@ public:
   int takeoff() {
     // check if service is available
     if (!client_takeoff_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Takeoff service not found.");
+      RCLCPP_ERROR(this->get_logger(), "Takeoff service not found.");
       return 404; // ros service not found
     }
 
@@ -186,19 +186,19 @@ public:
 
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to takeoff: [%s]",
+        RCLCPP_WARN(this->get_logger(), "Failed to takeoff: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command failed
       }
 
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Takeoff initiated.");
+      RCLCPP_INFO(this->get_logger(), "Takeoff initiated.");
       // wait to reach sufficient height (TODO)
       std::this_thread::sleep_for(std::chrono::milliseconds(8000));
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Takeoff service failed.");
+      RCLCPP_ERROR(this->get_logger(), "Takeoff service failed.");
       return 401; // ros error
     }
   }
@@ -206,7 +206,7 @@ public:
   int land() {
     // check if service is available
     if (!client_land_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Land service not found.");
+      RCLCPP_ERROR(this->get_logger(), "Land service not found.");
       return 404; // ros service not found
     }
 
@@ -224,19 +224,19 @@ public:
 
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to land: [%s]",
+        RCLCPP_WARN(this->get_logger(), "Failed to land: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command failed
       }
 
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Landing initiated.");
+      RCLCPP_INFO(this->get_logger(), "Landing initiated.");
       // wait for quad to land TODO
       std::this_thread::sleep_for(std::chrono::milliseconds(10000));
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Landing service failed.");
+      RCLCPP_ERROR(this->get_logger(), "Landing service failed.");
       return 401; // ros error
     }
   }
@@ -244,7 +244,7 @@ public:
   int startOffboard() {
     // check if service is available
     if (!client_start_offboard_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+      RCLCPP_ERROR(this->get_logger(),
                    "Start offboard service not found.");
       return 404; // ros service not found
     }
@@ -263,20 +263,20 @@ public:
 
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"),
+        RCLCPP_WARN(this->get_logger(),
                     "Failed to start offboard: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command failed
       }
 
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Offboard started.");
+      RCLCPP_INFO(this->get_logger(), "Offboard started.");
       // wait for drone to stabilize
       std::this_thread::sleep_for(std::chrono::milliseconds(2000));
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Offboard service failed.");
+      RCLCPP_ERROR(this->get_logger(), "Offboard service failed.");
       return 401; // ros error
     }
   }
@@ -284,7 +284,7 @@ public:
   int stopOffboard() {
     // check if service is available
     if (!client_stop_offboard_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+      RCLCPP_ERROR(this->get_logger(),
                    "Stop offboard service not found.");
       return 404; // ros service not found
     }
@@ -303,17 +303,17 @@ public:
 
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"),
+        RCLCPP_WARN(this->get_logger(),
                     "Failed to stop offboard: [%s]", response->message.c_str());
         return 301; // mavsdk command failed
       }
 
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Offboard stopped.");
+      RCLCPP_INFO(this->get_logger(), "Offboard stopped.");
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Offboard service failed.");
+      RCLCPP_ERROR(this->get_logger(), "Offboard service failed.");
       return 401; // ros error
     }
   }
@@ -322,7 +322,7 @@ public:
                int time_ms) {
     // check if service is available
     if (!client_go_to_pos_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service not found.");
+      RCLCPP_ERROR(this->get_logger(), "GoToPos service not found.");
       return false;
     }
 
@@ -348,18 +348,18 @@ public:
       auto response = result.get();
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "GoToPos failed: [%s]",
+        RCLCPP_WARN(this->get_logger(), "GoToPos failed: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command denied
       }
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "GoToPos sent.");
+      RCLCPP_INFO(this->get_logger(), "GoToPos sent.");
       // TODO wait
       std::this_thread::sleep_for(std::chrono::milliseconds(time_ms));
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service failed.");
+      RCLCPP_ERROR(this->get_logger(), "GoToPos service failed.");
       return 401; // ros error
     }
   }
@@ -368,9 +368,9 @@ public:
                int time_ms) {
     // check if service is available
     if (!client_go_to_pos_->wait_for_service(std::chrono::seconds(1))) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service not found.");
+      RCLCPP_ERROR(this->get_logger(), "GoToPos service not found.");
       return false;
-    }
+    
 
     // TODO check reference
 
@@ -397,18 +397,18 @@ public:
       auto response = result.get();
       // check response
       if (!(response->success)) {
-        RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "GoToPos failed: [%s]",
+        RCLCPP_WARN(this->get_logger(), "GoToPos failed: [%s]",
                     response->message.c_str());
         return 301; // mavsdk command denied
       }
-      RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "GoToPos sent.");
+      RCLCPP_INFO(this->get_logger(), "GoToPos sent.");
       // TODO wait
       std::this_thread::sleep_for(std::chrono::milliseconds(time_ms));
       return 0; // success
 
     } else {
       // service call unsuccessfull
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "GoToPos service failed.");
+      RCLCPP_ERROR(this->get_logger(), "GoToPos service failed.");
       return 401; // ros error
     }
   }
@@ -430,7 +430,7 @@ public:
 
   void mocapObjectCallback(const raptor_interface::msg::Pose msg) {
     // DEBUG
-    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
+    // RCLCPP_INFO(this->get_logger(), 
     //     "Callback called with position [%f,%f,%f].",
     //     msg.x,
     //     msg.y,

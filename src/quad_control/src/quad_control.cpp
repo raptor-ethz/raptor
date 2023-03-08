@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad actions server is ready.");
+  RCLCPP_INFO(rclcpp::get_logger("quad_control"), "Quad actions server is ready.");
 
   rclcpp::spin(interface);
   rclcpp::shutdown();
