@@ -37,12 +37,12 @@ private:
   bool is_offboard_{false};
 
   // mavsdk
-  mavsdk::Mavsdk *mavsdk_;
+  std::shared_ptr<mavsdk::Mavsdk> mavsdk_;
   std::shared_ptr<mavsdk::System> system_;
-  mavsdk::Action *action_;
-  mavsdk::Offboard *offboard_;
-  mavsdk::Telemetry *telemetry_;
-  mavsdk::MavlinkPassthrough *passthrough_;
+  std::shared_ptr<mavsdk::Action> action_;
+  std::shared_ptr<mavsdk::Offboard> offboard_;
+  std::shared_ptr<mavsdk::Telemetry> telemetry_;
+  std::shared_ptr<mavsdk::MavlinkPassthrough> passthrough_;
 
   // services
   void getStatus(std::shared_ptr<raptor_interface::srv::QuadStatus::Request> request,
