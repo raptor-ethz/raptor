@@ -20,6 +20,15 @@
 #include <mavsdk/plugins/telemetry/telemetry.h>
 #include <mavsdk/plugins/mavlink_passthrough/mavlink_passthrough.h>
 
+enum class QuadState
+{
+  UNINITIALIZED = 0,
+  INITIALIZED = 1,
+  ARMED = 2,
+  DISARMED = 3,
+  OFFBOARD = 4,
+  ONBOARD = 5
+};
 
 class Quad : public rclcpp::Node
 {
