@@ -44,13 +44,12 @@ public:
         this->create_client<raptor_interface::srv::SetServo>("leftGripper_deg");
     // initialize subscribers
     // TODO: Fix subscriber issue with foxy
+    auto bound_callback_func = std::bind(&ReferenceGenerator::mocapObjectCallback, this, std::placeholders::_1);
     subscriber_mocap_object_ = 
         this->create_subscription<raptor_interface::msg::Pose>(
             object_name, 
             10, 
-            std::bind(&ReferenceGenerator::mocapObjectCallback, 
-                      this, 
-                      std::placeholders::_1));
+            bound_callback_func);
   }
 
   //  TODO
