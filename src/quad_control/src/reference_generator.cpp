@@ -43,7 +43,6 @@ public:
     client_set_left_gripper_ =
         this->create_client<raptor_interface::srv::SetServo>("leftGripper_deg");
     // initialize subscribers
-    // TODO: Fix subscriber issue with foxy
     subscriber_mocap_object_ = 
         this->create_subscription<raptor_interface::msg::Pose>(
             object_name, 
