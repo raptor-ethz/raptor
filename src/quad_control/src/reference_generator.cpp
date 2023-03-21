@@ -44,12 +44,13 @@ public:
         this->create_client<raptor_interface::srv::SetServo>("leftGripper_deg");
     // initialize subscribers
     // TODO: Fix subscriber issue with foxy
-    auto bound_callback_func = std::bind(&ReferenceGenerator::mocapObjectCallback, this, std::placeholders::_1);
     subscriber_mocap_object_ = 
         this->create_subscription<raptor_interface::msg::Pose>(
             object_name, 
             10, 
-            bound_callback_func);
+            std::bind(&ReferenceGenerator::mocapObjectCallback, 
+                      this, 
+                      std::placeholders::_1));
   }
 
   //  TODO
@@ -428,16 +429,16 @@ public:
     client_set_left_gripper_->async_send_request(request_left);
   }
 
-  void mocapObjectCallback(const raptor_interface::msg::Pose msg) {
+  void mocapObjectCallback(const raptor_interface::msg::Pose::SharedPtr msg) {
     // DEBUG
     // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
     //     "Callback called with position [%f,%f,%f].",
     //     msg.x,
     //     msg.y,
     //     msg.z);
-    object_x = msg.x_m;
-    object_y = -msg.y_m; // TODO
-    object_z = msg.z_m;
+    object_x = msg->x_m;
+    object_y = -msg->y_m; // TODO
+    object_z = msg->z_m;
   }
 
 private:
