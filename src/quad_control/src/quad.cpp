@@ -36,7 +36,8 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     return;
   }
 
-  // TODO initialize mavsdk wrapper here
+  // initialize mavsdk wrapper here
+  mavsdk_wrapper_ = std::make_shared<MavsdkWrapper>(mavsdk_, system_, action_, offboard_, telemetry_, passthrough_);
 
   // TODO create action servers here
 

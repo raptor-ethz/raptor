@@ -7,6 +7,9 @@
 // ros default
 #include "rclcpp/rclcpp.hpp"
 
+// custom
+#include "quad_control/mavsdk_wrapper.hpp"
+
 // mavsdk
 #include <mavsdk/mavsdk.h>
 #include <mavsdk/plugins/action/action.h>
@@ -36,6 +39,9 @@ private:
   QuadState state_{QuadState::UNINITIALIZED};
 
   bool initializeMavsdk(const std::string &port);
+
+  // modules
+  std::shared_ptr<MavsdkWrapper> mavsdk_wrapper_;
 
   // mavsdk
   std::shared_ptr<mavsdk::Mavsdk> mavsdk_;
