@@ -11,21 +11,21 @@
 class MavsdkWrapper
 {
 public:
-    MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
-                  const std::shared_ptr<mavsdk::System> &system,
-                  const std::shared_ptr<mavsdk::Action> &action,
-                  const std::shared_ptr<mavsdk::Offboard> &offboard,
-                  const std::shared_ptr<mavsdk::Telemetry> &telemetry,
-                  const std::shared_ptr<mavsdk::MavlinkPassthrough> &passthrough);
-    ~MavsdkWrapper() {};
+  MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
+                const std::shared_ptr<mavsdk::System> &system,
+                const std::shared_ptr<mavsdk::Action> &action,
+                const std::shared_ptr<mavsdk::Offboard> &offboard,
+                const std::shared_ptr<mavsdk::Telemetry> &telemetry,
+                const std::shared_ptr<mavsdk::MavlinkPassthrough> &passthrough);
+  ~MavsdkWrapper() {};
 
 
 private:
-    // mavsdk
-    std::shared_ptr<mavsdk::Mavsdk> mavsdk_;
-    std::shared_ptr<mavsdk::System> system_;
-    std::shared_ptr<mavsdk::Action> action_;
-    std::shared_ptr<mavsdk::Offboard> offboard_;
-    std::shared_ptr<mavsdk::Telemetry> telemetry_;
-    std::shared_ptr<mavsdk::MavlinkPassthrough> passthrough_;
+  // mavsdk
+  std::shared_ptr<mavsdk::Mavsdk> mavsdk_;
+  std::shared_ptr<mavsdk::System> system_;
+  std::shared_ptr<mavsdk::Action> action_;
+  std::shared_ptr<mavsdk::Offboard> offboard_;
+  std::shared_ptr<mavsdk::Telemetry> telemetry_;
+  std::shared_ptr<mavsdk::MavlinkPassthrough> passthrough_;
 };
