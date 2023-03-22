@@ -6,12 +6,6 @@
 
 // ros default
 #include "rclcpp/rclcpp.hpp"
-// #include "std_msgs/msg/string.hpp"
-// #include "std_srvs/srv/trigger.hpp"
-// #include "geometry_msgs/msg/point.hpp"
-// ros custom 
-// #include "raptor_interface/srv/go_to_pos.hpp"
-// #include "raptor_interface/srv/quad_status.hpp"
 
 // mavsdk
 #include <mavsdk/mavsdk.h>
@@ -40,7 +34,7 @@ public:
 private:
   // state
   QuadState state_{QuadState::UNINITIALIZED};
-  
+
   bool initializeMavsdk(const std::string &port);
 
   // mavsdk

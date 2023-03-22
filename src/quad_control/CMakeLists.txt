@@ -36,9 +36,6 @@ target_include_directories(quad_control PUBLIC
 target_sources(quad_control PUBLIC src/quad.cpp)
 ament_target_dependencies(quad_control 
   rclcpp 
-  std_msgs 
-  std_srvs 
-  geometry_msgs 
   raptor_interface)
 target_link_libraries(quad_control MAVSDK::mavsdk)
 
