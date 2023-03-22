@@ -33,7 +33,9 @@ add_executable(quad_control src/quad_control_app.cpp)
 target_include_directories(quad_control PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-target_sources(quad_control PUBLIC src/quad.cpp)
+target_sources(quad_control PUBLIC 
+  src/quad.cpp
+  src/mavsdk_wrapper.cpp)
 ament_target_dependencies(quad_control 
   rclcpp 
   raptor_interface)
