@@ -19,7 +19,22 @@ public:
                 const std::shared_ptr<mavsdk::MavlinkPassthrough> &passthrough);
   ~MavsdkWrapper() {};
 
+  int sendArmRequest() const;
+
+  int sendTakeoffRequest() const;
+
+  int sendLandRequest() const;
+
+  // PRE: steady stream of offboard messages
+  int sendOffboardRequest() const;
+
   int sendPositionMessage (const std::array<float,3> &position, const float yaw = 0) const;
+
+  bool isArmable() const;
+
+  bool isLocalPositionOk() const;
+
+  // TODO get battery status
 
 private:
   // mavsdk

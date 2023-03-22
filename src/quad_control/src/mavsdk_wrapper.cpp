@@ -10,6 +10,26 @@ MavsdkWrapper::MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
 {
 }
 
+int MavsdkWrapper::sendArmRequest() const
+{
+  return int(action_->arm());
+}
+
+int MavsdkWrapper::sendTakeoffRequest() const
+{
+  return int(action_->takeoff());
+}
+
+int MavsdkWrapper::sendLandRequest() const
+{
+  return int(action_->land());
+}
+
+int MavsdkWrapper::sendOffboardRequest() const
+{
+  return int(offboard_->start());
+}
+
 int MavsdkWrapper::sendPositionMessage (const std::array<float,3> &position, const float yaw) const
 {
   // create message
@@ -23,4 +43,14 @@ int MavsdkWrapper::sendPositionMessage (const std::array<float,3> &position, con
 
   // send message to px4
   return int(offboard_->set_position_ned(pos_msg)); // TODO is this thread safe?
+}
+
+bool MavsdkWrapper::isArmable() const
+{
+  return telemetry_->health().is_armable;
+}
+
+bool MavsdkWrapper::isLocalPositionOk() const
+{
+  return telemetry_->health().is_local_position_ok;
 }
