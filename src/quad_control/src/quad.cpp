@@ -4,7 +4,7 @@
 const int position_pub_interval = 50;
 
 // Constructor
-Quad::Quad() : Node("quad_control") {
+Quad::Quad(const std::string &port) : Node("quad_control") {
 
   // create services
   // service_quad_status_ =

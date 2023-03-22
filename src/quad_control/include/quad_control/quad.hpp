@@ -33,7 +33,7 @@ enum class QuadState
 class Quad : public rclcpp::Node
 {
 public:
-    Quad();
+    Quad(const std::string &port);
     ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
 
   // public methods
