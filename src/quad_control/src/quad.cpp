@@ -3,6 +3,29 @@
 // TODO read these values from a yaml file
 const int position_pub_interval = 50;
 
+const std::string MAVSDK_OFFBOARD_RESULTS[] = { "Unknown",
+                                                "Success",
+                                                "NoSystem",
+                                                "ConnectionError",
+                                                "Busy",
+                                                "CommandDenied",
+                                                "Timeout",
+                                                "NoSetpointSet"};
+
+const std::string MAVSDK_ACTION_RESULTS[] = { "Unknown",
+                                              "Success",
+                                              "NoSystem",
+                                              "ConnectionError",
+                                              "Busy",
+                                              "CommandDenied",
+                                              "CommandDeniedLandedStateUnknown",
+                                              "CommandDeniedNotLanded",
+                                              "Timeout",
+                                              "VtolTransitionSupportUnknown",
+                                              "NoVtolTransitionSupport",
+                                              "ParameterError",
+                                              "Unsupported"};
+
 // Constructor
 Quad::Quad(const std::string &port) : Node("quad_control") {
   RCLCPP_INFO(this->get_logger(), "Initializing...");
@@ -244,30 +267,12 @@ bool Quad::initializeMavsdk(const std::string &port) {
 // ////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////// Helpers
 
-// TODO create list
 std::string actionResultToString(mavsdk::Action::Result index) {
-  std::string val[] = {"Unknown",
-                       "Success",
-                       "NoSystem",
-                       "ConnectionError",
-                       "Busy",
-                       "CommandDenied",
-                       "CommandDeniedLandedStateUnknown",
-                       "CommandDeniedNotLanded",
-                       "Timeout",
-                       "VtolTransitionSupportUnknown",
-                       "NoVtolTransitionSupport",
-                       "ParameterError",
-                       "Unsupported"};
-  return val[int(index)];
+  return MAVSDK_ACTION_RESULTS[int(index)];
 }
 
-// TODO create list
 std::string offboardResultToString(mavsdk::Offboard::Result index) {
-  std::string val[] = {"Unknown",         "Success",      "NoSystem",
-                       "ConnectionError", "Busy",         "CommandDenied",
-                       "Timeout",         "NoSetpointSet"};
-  return val[int(index)];
+  return MAVSDK_OFFBOARD_RESULTS[int(index)];
 }
 
 void usage(const std::string &bin_name) {
