@@ -10,7 +10,7 @@ MavsdkWrapper::MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
 {
 }
 
-void MavsdkWrapper::sendPositionMessage const (const std::array<float,3> &position, const float yaw)
+void MavsdkWrapper::sendPositionMessage (const std::array<float,3> &position, const float yaw) const
 {
   // create message
   mavsdk::Offboard::PositionNedYaw pos_msg{}; // TODO should we instantiate the message on every function call or rather once as a resuable member variable?

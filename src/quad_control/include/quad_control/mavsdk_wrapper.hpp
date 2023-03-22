@@ -19,7 +19,7 @@ public:
                 const std::shared_ptr<mavsdk::MavlinkPassthrough> &passthrough);
   ~MavsdkWrapper() {};
 
-  void sendPositionMessage const (const std::array<float,3> &position, const float yaw = 0);
+  void sendPositionMessage (const std::array<float,3> &position, const float yaw = 0) const;
 
 private:
   // mavsdk
