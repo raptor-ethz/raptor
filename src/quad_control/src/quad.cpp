@@ -78,7 +78,7 @@ bool Quad::initializeMavsdk(const std::string &port) {
   }
 
   // instantiate plugins
-  action _ = std::make_shared<mavsdk::Action>(system_);
+  action_ = std::make_shared<mavsdk::Action>(system_);
   offboard_ = std::make_shared<mavsdk::Offboard>(system_);
   telemetry_ = std::make_shared<mavsdk::Telemetry>(system_);
   passthrough_ = std::make_shared<mavsdk::MavlinkPassthrough>(system_);
