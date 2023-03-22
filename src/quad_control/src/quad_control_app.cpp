@@ -15,10 +15,7 @@
 
 int main(int argc, char *argv[])
 {
-  // initialize ros
-  rclcpp::init(argc, argv);
-
-  // check input
+  // check command line input
   if (argc < 2)
   {
     std::cerr << "Port not provided.\n";
@@ -26,16 +23,18 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  // start node
-  auto quad_control_node = std::make_shared<Quad>();
-  // if ( !(quad_control_node->initialize(argv[1])) ) {
-  //   rclcpp::shutdown();
-  //   return 1;
-  // }
+  // initialize ros
+  rclcpp::init(argc, argv);
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Quad Control Node is ready.");
+  // initialize node
+  auto quad_control_node = std::make_shared<Quad>(argv[1]);
 
-  rclcpp::spin(quad_control_node);
+  // spin node if initialization was successful
+  if(rclcpp::ok()) {
+    RCLCPP_INFO(quad_control_node->get_logger(), "Ready.");
+    rclcpp::spin(quad_control_node);
+  }
+
   rclcpp::shutdown();
   return 0;
 }
