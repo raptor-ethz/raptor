@@ -9,3 +9,18 @@ MavsdkWrapper::MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
   : mavsdk_(mavsdk), system_(system), action_(action), offboard_(offboard), telemetry_(telemetry), passthrough_(passthrough)
 {
 }
+
+void MavsdkWrapper::sendPositionMessage(const std::array<float,3> &position, const float yaw)
+{
+  // create message
+  mavsdk::Offboard::PositionNedYaw pos_msg{}; // TODO should we instantiate the message on every function call or rather once as a resuable member variable?
+
+  // fill message: transform from north-west-up to PX4's north-east-down
+  pos_msg.north_m = position[0];
+  pos_msg.east_m = -position[1];
+  pos_msg.down_m = -position[2];
+  pos_msg.yaw_deg = -yaw;
+
+  // send message to px4
+  offboard_->set_position_ned(pos_msg);
+}
