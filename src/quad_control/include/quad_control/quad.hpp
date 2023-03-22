@@ -36,12 +36,12 @@ public:
     Quad(const std::string &port);
     ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
 
-  // public methods
-  bool initialize(const std::string &port);
 
 private:
   // state
   QuadState state_{QuadState::UNINITIALIZED};
+  
+  bool initializeMavsdk(const std::string &port);
 
   // mavsdk
   std::shared_ptr<mavsdk::Mavsdk> mavsdk_;

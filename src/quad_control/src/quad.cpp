@@ -5,6 +5,20 @@ const int position_pub_interval = 50;
 
 // Constructor
 Quad::Quad(const std::string &port) : Node("quad_control") {
+  RCLCPP_INFO(this->get_logger(), "Initializing...");
+
+  // initialize mavsdk
+  if (!initializeMavsdk(port)) {
+    rclcpp::shutdown();
+    return;
+  }
+
+  // TODO initialize mavsdk wrapper here
+
+  // TODO create action servers here
+
+  state_ = QuadState::INITIALIZED;
+  RCLCPP_INFO(this->get_logger(), "Initialization successful.");
 
   // create services
   // service_quad_status_ =
@@ -43,38 +57,34 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   //                             std::bind(&Quad::positionPubCallback, this));
 }
 
-// methods
-// bool Quad::initialize(const std::string &port) {
-//   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Initializing MavSDK interface.");
-//   // create connection
-//   mavsdk_ = new mavsdk::Mavsdk;
-//   mavsdk::ConnectionResult connection_result =
-//       mavsdk_->add_any_connection(port);
-//   if (connection_result != mavsdk::ConnectionResult::Success) {
-//     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-//                  "Initialisation failed: MavLink connection failed [%i].",
-//                  (int)connection_result);
-//     return false;
-//   }
+bool Quad::initializeMavsdk(const std::string &port) {
+  // create mavsdk instance
+  mavsdk_ = std::make_shared<mavsdk::Mavsdk>();
+  
+  // create connection
+  mavsdk::ConnectionResult connection_result = mavsdk_->add_any_connection(port);
+  if (connection_result != mavsdk::ConnectionResult::Success) {
+    RCLCPP_ERROR(this->get_logger(),
+                 "Initialization failed: MavLink connection failed (%i).",
+                 (int)connection_result);
+    return false;
+  }
 
-//   // connect to system
-//   system_ = get_system(*mavsdk_);
-//   if (!system_) {
-//     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-//                  "Initialisation failed: System connection failed.");
-//     return false;
-//   }
+  // connect to system
+  system_ = get_system(*mavsdk_);
+  if (!system_) {
+    RCLCPP_ERROR(this->get_logger(), "Initialization failed: System connection failed.");
+    return false;
+  }
 
-//   // Instantiate plugins
-//   action_ = new mavsdk::Action{system_};
-//   offboard_ = new mavsdk::Offboard{system_};
-//   telemetry_ = new mavsdk::Telemetry{system_};
-//   passthrough_ = new mavsdk::MavlinkPassthrough{system_};
+  // instantiate plugins
+  action _ = std::make_shared<mavsdk::Action>(system_);
+  offboard_ = std::make_shared<mavsdk::Offboard>(system_);
+  telemetry_ = std::make_shared<mavsdk::Telemetry>(system_);
+  passthrough_ = std::make_shared<mavsdk::MavlinkPassthrough>(system_);
 
-//   initialized_ = true;
-//   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Initialization successful.");
-//   return true;
-// }
+  return true;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////// Services
