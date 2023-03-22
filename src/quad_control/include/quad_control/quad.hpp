@@ -34,7 +34,7 @@ class Quad : public rclcpp::Node
 {
 public:
     Quad();
-    ~Quad();
+    ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
 
   // public methods
   bool initialize(const std::string &port);

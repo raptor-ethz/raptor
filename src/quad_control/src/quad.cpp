@@ -1,4 +1,4 @@
-#include "quad_control/quad_control.hpp"
+#include "quad_control/quad.hpp"
 
 // TODO read these values from a yaml file
 const int position_pub_interval = 50;
@@ -41,14 +41,6 @@ Quad::Quad() : Node("quad_control") {
   // timer_position_pub_ =
   //     this->create_wall_timer(std::chrono::milliseconds(position_pub_interval),
   //                             std::bind(&Quad::positionPubCallback, this));
-}
-
-Quad::~Quad() {
-  delete mavsdk_;
-  delete action_;
-  delete offboard_;
-  delete telemetry_;
-  delete passthrough_;
 }
 
 // methods
