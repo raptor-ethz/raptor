@@ -22,5 +22,5 @@ void MavsdkWrapper::sendPositionMessage const (const std::array<float,3> &positi
   pos_msg.yaw_deg = -yaw;
 
   // send message to px4
-  offboard_->set_position_ned(pos_msg);
+  offboard_->set_position_ned(pos_msg); // TODO is this thread safe?
 }
