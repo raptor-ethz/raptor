@@ -13,7 +13,7 @@ include_directories(
   Vicon/CrossMarket/DataStream
   Vicon/CrossMarket
 )
-# find_package(MAVSDK REQUIRED)
+
 add_definitions(
   -D_EXPORTING
 )
@@ -37,7 +37,6 @@ target_link_libraries(ViconDataStreamSDK_lib
     Boost::system
     Boost::thread
     Threads::Threads
-    # MAVSDK::mavsdk
 )
 
 target_include_directories(ViconDataStreamSDK_lib PUBLIC
