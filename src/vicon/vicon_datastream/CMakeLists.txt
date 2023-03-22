@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.20.0)
+cmake_minimum_required(VERSION 3.16.0)
 project(vicon_test VERSION 1.0)
+
+if (NOT CMAKE_CXX_STANDARD)
 set(CMAKE_CXX_STANDARD 17)
+endif()
 
 find_package(Boost 1.5 COMPONENTS system thread REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -10,6 +13,7 @@ include_directories(
   Vicon/CrossMarket/DataStream
   Vicon/CrossMarket
 )
+# find_package(MAVSDK REQUIRED)
 add_definitions(
   -D_EXPORTING
 )
@@ -33,6 +37,7 @@ target_link_libraries(ViconDataStreamSDK_lib
     Boost::system
     Boost::thread
     Threads::Threads
+    # MAVSDK::mavsdk
 )
 
 target_include_directories(ViconDataStreamSDK_lib PUBLIC
