@@ -1,3 +1,4 @@
 [submodule "src/realsense-ros"]
 	path = src/realsense-ros
 	url = https://github.com/raptor-ethz/realsense-ros.git
+	branch = Raptor
