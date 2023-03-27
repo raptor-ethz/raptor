@@ -26,6 +26,9 @@ const std::string MAVSDK_ACTION_RESULTS[] = { "Unknown",
                                               "ParameterError",
                                               "Unsupported"};
 
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////// Construction
+
 // Constructor
 Quad::Quad(const std::string &port) : Node("quad_control") {
   RCLCPP_INFO(this->get_logger(), "Initializing...");
@@ -81,6 +84,12 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   //                             std::bind(&Quad::positionPubCallback, this));
 }
 
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////// Initialization
+
 bool Quad::initializeMavsdk(const std::string &port) {
   // create mavsdk instance
   mavsdk_ = std::make_shared<mavsdk::Mavsdk>();
@@ -109,6 +118,9 @@ bool Quad::initializeMavsdk(const std::string &port) {
 
   return true;
 }
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////// Services
