@@ -8,6 +8,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // custom
+#include "raptor_interface/srv/trigger.hpp"
 #include "quad_control/mavsdk_wrapper.hpp"
 
 // mavsdk
@@ -43,6 +44,9 @@ private:
   // modules
   std::shared_ptr<MavsdkWrapper> mavsdk_wrapper_;
 
+  // interfaces
+  rclcpp::Service<raptor_interface::srv::Trigger>::SharedPtr srv_arm_;
+
   // mavsdk
   std::shared_ptr<mavsdk::Mavsdk> mavsdk_;
   std::shared_ptr<mavsdk::System> system_;
@@ -52,12 +56,11 @@ private:
   std::shared_ptr<mavsdk::MavlinkPassthrough> passthrough_;
 
   // services
+  void arm(const std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
+            std::shared_ptr<raptor_interface::srv::Trigger::Response> response);
+
   // void getStatus(std::shared_ptr<raptor_interface::srv::QuadStatus::Request> request,
   //                 std::shared_ptr<raptor_interface::srv::QuadStatus::Response> response);
-
-  // void arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  //           std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-
   // void disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
   //             std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 

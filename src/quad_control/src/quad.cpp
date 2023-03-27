@@ -42,20 +42,20 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   // initialize mavsdk wrapper here
   mavsdk_wrapper_ = std::make_shared<MavsdkWrapper>(mavsdk_, system_, action_, offboard_, telemetry_, passthrough_);
 
+  // service servers
+  srv_arm_ = this->create_service<raptor_interface::srv::Trigger>(
+              "arm", std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
+
   // TODO create action servers here
 
   state_ = QuadState::INITIALIZED;
   RCLCPP_INFO(this->get_logger(), "Initialization successful.");
 
-  // create services
   // service_quad_status_ =
   //     this->create_service<raptor_interface::srv::QuadStatus>(
   //         "quad_status",
   //         std::bind(&Quad::getStatus, this, std::placeholders::_1,
   //                   std::placeholders::_2));
-  // service_arm_ = this->create_service<std_srvs::srv::Trigger>(
-  //     "arm", std::bind(&Quad::arm, this, std::placeholders::_1,
-  //                      std::placeholders::_2));
   // service_disarm_ = this->create_service<std_srvs::srv::Trigger>(
   //     "disarm", std::bind(&Quad::disarm, this, std::placeholders::_1,
   //                         std::placeholders::_2));
@@ -125,6 +125,31 @@ bool Quad::initializeMavsdk(const std::string &port) {
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////// Services
 
+void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
+               std::shared_ptr<raptor_interface::srv::Trigger::Response> response) {
+  (void)request; // suppress unused variable warning
+
+  RCLCPP_INFO(this->get_logger(), "Received arm request.");
+
+  // check if proper state
+  if (state_ != QuadState::INITIALIZED) {
+    response->result = 201;
+    return;
+  }
+
+  const int mavsdk_result = mavsdk_wrapper_->sendArmRequest();
+
+  if (mavsdk_result == 1) {
+    response->result = 0; // success
+  } else {
+    response->result = mavsdk_result + 300;
+  }
+  
+  // debug
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arm result: [%d]", response->result);
+}
+
+
 // void Quad::getStatus(
 //     std::shared_ptr<raptor_interface::srv::QuadStatus::Request> request,
 //     std::shared_ptr<raptor_interface::srv::QuadStatus::Response> response) {
@@ -138,21 +163,6 @@ bool Quad::initializeMavsdk(const std::string &port) {
 //               response->battery, response->local_pos_ok, response->armable);
 // }
 
-// void Quad::arm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-//                std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
-//   (void)request;
-//   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received arming request.");
-//   const mavsdk::Action::Result arm_result = action_->arm();
-//   response->message = actionResultToString(arm_result);
-//   if (arm_result == mavsdk::Action::Result::Success) {
-//     response->success = true;
-//   } else {
-//     response->success = false;
-//   }
-//   // debug
-//   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arming result: [%s]",
-//               response->message.c_str());
-// }
 
 // void Quad::disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
 //                   std::shared_ptr<std_srvs::srv::Trigger::Response> response) {
