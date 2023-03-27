@@ -265,6 +265,9 @@ bool Quad::initializeMavsdk(const std::string &port) {
 //   pub_position_->publish(message);
 // }
 
+
+
+
 // ////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////// Helpers
 
@@ -272,9 +275,11 @@ std::string actionResultToString(mavsdk::Action::Result index) {
   return MAVSDK_ACTION_RESULTS[int(index)];
 }
 
+
 std::string offboardResultToString(mavsdk::Offboard::Result index) {
   return MAVSDK_OFFBOARD_RESULTS[int(index)];
 }
+
 
 void usage(const std::string &bin_name) {
   std::cerr
@@ -285,6 +290,7 @@ void usage(const std::string &bin_name) {
       << " For Serial : serial:///path/to/serial/dev[:baudrate]\n"
       << "For example, to connect to the simulator use URL: udp://:14540\n";
 }
+
 
 std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk) {
   std::cout << "Waiting to discover system...\n";
