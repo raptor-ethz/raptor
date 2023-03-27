@@ -15,6 +15,7 @@ set(msg_files
   "msg/Acceleration.msg"
 )
 set(srv_files
+  "srv/Trigger.srv"
   "srv/GoToPos.srv"
   "srv/QuadStatus.srv"
   "srv/SetServo.srv"
