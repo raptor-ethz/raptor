@@ -6,7 +6,8 @@
 
 ## Bad Execution [1XX]
 
-- General unsuccessfull execution: 10
+- General unsuccessfull execution: 100
+- Timeout: 104
 
 
 ## Bad Argument / State [2XX]
