@@ -133,7 +133,7 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
 
   // check if proper state
   if (state_ != QuadState::INITIALIZED) {
-    response->result = 201;
+    response->result = 201; // request not feasible
     return;
   }
 
@@ -142,7 +142,7 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
   if (mavsdk_result == 1) {
     response->result = 0; // success
   } else {
-    response->result = mavsdk_result + 300;
+    response->result = mavsdk_result + 300; // mavsdk error
   }
   
   // debug
