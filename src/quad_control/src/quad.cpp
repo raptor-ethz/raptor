@@ -146,7 +146,7 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
   }
   
   // debug
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Arm result: [%d]", response->result);
+  RCLCPP_INFO(this->get_logger(), "Arm result: [%d]", response->result);
 }
 
 
