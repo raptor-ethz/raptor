@@ -20,10 +20,14 @@ set(srv_files
   "srv/QuadStatus.srv"
   "srv/SetServo.srv"
 )
+set(action_files
+  "action/Takeoff.action"
+)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
   ${msg_files}
+  ${action_files}
 )
 
 ament_package()
