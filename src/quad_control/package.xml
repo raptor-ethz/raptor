@@ -16,17 +16,19 @@
 
   <!-- ros rependencies -->
   <buildtool_depend>ament_cmake</buildtool_depend>
-
   <depend>rclcpp</depend>
+
+  <!-- standard interfaces -->
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>std_srvs</depend>
   <depend>rclcpp_action</depend>
   
+  <!-- test dependencies -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
-  <!-- custom ros dependencies -->
+  <!-- custom interfaces -->
   <depend>raptor_interface</depend>
 
   <export>
