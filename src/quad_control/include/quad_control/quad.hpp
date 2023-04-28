@@ -38,14 +38,6 @@ private:
   // interfaces
   rclcpp::Service<raptor_interface::srv::Trigger>::SharedPtr srv_arm_;
 
-  // mavsdk
-  std::shared_ptr<mavsdk::Mavsdk> mavsdk_;
-  std::shared_ptr<mavsdk::System> system_;
-  std::shared_ptr<mavsdk::Action> action_;
-  std::shared_ptr<mavsdk::Offboard> offboard_;
-  std::shared_ptr<mavsdk::Telemetry> telemetry_;
-  std::shared_ptr<mavsdk::MavlinkPassthrough> passthrough_;
-
   // services
   void arm(const std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
             std::shared_ptr<raptor_interface::srv::Trigger::Response> response);
