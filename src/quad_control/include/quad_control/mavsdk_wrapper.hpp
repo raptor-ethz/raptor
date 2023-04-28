@@ -11,13 +11,10 @@
 class MavsdkWrapper
 {
 public:
-  MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
-                const std::shared_ptr<mavsdk::System> &system,
-                const std::shared_ptr<mavsdk::Action> &action,
-                const std::shared_ptr<mavsdk::Offboard> &offboard,
-                const std::shared_ptr<mavsdk::Telemetry> &telemetry,
-                const std::shared_ptr<mavsdk::MavlinkPassthrough> &passthrough);
+  MavsdkWrapper();
   ~MavsdkWrapper() {};
+
+  int initialize(const std::string &port);
 
   int sendArmRequest() const;
 

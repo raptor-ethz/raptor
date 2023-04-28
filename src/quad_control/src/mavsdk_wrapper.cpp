@@ -1,14 +1,33 @@
 #include "quad_control/mavsdk_wrapper.hpp"
 
-MavsdkWrapper::MavsdkWrapper(const std::shared_ptr<mavsdk::Mavsdk> &mavsdk,
-                             const std::shared_ptr<mavsdk::System> &system,
-                             const std::shared_ptr<mavsdk::Action> &action,
-                             const std::shared_ptr<mavsdk::Offboard> &offboard,
-                             const std::shared_ptr<mavsdk::Telemetry> &telemetry,
-                             const std::shared_ptr<mavsdk::MavlinkPassthrough> &passthrough)
-  : mavsdk_(mavsdk), system_(system), action_(action), offboard_(offboard), telemetry_(telemetry), passthrough_(passthrough)
+MavsdkWrapper::MavsdkWrapper() {}
+
+
+int MavsdkWrapper::initialize(const std::string& port)
 {
+  // create mavsdk instance
+  mavsdk_ = std::make_shared<mavsdk::Mavsdk>();
+
+  
+  // create connection
+  mavsdk::ConnectionResult connection_result = mavsdk_->add_any_connection(port);
+  if (connection_result != mavsdk::ConnectionResult::Success) { return 1; } // Connection failed
+
+
+  // connect to system
+  system_ = get_system(*mavsdk_);
+  if (!system_) { return 2; } // System connection failed
+
+
+  // instantiate plugins
+  action_ = std::make_shared<mavsdk::Action>(system_);
+  offboard_ = std::make_shared<mavsdk::Offboard>(system_);
+  telemetry_ = std::make_shared<mavsdk::Telemetry>(system_);
+  passthrough_ = std::make_shared<mavsdk::MavlinkPassthrough>(system_);
+
+  return 0;
 }
+
 
 int MavsdkWrapper::sendArmRequest() const
 {
@@ -44,6 +63,7 @@ int MavsdkWrapper::sendPositionMessage (const std::array<float,3> &position, con
   // send message to px4
   return int(offboard_->set_position_ned(pos_msg)); // TODO is this thread safe?
 }
+
 
 bool MavsdkWrapper::isArmable() const
 {
