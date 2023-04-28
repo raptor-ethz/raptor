@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <future>
+
 // mavsdk
 #include <mavsdk/mavsdk.h>
 #include <mavsdk/plugins/action/action.h>
@@ -42,3 +45,13 @@ private:
   std::shared_ptr<mavsdk::Telemetry> telemetry_;
   std::shared_ptr<mavsdk::MavlinkPassthrough> passthrough_;
 };
+
+
+
+
+/**
+ * Find PX4 flight controller.
+ * 
+ * @return Shared pointer to discovered system.
+*/
+std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk);
