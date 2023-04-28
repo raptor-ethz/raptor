@@ -31,16 +31,17 @@ const std::string MAVSDK_ACTION_RESULTS[] = { "Unknown",
 
 // Constructor
 Quad::Quad(const std::string &port) : Node("quad_control") {
+
   RCLCPP_INFO(this->get_logger(), "Initializing...");
 
-  // initialize mavsdk
-  if (!initializeMavsdk(port)) {
+
+  mavsdk_wrapper_ = std::make_shared<MavsdkWrapper>();
+
+  if (mavsdk_wrapper_->initialize(port)) {
+    RCLCPP_ERROR(this->get_logger(), "MavsdkWrapper initialization failed.");
     rclcpp::shutdown();
     return;
   }
-
-  // initialize mavsdk wrapper here
-  mavsdk_wrapper_ = std::make_shared<MavsdkWrapper>(mavsdk_, system_, action_, offboard_, telemetry_, passthrough_);
 
   // service servers
   srv_arm_ = this->create_service<raptor_interface::srv::Trigger>(
@@ -84,40 +85,6 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   //                             std::bind(&Quad::positionPubCallback, this));
 }
 
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////// Initialization
-
-bool Quad::initializeMavsdk(const std::string &port) {
-  // create mavsdk instance
-  mavsdk_ = std::make_shared<mavsdk::Mavsdk>();
-  
-  // create connection
-  mavsdk::ConnectionResult connection_result = mavsdk_->add_any_connection(port);
-  if (connection_result != mavsdk::ConnectionResult::Success) {
-    RCLCPP_ERROR(this->get_logger(),
-                 "Initialization failed: MavLink connection failed (%i).",
-                 (int)connection_result);
-    return false;
-  }
-
-  // connect to system
-  system_ = get_system(*mavsdk_);
-  if (!system_) {
-    RCLCPP_ERROR(this->get_logger(), "Initialization failed: System connection failed.");
-    return false;
-  }
-
-  // instantiate plugins
-  action_ = std::make_shared<mavsdk::Action>(system_);
-  offboard_ = std::make_shared<mavsdk::Offboard>(system_);
-  telemetry_ = std::make_shared<mavsdk::Telemetry>(system_);
-  passthrough_ = std::make_shared<mavsdk::MavlinkPassthrough>(system_);
-
-  return true;
-}
 
 
 
@@ -311,35 +278,4 @@ void usage(const std::string &bin_name) {
       << " For UDP : udp://[bind_host][:bind_port]\n"
       << " For Serial : serial:///path/to/serial/dev[:baudrate]\n"
       << "For example, to connect to the simulator use URL: udp://:14540\n";
-}
-
-
-std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk) {
-  std::cout << "Waiting to discover system...\n";
-  auto prom = std::promise<std::shared_ptr<mavsdk::System>>{};
-  auto fut = prom.get_future();
-
-  // We wait for new systems to be discovered, once we find one that has an
-  // autopilot, we decide to use it.
-  mavsdk.subscribe_on_new_system([&mavsdk, &prom]() {
-    auto system = mavsdk.systems().back();
-
-    if (system->has_autopilot()) {
-      std::cout << "Discovered autopilot\n";
-
-      // Unsubscribe again as we only want to find one system.
-      mavsdk.subscribe_on_new_system(nullptr);
-      prom.set_value(system);
-    }
-  });
-
-  // We usually receive heartbeats at 1Hz, therefore we should find a
-  // system after around 3 seconds max, surely.
-  if (fut.wait_for(std::chrono::seconds(3)) == std::future_status::timeout) {
-    std::cerr << "No autopilot found.\n";
-    return nullptr;
-  }
-
-  // Get discovered system now.
-  return fut.get();
 }

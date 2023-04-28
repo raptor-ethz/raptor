@@ -109,10 +109,3 @@ std::string offboardResultToString(mavsdk::Offboard::Result index);
  * Print error message when no port is provided as argument.
 */
 void usage(const std::string &bin_name);
-
-/**
- * Find PX4 flight controller.
- * 
- * @return Shared pointer to discovered system.
-*/
-std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk);
