@@ -10,6 +10,7 @@
 // custom
 #include "raptor_interface/srv/trigger.hpp"
 #include "quad_control/mavsdk_wrapper.hpp"
+#include "quad_control/quad_state.hpp"
 
 // mavsdk
 #include <mavsdk/mavsdk.h>
@@ -18,15 +19,7 @@
 #include <mavsdk/plugins/telemetry/telemetry.h>
 #include <mavsdk/plugins/mavlink_passthrough/mavlink_passthrough.h>
 
-enum class QuadState
-{
-  UNINITIALIZED = 0,
-  INITIALIZED = 1,
-  ARMED = 2,
-  DISARMED = 3,
-  OFFBOARD = 4,
-  ONBOARD = 5
-};
+
 
 class Quad : public rclcpp::Node
 {
@@ -37,7 +30,7 @@ public:
 
 private:
   // state
-  QuadState state_{QuadState::UNINITIALIZED};
+  std::shared_ptr<QuadState> quad_state_;
 
   // modules
   std::shared_ptr<MavsdkWrapper> mavsdk_wrapper_;

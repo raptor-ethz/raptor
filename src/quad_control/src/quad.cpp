@@ -45,13 +45,21 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     return;
   }
 
+
+
+
   // service servers
   srv_arm_ = this->create_service<raptor_interface::srv::Trigger>(
               "arm", std::bind(&Quad::arm, this, _1, _2));
 
   // TODO create action servers here
 
-  state_ = QuadState::INITIALIZED;
+
+
+
+
+  quad_state_->setState(State::INITIALIZED);
+
   RCLCPP_INFO(this->get_logger(), "Initialization successful.");
 
   // service_quad_status_ =
@@ -100,11 +108,11 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
 
   RCLCPP_INFO(this->get_logger(), "Received arm request.");
 
-  // check if proper state
-  if (state_ != QuadState::INITIALIZED) {
-    response->result = 201; // request not feasible
-    return;
-  }
+  // check if proper state TODO
+  // if (state_ != QuadState::INITIALIZED) {
+  //   response->result = 201; // request not feasible
+  //   return;
+  // }
 
   const int mavsdk_result = mavsdk_wrapper_->sendArmRequest();
 
