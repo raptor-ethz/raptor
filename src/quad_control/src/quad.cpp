@@ -109,10 +109,10 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
   RCLCPP_INFO(this->get_logger(), "Received arm request.");
 
   // check if proper state TODO
-  // if (state_ != QuadState::INITIALIZED) {
-  //   response->result = 201; // request not feasible
-  //   return;
-  // }
+  if (!quad_state_->isValidTransition(State::ARMED)) {
+    response->result = 201; // request not feasible
+    return;
+  }
 
   const int mavsdk_result = mavsdk_wrapper_->sendArmRequest();
 
