@@ -32,6 +32,8 @@ const std::string MAVSDK_ACTION_RESULTS[] = { "Unknown",
 // Constructor
 Quad::Quad(const std::string &port) : Node("quad_control") {
 
+  using namespace std::placeholders;
+
   RCLCPP_INFO(this->get_logger(), "Initializing...");
 
 
@@ -45,7 +47,7 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
 
   // service servers
   srv_arm_ = this->create_service<raptor_interface::srv::Trigger>(
-              "arm", std::bind(&Quad::arm, this, std::placeholders::_1, std::placeholders::_2));
+              "arm", std::bind(&Quad::arm, this, _1, _2));
 
   // TODO create action servers here
 
