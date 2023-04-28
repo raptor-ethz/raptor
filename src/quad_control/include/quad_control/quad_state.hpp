@@ -25,15 +25,9 @@ public:
 
   inline QuadState() {};
 
-  inline void setState(const State &state)
-  {
-    // exclusive lock for writing 
-    mutex_.lock();
-    
-    state_ = state;
-    
-    mutex_.unlock();
-  }
+  inline void setState(const State &state);
+
+  inline bool isValidTransition(const State& state);
 
 private:
 
@@ -42,3 +36,59 @@ private:
   std::shared_mutex mutex_;
 
 };
+
+
+
+inline void QuadState::setState(const State &state)
+{
+  // exclusive lock for writing 
+  mutex_.lock();
+  
+  state_ = state;
+  
+  mutex_.unlock();
+}
+
+
+inline bool QuadState::isValidTransition(const State& new_state)
+{
+  // shared lock for reading
+  mutex_.lock_shared();
+
+  bool valid = false;
+
+  switch (state_)
+  {
+    case State::UNINITIALIZED:
+      valid = (new_state == State::INITIALIZED);
+      break;
+    case State::INITIALIZED:
+      valid = (new_state == State::ARMED);
+      break;
+    case State::ARMED:
+      valid = (new_state == State::TAKEOFF);
+      break;
+    case State::TAKEOFF:
+      valid = (new_state == State::HOVER_ONBOARD) || (new_state == State::HOVER_OFFBOARD) || (new_state == State::POSITION);
+      break;
+    case State::LAND:
+      valid = (new_state == State::HOVER_ONBOARD) || (new_state == State::HOVER_OFFBOARD) || (new_state == State::POSITION);
+      break;
+    case State::HOVER_ONBOARD:
+      valid = (new_state == State::HOVER_OFFBOARD) || (new_state == State::POSITION) || (new_state == State::LAND);
+      break;
+    case State::HOVER_OFFBOARD:
+      valid = (new_state == State::HOVER_ONBOARD) || (new_state == State::POSITION) || (new_state == State::LAND);
+      break;
+    case State::POSITION:
+      valid = (new_state == State::HOVER_ONBOARD) || (new_state == State::HOVER_OFFBOARD) || (new_state == State::TAKEOFF) || (new_state == State::LAND);
+      break;
+    default:
+      valid = false;
+      break;
+  }
+
+  mutex_.unlock_shared();
+
+  return valid;
+}
