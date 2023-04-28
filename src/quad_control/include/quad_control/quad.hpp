@@ -39,8 +39,6 @@ private:
   // state
   QuadState state_{QuadState::UNINITIALIZED};
 
-  bool initializeMavsdk(const std::string &port);
-
   // modules
   std::shared_ptr<MavsdkWrapper> mavsdk_wrapper_;
 
