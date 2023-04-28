@@ -118,6 +118,7 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
 
   if (mavsdk_result == 1) {
     response->result = 0; // success
+    quad_state_->setState(State::ARMED);
   } else {
     response->result = mavsdk_result + 300; // mavsdk error
   }
