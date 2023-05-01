@@ -6,11 +6,18 @@
 
 // ros default
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 
 // custom
-#include "raptor_interface/srv/trigger.hpp"
 #include "quad_control/mavsdk_wrapper.hpp"
 #include "quad_control/quad_state.hpp"
+#include "quad_control/telemetry.hpp"
+
+// interfaces
+#include "raptor_interface/srv/trigger.hpp"
+#include "raptor_interface/msg/pose.hpp"
+#include "raptor_interface/msg/velocity.hpp"
+#include "raptor_interface/action/takeoff.hpp"
 
 // mavsdk
 #include <mavsdk/mavsdk.h>
@@ -24,69 +31,52 @@
 class Quad : public rclcpp::Node
 {
 public:
+  // interface type aliases
+  using Pose = raptor_interface::msg::Pose;
+  using Velocity = raptor_interface::msg::Velocity;
+  using Trigger = raptor_interface::srv::Trigger;
+  using Takeoff = raptor_interface::action::Takeoff;
+  using TakeoffGoalHandle = rclcpp_action::ServerGoalHandle<Takeoff>;
+
     Quad(const std::string &port);
     ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
 
 
 private:
-  // state
-  std::shared_ptr<QuadState> quad_state_;
-
   // modules
+  std::shared_ptr<QuadState> quad_state_;
   std::shared_ptr<MavsdkWrapper> mavsdk_wrapper_;
+  std::shared_ptr<Telemetry> telemetry_;
 
-  // interfaces
-  rclcpp::Service<raptor_interface::srv::Trigger>::SharedPtr srv_arm_;
+  // ros interface servers
+  rclcpp::Service<Trigger>::SharedPtr srv_arm_;
+  rclcpp_action::Server<Takeoff>::SharedPtr act_takeoff_;
+
+  // ros interface clients
+  rclcpp::Subscription<Pose>::SharedPtr sub_pose_;
+  rclcpp::Subscription<Velocity>::SharedPtr sub_vel_;
+
+
+  // subscriptions
+  void pose_callback(const Pose & msg);
+  void vel_callback(const Velocity & msg);
 
   // services
-  void arm(const std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
-            std::shared_ptr<raptor_interface::srv::Trigger::Response> response);
+  void arm(const std::shared_ptr<Trigger::Request> request,
+            std::shared_ptr<Trigger::Response> response);
 
-  // void getStatus(std::shared_ptr<raptor_interface::srv::QuadStatus::Request> request,
-  //                 std::shared_ptr<raptor_interface::srv::QuadStatus::Response> response);
-  // void disarm(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  //             std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-
-  // void startPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  //                         std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-
-  // void stopPosOffboard(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  //                         std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-
-  // void takeoff(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  //               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-
-  // void land(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-  //           std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-
-  // void goToPos(std::shared_ptr<raptor_interface::srv::GoToPos::Request> request,
-  //               std::shared_ptr<raptor_interface::srv::GoToPos::Response> response);
-
-  // // service servers
-  // rclcpp::Service<raptor_interface::srv::QuadStatus>::SharedPtr service_quad_status_;
-
-  // rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_arm_;
-  // rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_disarm_;
-
-  // rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_start_offboard_;
-  // rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_stop_offboard_;
-
-  // rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_takeoff_;
-  // rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service_land_;
-
-  // rclcpp::Service<raptor_interface::srv::GoToPos>::SharedPtr service_go_to_pos_;
-
-  // // publishers
-  // void positionPubCallback();
-
-  // // publisher servers
-  // rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr pub_position_;
-  // rclcpp::TimerBase::SharedPtr timer_position_pub_;
+  // actions
+  rclcpp_action::GoalResponse handleTakeoffGoal(const rclcpp_action::GoalUUID & uuid,
+                                                  std::shared_ptr<const Takeoff::Goal> goal);
+  rclcpp_action::CancelResponse handleTakeoffCancel(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
+  void handleTakeoffAccepted(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
+  void executeTakeoff(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
+  void abortTakeoff(const std::shared_ptr<TakeoffGoalHandle> goal_handle, 
+                    const int return_code, 
+                    bool cancel = false);
 };
 
 // Helpers
-std::string actionResultToString(mavsdk::Action::Result index);
-std::string offboardResultToString(mavsdk::Offboard::Result index);
 
 /**
  * Print error message when no port is provided as argument.

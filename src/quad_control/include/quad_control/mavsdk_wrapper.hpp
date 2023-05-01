@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <iostream>
 #include <future>
 
@@ -9,6 +10,30 @@
 #include <mavsdk/plugins/offboard/offboard.h>
 #include <mavsdk/plugins/telemetry/telemetry.h>
 #include <mavsdk/plugins/mavlink_passthrough/mavlink_passthrough.h>
+
+
+const std::string MAVSDK_OFFBOARD_RESULTS[] = { "Unknown",
+                                                "Success",
+                                                "NoSystem",
+                                                "ConnectionError",
+                                                "Busy",
+                                                "CommandDenied",
+                                                "Timeout",
+                                                "NoSetpointSet"};
+
+const std::string MAVSDK_ACTION_RESULTS[] = { "Unknown",
+                                              "Success",
+                                              "NoSystem",
+                                              "ConnectionError",
+                                              "Busy",
+                                              "CommandDenied",
+                                              "CommandDeniedLandedStateUnknown",
+                                              "CommandDeniedNotLanded",
+                                              "Timeout",
+                                              "VtolTransitionSupportUnknown",
+                                              "NoVtolTransitionSupport",
+                                              "ParameterError",
+                                              "Unsupported"};
 
 
 class MavsdkWrapper
@@ -47,6 +72,11 @@ private:
 };
 
 
+
+// helpers
+std::string actionResultToString(const int index);
+
+std::string offboardResultToString(const int index);
 
 
 /**

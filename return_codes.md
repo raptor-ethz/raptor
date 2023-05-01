@@ -3,6 +3,7 @@
 
 - Successful execution: 0
 - (Feedback on execution...)
+- Successful cancellation by request: 30;
 
 ## Bad Execution [1XX]
 

@@ -1,16 +1,5 @@
-#include <string>
-#include <iostream>
-#include <chrono>
-
 #include "rclcpp/rclcpp.hpp"
 
-// mavsdk
-#include <mavsdk/mavsdk.h>
-#include <mavsdk/plugins/action/action.h>
-#include <mavsdk/plugins/offboard/offboard.h>
-#include <mavsdk/plugins/telemetry/telemetry.h>
-
-// Quad library
 #include "quad_control/quad.hpp"
 
 int main(int argc, char *argv[])

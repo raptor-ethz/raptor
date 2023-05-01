@@ -1,6 +1,8 @@
 #pragma once
 
+#include <mutex>
 #include <shared_mutex>
+
 
 
 
@@ -23,17 +25,17 @@ class QuadState
 {
 public:
 
-  inline QuadState() {};
+  QuadState() {};
 
   inline void setState(const State &state);
 
   inline bool isValidTransition(const State& state);
 
 private:
-
+  int a{0};
   State state_{State::UNINITIALIZED};
 
-  std::shared_mutex mutex_;
+  std::mutex mutex_;
 
 };
 
@@ -41,8 +43,7 @@ private:
 
 inline void QuadState::setState(const State &state)
 {
-  // exclusive lock for writing 
-  mutex_.lock();
+  mutex_.lock(); // TODO we should consider using lock guards
   
   state_ = state;
   
@@ -52,8 +53,7 @@ inline void QuadState::setState(const State &state)
 
 inline bool QuadState::isValidTransition(const State& new_state)
 {
-  // shared lock for reading
-  mutex_.lock_shared();
+  mutex_.lock();
 
   bool valid = false;
 
@@ -66,7 +66,7 @@ inline bool QuadState::isValidTransition(const State& new_state)
       valid = (new_state == State::ARMED);
       break;
     case State::ARMED:
-      valid = (new_state == State::TAKEOFF);
+      valid = (new_state == State::TAKEOFF) || (new_state == State::ARMED);
       break;
     case State::TAKEOFF:
       valid = (new_state == State::HOVER_ONBOARD) || (new_state == State::HOVER_OFFBOARD) || (new_state == State::POSITION);
@@ -88,7 +88,7 @@ inline bool QuadState::isValidTransition(const State& new_state)
       break;
   }
 
-  mutex_.unlock_shared();
+  mutex_.unlock();
 
   return valid;
 }

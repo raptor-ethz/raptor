@@ -3,29 +3,6 @@
 // TODO read these values from a yaml file
 const int position_pub_interval = 50;
 
-const std::string MAVSDK_OFFBOARD_RESULTS[] = { "Unknown",
-                                                "Success",
-                                                "NoSystem",
-                                                "ConnectionError",
-                                                "Busy",
-                                                "CommandDenied",
-                                                "Timeout",
-                                                "NoSetpointSet"};
-
-const std::string MAVSDK_ACTION_RESULTS[] = { "Unknown",
-                                              "Success",
-                                              "NoSystem",
-                                              "ConnectionError",
-                                              "Busy",
-                                              "CommandDenied",
-                                              "CommandDeniedLandedStateUnknown",
-                                              "CommandDeniedNotLanded",
-                                              "Timeout",
-                                              "VtolTransitionSupportUnknown",
-                                              "NoVtolTransitionSupport",
-                                              "ParameterError",
-                                              "Unsupported"};
-
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////// Construction
 
@@ -37,7 +14,10 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   RCLCPP_INFO(this->get_logger(), "Initializing...");
 
 
+  // initialize modules
+  quad_state_ = std::make_shared<QuadState>();
   mavsdk_wrapper_ = std::make_shared<MavsdkWrapper>();
+  telemetry_ = std::make_shared<Telemetry>();
 
   if (mavsdk_wrapper_->initialize(port)) {
     RCLCPP_ERROR(this->get_logger(), "MavsdkWrapper initialization failed.");
@@ -46,55 +26,53 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   }
 
 
+  // subscriptions
+  sub_pose_ =  this->create_subscription<raptor_interface::msg::Pose>(
+                "px4_pose_nwu", 10, std::bind(&Quad::pose_callback, this, _1));
+
+  sub_vel_ = this->create_subscription<raptor_interface::msg::Velocity>(
+              "px4_vel_nwu", 10, std::bind(&Quad::vel_callback, this, _1));
 
 
   // service servers
-  srv_arm_ = this->create_service<raptor_interface::srv::Trigger>(
+  srv_arm_ = this->create_service<Trigger>(
               "arm", std::bind(&Quad::arm, this, _1, _2));
 
-  // TODO create action servers here
 
-
+  // action servers TODO
+  act_takeoff_ = rclcpp_action::create_server<Takeoff>(
+    this->get_node_base_interface(),
+    this->get_node_clock_interface(),
+    this->get_node_logging_interface(),
+    this->get_node_waitables_interface(),
+    "takeoff",
+    std::bind(&Quad::handleTakeoffGoal, this, _1, _2),
+    std::bind(&Quad::handleTakeoffCancel, this, _1),
+    std::bind(&Quad::handleTakeoffAccepted, this, _1));
 
 
 
   quad_state_->setState(State::INITIALIZED);
 
   RCLCPP_INFO(this->get_logger(), "Initialization successful.");
-
-  // service_quad_status_ =
-  //     this->create_service<raptor_interface::srv::QuadStatus>(
-  //         "quad_status",
-  //         std::bind(&Quad::getStatus, this, std::placeholders::_1,
-  //                   std::placeholders::_2));
-  // service_disarm_ = this->create_service<std_srvs::srv::Trigger>(
-  //     "disarm", std::bind(&Quad::disarm, this, std::placeholders::_1,
-  //                         std::placeholders::_2));
-  // service_takeoff_ = this->create_service<std_srvs::srv::Trigger>(
-  //     "takeoff", std::bind(&Quad::takeoff, this, std::placeholders::_1,
-  //                          std::placeholders::_2));
-  // service_land_ = this->create_service<std_srvs::srv::Trigger>(
-  //     "land", std::bind(&Quad::land, this, std::placeholders::_1,
-  //                       std::placeholders::_2));
-  // service_start_offboard_ = this->create_service<std_srvs::srv::Trigger>(
-  //     "start_offboard",
-  //     std::bind(&Quad::startPosOffboard, this, std::placeholders::_1,
-  //               std::placeholders::_2));
-  // service_stop_offboard_ = this->create_service<std_srvs::srv::Trigger>(
-  //     "stop_offboard", std::bind(&Quad::stopPosOffboard, this,
-  //                                std::placeholders::_1, std::placeholders::_2));
-  // service_go_to_pos_ = this->create_service<raptor_interface::srv::GoToPos>(
-  //     "go_to_pos", std::bind(&Quad::goToPos, this, std::placeholders::_1,
-  //                            std::placeholders::_2));
-
-  // create publishers
-  // pub_position_ =
-  //     this->create_publisher<geometry_msgs::msg::Point>("position", 10);
-  // timer_position_pub_ =
-  //     this->create_wall_timer(std::chrono::milliseconds(position_pub_interval),
-  //                             std::bind(&Quad::positionPubCallback, this));
 }
 
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////// Subscriptions
+
+void Quad::pose_callback(const Pose & msg)
+{
+  telemetry_->setPosition({msg.x_m, msg.y_m, msg.z_m});
+  telemetry_->setAttitude({msg.roll_deg, msg.pitch_deg, msg.yaw_deg});
+}
+
+void Quad::vel_callback(const Velocity & msg)
+{
+  telemetry_->setVelocity({msg.x_m_s, msg.y_m_s, msg.z_m_s});
+}
 
 
 
@@ -102,13 +80,13 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////// Services
 
-void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
-               std::shared_ptr<raptor_interface::srv::Trigger::Response> response) {
+void Quad::arm(std::shared_ptr<Trigger::Request> request,
+               std::shared_ptr<Trigger::Response> response) {
   (void)request; // suppress unused variable warning
 
   RCLCPP_INFO(this->get_logger(), "Received arm request.");
 
-  // check if proper state TODO
+  // check if proper state
   if (!quad_state_->isValidTransition(State::ARMED)) {
     response->result = 201; // request not feasible
     return;
@@ -270,16 +248,6 @@ void Quad::arm(std::shared_ptr<raptor_interface::srv::Trigger::Request> request,
 
 // ////////////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////// Helpers
-
-std::string actionResultToString(mavsdk::Action::Result index) {
-  return MAVSDK_ACTION_RESULTS[int(index)];
-}
-
-
-std::string offboardResultToString(mavsdk::Offboard::Result index) {
-  return MAVSDK_OFFBOARD_RESULTS[int(index)];
-}
-
 
 void usage(const std::string &bin_name) {
   std::cerr

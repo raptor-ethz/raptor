@@ -76,6 +76,18 @@ bool MavsdkWrapper::isLocalPositionOk() const
 }
 
 
+std::string actionResultToString(const int index) {
+  assert(index >= 0 && index < 13);
+  return MAVSDK_ACTION_RESULTS[index];
+}
+
+
+std::string offboardResultToString(const int index) {
+  assert(index >= 0 && index < 8);
+  return MAVSDK_OFFBOARD_RESULTS[index];
+}
+
+
 std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk &mavsdk) {
   std::cout << "Waiting to discover system...\n";
   auto prom = std::promise<std::shared_ptr<mavsdk::System>>{};
