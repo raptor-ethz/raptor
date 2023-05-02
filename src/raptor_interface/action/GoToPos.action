@@ -1,0 +1,10 @@
+float32 x_m
+float32 y_m
+float32 z_m
+int32 timeout_s
+bool wait false
+---
+# result according to return codes
+int32 return_code
+---
+float32 distance_remaining
