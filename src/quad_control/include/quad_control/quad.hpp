@@ -50,6 +50,7 @@ private:
 
   // ros interface servers
   rclcpp::Service<Trigger>::SharedPtr srv_arm_;
+  rclcpp::Service<Trigger>::SharedPtr srv_land_;
   rclcpp_action::Server<Takeoff>::SharedPtr act_takeoff_;
 
   // ros interface clients
@@ -63,6 +64,8 @@ private:
 
   // services
   void arm(const std::shared_ptr<Trigger::Request> request,
+            std::shared_ptr<Trigger::Response> response);
+  void land(const std::shared_ptr<Trigger::Request> request,
             std::shared_ptr<Trigger::Response> response);
 
   // actions

@@ -37,6 +37,8 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
   // service servers
   srv_arm_ = this->create_service<Trigger>(
               "arm", std::bind(&Quad::arm, this, _1, _2));
+  srv_land_ = this->create_service<Trigger>(
+              "land", std::bind(&Quad::land, this, _1, _2));
 
 
   // action servers TODO
@@ -103,6 +105,28 @@ void Quad::arm(std::shared_ptr<Trigger::Request> request,
   
   // debug
   RCLCPP_INFO(this->get_logger(), "Arm result: [%d]", response->result);
+}
+
+
+void Quad::land(std::shared_ptr<Trigger::Request> request,
+               std::shared_ptr<Trigger::Response> response) {
+  (void)request; // suppress unused variable warning
+
+  RCLCPP_INFO(this->get_logger(), "Received land request.");
+
+  // check if proper state TODO
+
+  const int mavsdk_result = mavsdk_wrapper_->sendLandRequest();
+
+  if (mavsdk_result == 1) {
+    response->result = 0; // success
+    quad_state_->setState(State::LAND);
+  } else {
+    response->result = mavsdk_result + 300; // mavsdk error
+  }
+  
+  // debug
+  RCLCPP_INFO(this->get_logger(), "Land result: [%d]", response->result);
 }
 
 
