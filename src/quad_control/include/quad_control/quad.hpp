@@ -78,10 +78,3 @@ private:
                     const int return_code, 
                     bool cancel = false);
 };
-
-// Helpers
-
-/**
- * Print error message when no port is provided as argument.
-*/
-void usage(const std::string &bin_name);

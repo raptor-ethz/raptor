@@ -266,19 +266,3 @@ void Quad::land(std::shared_ptr<Trigger::Request> request,
 //   // message.x, message.y, message.z);
 //   pub_position_->publish(message);
 // }
-
-
-
-
-// ////////////////////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////////// Helpers
-
-void usage(const std::string &bin_name) {
-  std::cerr
-      << "Usage : " << bin_name << " <connection_url>\n"
-      << "Connection URL format should be :\n"
-      << " For TCP : tcp://[server_host][:server_port]\n"
-      << " For UDP : udp://[bind_host][:bind_port]\n"
-      << " For Serial : serial:///path/to/serial/dev[:baudrate]\n"
-      << "For example, to connect to the simulator use URL: udp://:14540\n";
-}

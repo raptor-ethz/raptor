@@ -2,6 +2,23 @@
 
 #include "quad_control/quad.hpp"
 
+
+
+
+/**
+ * Print error message when no port is provided as argument.
+*/
+void usage(const std::string &bin_name) {
+  std::cerr
+      << "Usage : " << bin_name << " <connection_url>\n"
+      << "Connection URL format should be :\n"
+      << " For TCP : tcp://[server_host][:server_port]\n"
+      << " For UDP : udp://[bind_host][:bind_port]\n"
+      << " For Serial : serial:///path/to/serial/dev[:baudrate]\n"
+      << "For example, to connect to the simulator use URL: udp://:14540\n";
+}
+
+
 int main(int argc, char *argv[])
 {
   // check command line input
