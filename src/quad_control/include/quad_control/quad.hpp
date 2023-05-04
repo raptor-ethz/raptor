@@ -18,6 +18,7 @@
 #include "raptor_interface/msg/pose.hpp"
 #include "raptor_interface/msg/velocity.hpp"
 #include "raptor_interface/action/takeoff.hpp"
+#include "raptor_interface/action/go_to_pos.hpp"
 
 // mavsdk
 #include <mavsdk/mavsdk.h>
@@ -37,6 +38,8 @@ public:
   using Trigger = raptor_interface::srv::Trigger;
   using Takeoff = raptor_interface::action::Takeoff;
   using TakeoffGoalHandle = rclcpp_action::ServerGoalHandle<Takeoff>;
+  using GoToPos = raptor_interface::action::GoToPos;
+  using GoToPosGoalHandle = rclcpp_action::ServerGoalHandle<GoToPos>;
 
     Quad(const std::string &port);
     ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
@@ -52,6 +55,7 @@ private:
   rclcpp::Service<Trigger>::SharedPtr srv_arm_;
   rclcpp::Service<Trigger>::SharedPtr srv_land_;
   rclcpp_action::Server<Takeoff>::SharedPtr act_takeoff_;
+  rclcpp_action::Server<GoToPos>::SharedPtr act_goToPos_;
 
   // ros interface clients
   rclcpp::Subscription<Pose>::SharedPtr sub_pose_;
@@ -75,6 +79,15 @@ private:
   void handleTakeoffAccepted(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
   void executeTakeoff(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
   void abortTakeoff(const std::shared_ptr<TakeoffGoalHandle> goal_handle, 
+                    const int return_code, 
+                    bool cancel = false);
+
+  rclcpp_action::GoalResponse handleGoToPosGoal(const rclcpp_action::GoalUUID & uuid,
+                                                  std::shared_ptr<const GoToPos::Goal> goal);
+  rclcpp_action::CancelResponse handleGoToPosCancel(const std::shared_ptr<GoToPosGoalHandle> goal_handle);
+  void handleGoToPosAccepted(const std::shared_ptr<GoToPosGoalHandle> goal_handle);
+  void executeGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle);
+  void abortGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle, 
                     const int return_code, 
                     bool cancel = false);
 };

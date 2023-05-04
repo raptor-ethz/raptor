@@ -41,7 +41,7 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
               "land", std::bind(&Quad::land, this, _1, _2));
 
 
-  // action servers TODO
+  // action servers
   act_takeoff_ = rclcpp_action::create_server<Takeoff>(
     this->get_node_base_interface(),
     this->get_node_clock_interface(),
@@ -51,6 +51,16 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     std::bind(&Quad::handleTakeoffGoal, this, _1, _2),
     std::bind(&Quad::handleTakeoffCancel, this, _1),
     std::bind(&Quad::handleTakeoffAccepted, this, _1));
+
+  act_goToPos_ = rclcpp_action::create_server<GoToPos>(
+    this->get_node_base_interface(),
+    this->get_node_clock_interface(),
+    this->get_node_logging_interface(),
+    this->get_node_waitables_interface(),
+    "goToPos",
+    std::bind(&Quad::handleGoToPosGoal, this, _1, _2),
+    std::bind(&Quad::handleGoToPosCancel, this, _1),
+    std::bind(&Quad::handleGoToPosAccepted, this, _1));
 
 
 
@@ -120,7 +130,7 @@ void Quad::land(std::shared_ptr<Trigger::Request> request,
 
   if (mavsdk_result == 1) {
     response->result = 0; // success
-    quad_state_->setState(State::LAND);
+    quad_state_->setState(State::INITIALIZED); // TODO
   } else {
     response->result = mavsdk_result + 300; // mavsdk error
   }
