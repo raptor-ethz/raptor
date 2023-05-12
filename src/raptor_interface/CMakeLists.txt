@@ -15,14 +15,20 @@ set(msg_files
   "msg/Acceleration.msg"
 )
 set(srv_files
+  "srv/Trigger.srv"
   "srv/GoToPos.srv"
   "srv/QuadStatus.srv"
   "srv/SetServo.srv"
+)
+set(action_files
+  "action/Takeoff.action"
+  "action/GoToPos.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${srv_files}
   ${msg_files}
+  ${action_files}
 )
 
 ament_package()

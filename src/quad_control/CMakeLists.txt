@@ -7,6 +7,7 @@ project(quad_control)
 # ros default
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -29,16 +30,18 @@ endif()
 
 # TARGETS
 # quad control
-add_executable(quad_control src/quad_control.cpp)
+add_executable(quad_control src/quad_control_app.cpp)
 target_include_directories(quad_control PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-target_sources(quad_control PUBLIC src/quad.cpp)
+target_sources(quad_control PUBLIC 
+  src/quad.cpp
+  src/actions/takeoff.cpp
+  src/actions/goToPos.cpp
+  src/mavsdk_wrapper.cpp)
 ament_target_dependencies(quad_control 
   rclcpp 
-  std_msgs 
-  std_srvs 
-  geometry_msgs 
+  rclcpp_action
   raptor_interface)
 target_link_libraries(quad_control MAVSDK::mavsdk)
 
