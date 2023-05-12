@@ -64,6 +64,8 @@ void Quad::executeGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle)
       return;
     }
 
+    // TODO check if goal is reached within allowed tolerance
+
     mavsdk_wrapper_->sendPositionMessage(position_msg, goal->yaw_deg);
 
     loop_rate.sleep();
