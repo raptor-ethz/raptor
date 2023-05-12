@@ -37,6 +37,7 @@ target_include_directories(quad_control PUBLIC
 target_sources(quad_control PUBLIC 
   src/quad.cpp
   src/actions/takeoff.cpp
+  src/actions/goToPos.cpp
   src/mavsdk_wrapper.cpp)
 ament_target_dependencies(quad_control 
   rclcpp 
