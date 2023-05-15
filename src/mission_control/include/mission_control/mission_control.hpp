@@ -26,9 +26,17 @@ public:
   ~MissionControl() {};
 
 
+  // API
+  bool arm();
+
+  bool takeoff(const float altitude);
+
+  bool go_to_pos(const std::array<float, 3> &pos, const float yaw = 0);
+
+
 private:
   // TODO add quad state
-  
+
   rclcpp_action::Client<Takeoff>::SharedPtr act_takeoff_;
   rclcpp_action::Client<GoToPos>::SharedPtr act_goToPos_;
 
