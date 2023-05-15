@@ -2,6 +2,8 @@
 
 // TODO read these values from a yaml file
 const int position_pub_interval = 50;
+const string TOPIC_POSE = "px4_pose_nwu";
+const string TOPIC_VEL = "px4_vel_nwu";
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////// Construction
@@ -28,10 +30,10 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
 
   // subscriptions
   sub_pose_ =  this->create_subscription<raptor_interface::msg::Pose>(
-                "px4_pose_nwu", 10, std::bind(&Quad::pose_callback, this, _1));
+                TOPIC_POSE, 10, std::bind(&Quad::pose_callback, this, _1));
 
   sub_vel_ = this->create_subscription<raptor_interface::msg::Velocity>(
-              "px4_vel_nwu", 10, std::bind(&Quad::vel_callback, this, _1));
+              TOPIC_VEL, 10, std::bind(&Quad::vel_callback, this, _1));
 
 
   // service servers
