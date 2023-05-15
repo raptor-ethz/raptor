@@ -16,7 +16,7 @@ rclcpp_action::GoalResponse Quad::handleTakeoffGoal(const rclcpp_action::GoalUUI
     return rclcpp_action::GoalResponse::REJECT;
   }
 
-  // TODO check requested height is valid
+  // TODO #33 Validate Requested Takeoff Height
 
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
