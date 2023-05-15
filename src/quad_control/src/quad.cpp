@@ -2,8 +2,8 @@
 
 // TODO read these values from a yaml file
 const int position_pub_interval = 50;
-const string TOPIC_POSE = "px4_pose_nwu";
-const string TOPIC_VEL = "px4_vel_nwu";
+const std::string TOPIC_POSE = "px4_pose_nwu";
+const std::string TOPIC_VEL = "px4_vel_nwu";
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////// Construction
