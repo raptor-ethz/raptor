@@ -8,9 +8,6 @@ project(quad_control)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
 # ros custom
 find_package(raptor_interface REQUIRED)
 # external
@@ -45,19 +42,10 @@ ament_target_dependencies(quad_control
   raptor_interface)
 target_link_libraries(quad_control MAVSDK::mavsdk)
 
-# ref gen
-add_executable(reference_generator src/reference_generator.cpp)
-ament_target_dependencies(reference_generator 
-  rclcpp 
-  std_srvs 
-  geometry_msgs
-  raptor_interface)
-
 
 # INSTALLATION
 install(TARGETS
   quad_control
-  reference_generator
   DESTINATION lib/${PROJECT_NAME})
 
 
