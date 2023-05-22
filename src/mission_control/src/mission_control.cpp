@@ -1,8 +1,8 @@
 #include "mission_control/mission_control.hpp"
 
 
-const std::string ACTION_TAKEOFF = "takeoff";
-const std::string ACTION_GOTOPOS = "goToPos";
+const std::string ACT_LABEL_TAKEOFF = "takeoff";
+const std::string ACT_LABEL_GOTOPOS = "goToPos";
 
 
 
@@ -18,14 +18,14 @@ MissionControl::MissionControl() : Node("mission_control")
     this->get_node_graph_interface(),
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
-    ACTION_TAKEOFF);
+    ACT_LABEL_TAKEOFF);
 
   act_goToPos_ = rclcpp_action::create_client<GoToPos>(
     this->get_node_base_interface(),
     this->get_node_graph_interface(),
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
-    ACTION_GOTOPOS);
+    ACT_LABEL_GOTOPOS);
 
 
 
