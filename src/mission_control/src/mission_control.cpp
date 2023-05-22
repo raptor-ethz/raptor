@@ -56,3 +56,10 @@ MissionControl::MissionControl() : Node("mission_control")
 
   RCLCPP_INFO(this->get_logger(), "Initialization successful.");
 }
+
+
+void MissionControl::shutdown() {
+  RCLCPP_ERROR(this->get_logger(), "Mission interrupted. Shutting down");
+  rclcpp::shutdown();
+  exit(0);
+}

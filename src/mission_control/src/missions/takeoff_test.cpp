@@ -13,23 +13,18 @@ int main(int argc, char *argv[])
   // initialize node
   auto mission_control_node = std::make_shared<MissionControl>();
 
-  // spin node if initialization was successful
-  if(!rclcpp::ok()) {
-    rclcpp::shutdown();
-    return 0;
-  }
+  if(!rclcpp::ok()) {mission_control_node->shutdown();}
 
-  RCLCPP_INFO(mission_control_node->get_logger(), "Ready.");
-  mission_control_node->arm();
-  rclcpp::spin_some(mission_control_node);
+  RCLCPP_INFO(mission_control_node->get_logger(), "Starting mission.");
 
-  if(!rclcpp::ok()) {
-    rclcpp::shutdown();
-    return 0;
-  }
+  if(!mission_control_node->arm()) {mission_control_node->shutdown();}
+
+  if(!rclcpp::ok()) {mission_control_node->shutdown(); }
 
   mission_control_node->takeoff(0.7);
-  rclcpp::spin_some(mission_control_node);
+  if(!mission_control_node->takeoff(0.7)) {mission_control_node->shutdown();}
+
+  RCLCPP_INFO(mission_control_node->get_logger(), "Mission complete. Shutting down.");
 
   rclcpp::shutdown();
   return 0;

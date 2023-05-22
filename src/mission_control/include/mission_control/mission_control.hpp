@@ -37,6 +37,10 @@ public:
   bool go_to_pos(const std::array<float, 3> &pos, const float yaw, const float timeout_s);
 
 
+  // helper functions
+  void shutdown();
+
+
 private:
   // TODO add quad state
 
