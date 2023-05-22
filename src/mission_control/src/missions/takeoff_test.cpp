@@ -21,8 +21,12 @@ int main(int argc, char *argv[])
 
   if(!rclcpp::ok()) {mission_control_node->shutdown(); }
 
-  mission_control_node->takeoff(0.7);
   if(!mission_control_node->takeoff(0.7)) {mission_control_node->shutdown();}
+
+  // let quad hover for 5 seconds
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+
+  if(!mission_control_node->land()) {mission_control_node->shutdown();}
 
   RCLCPP_INFO(mission_control_node->get_logger(), "Mission complete. Shutting down.");
 
