@@ -32,14 +32,26 @@ MissionControl::MissionControl() : Node("mission_control")
 
 
   // check if servers are available
-  if(!act_takeoff_->wait_for_action_server(std::chrono::seconds(3)))
-  {
-    RCLCPP_WARN(this->get_logger(), "Takeoff action server not available");
+  // TODO: Parameters to see if error, warning or nothing should be returned if specific server is not available
+  if(!srv_arm_->wait_for_service(std::chrono::seconds(3))) {
+    RCLCPP_ERROR(this->get_logger(), "Arming service not available");
+    rclcpp::shutdown();
+    return;
   }
-
-  if(!act_goToPos_->wait_for_action_server(std::chrono::seconds(3)))
-  {
-    RCLCPP_WARN(this->get_logger(), "GoToPos action server not available");
+  if(!srv_land_->wait_for_service(std::chrono::seconds(3))) {
+    RCLCPP_ERROR(this->get_logger(), "Landing service not available");
+    rclcpp::shutdown();
+    return;
+  }
+  if(!act_takeoff_->wait_for_action_server(std::chrono::seconds(3))) {
+    RCLCPP_ERROR(this->get_logger(), "Takeoff action server not available"); 
+    rclcpp::shutdown();
+    return;
+  }
+  if(!act_goToPos_->wait_for_action_server(std::chrono::seconds(3))) {
+    RCLCPP_ERROR(this->get_logger(), "GoToPos action server not available");
+    rclcpp::shutdown();
+    return;
   }
 
   RCLCPP_INFO(this->get_logger(), "Initialization successful.");
