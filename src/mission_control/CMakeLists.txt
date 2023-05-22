@@ -24,11 +24,23 @@ endif()
 
 
 # TARGETS
-
+add_executable(mission_control src/mission_control_app.cpp)
+target_include_directories(mission_control PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(mission_control PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp)
+ament_target_dependencies(mission_control 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
 
 
 # INSTALLATION
-
+install(TARGETS
+  mission_control
+  DESTINATION lib/${PROJECT_NAME})
 
 
 ament_package()
