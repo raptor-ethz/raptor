@@ -31,6 +31,7 @@ target_include_directories(takeoff_test PUBLIC
 target_sources(takeoff_test PUBLIC 
   src/mission_control.cpp
   src/actions/arm.cpp
+  src/actions/land.cpp
   src/actions/takeoff.cpp)
 ament_target_dependencies(takeoff_test 
   rclcpp 
