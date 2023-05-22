@@ -30,7 +30,8 @@ target_include_directories(mission_control PUBLIC
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_sources(mission_control PUBLIC 
   src/mission_control.cpp
-  src/actions/arm.cpp)
+  src/actions/arm.cpp
+  src/actions/takeoff.cpp)
 ament_target_dependencies(mission_control 
   rclcpp 
   rclcpp_action
