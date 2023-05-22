@@ -13,6 +13,8 @@ MissionControl::MissionControl() : Node("mission_control")
 
 
   // initialize ros interface clients
+  srv_arm_ = this->create_client<Trigger>("arm");
+  srv_land_ = this->create_client<Trigger>("land");
   act_takeoff_ = rclcpp_action::create_client<Takeoff>(
     this->get_node_base_interface(),
     this->get_node_graph_interface(),
