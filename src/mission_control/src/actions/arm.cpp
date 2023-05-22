@@ -4,6 +4,8 @@
 
 
 bool MissionControl::arm() {
+  // TODO check quad state
+
   // check if service is available TODO
   if (!srv_arm_->wait_for_service(std::chrono::seconds(1))) {
     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Arming service not found.");
