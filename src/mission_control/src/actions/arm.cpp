@@ -17,7 +17,7 @@ bool MissionControl::arm() {
 
 
   // wait until service completed
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) 
+  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result, std::chrono::seconds(3)) 
       == rclcpp::FutureReturnCode::SUCCESS) {
       
     // get response from future
