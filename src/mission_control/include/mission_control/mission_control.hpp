@@ -17,6 +17,7 @@
 class MissionControl : public rclcpp::Node
 {
 public:
+  using Trigger = raptor_interface::srv::Trigger;
   using Takeoff = raptor_interface::action::Takeoff;
   using TakeoffGoalHandle = rclcpp_action::ClientGoalHandle<Takeoff>;
   using GoToPos = raptor_interface::action::GoToPos;
@@ -39,6 +40,8 @@ public:
 private:
   // TODO add quad state
 
+  rclcpp::Client<Trigger>::SharedPtr srv_arm_;
+  rclcpp::Client<Trigger>::SharedPtr srv_land_;
   rclcpp_action::Client<Takeoff>::SharedPtr act_takeoff_;
   rclcpp_action::Client<GoToPos>::SharedPtr act_goToPos_;
 
