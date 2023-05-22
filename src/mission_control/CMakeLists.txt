@@ -24,6 +24,7 @@ endif()
 
 
 # TARGETS
+# takeoff_test
 add_executable(takeoff_test src/missions/takeoff_test.cpp)
 target_include_directories(takeoff_test PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -32,8 +33,25 @@ target_sources(takeoff_test PUBLIC
   src/mission_control.cpp
   src/actions/arm.cpp
   src/actions/land.cpp
-  src/actions/takeoff.cpp)
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp)
 ament_target_dependencies(takeoff_test 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
+# square
+add_executable(square src/missions/square.cpp)
+target_include_directories(square PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(square PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp)
+ament_target_dependencies(square 
   rclcpp 
   rclcpp_action
   raptor_interface)
@@ -42,6 +60,7 @@ ament_target_dependencies(takeoff_test
 # INSTALLATION
 install(TARGETS
   takeoff_test
+  square
   DESTINATION lib/${PROJECT_NAME})
 
 
