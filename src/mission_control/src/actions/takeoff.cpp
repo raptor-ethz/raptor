@@ -18,7 +18,8 @@ bool MissionControl::takeoff(const float altitude) {
   auto goal_handle_future = act_takeoff_->async_send_goal(goal); // request goal
 
   // wait until goal was processed
-  if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), goal_handle_future) 
+  if (rclcpp::spin_until_future_complete(
+    this->get_node_base_interface(), goal_handle_future, std::chrono::seconds(1)) 
     != rclcpp::FutureReturnCode::SUCCESS)
   {
     RCLCPP_ERROR(this->get_logger(), "Takeoff action failed (ROS error).");
@@ -31,16 +32,14 @@ bool MissionControl::takeoff(const float altitude) {
     RCLCPP_WARN(this->get_logger(), "Takeoff goal rejected by server.");
     return false;
   }
-
   RCLCPP_INFO(this->get_logger(), "Taking off.");
 
   // waiting until action is completed
   auto result_future = act_takeoff_->async_get_result(goal_handle);
-  rclcpp::FutureReturnCode return_code = rclcpp::spin_until_future_complete(
-    this->get_node_base_interface(), result_future);
-
   // check return code
-  if (return_code != rclcpp::FutureReturnCode::SUCCESS)
+  if (rclcpp::spin_until_future_complete(
+    this->get_node_base_interface(), result_future, std::chrono::seconds(20)) 
+    != rclcpp::FutureReturnCode::SUCCESS)
   {
     RCLCPP_ERROR(this->get_logger(), "Takeoff action failed (ROS error).");
     return false;
