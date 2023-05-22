@@ -24,7 +24,7 @@ bool MissionControl::arm() {
     auto response = result.get();
 
     // check response
-    if (!(response->result)) {
+    if (response->result) {
       RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "Failed to arm: [%i]", response->result);
       return false;
     }
