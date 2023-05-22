@@ -24,15 +24,15 @@ endif()
 
 
 # TARGETS
-add_executable(mission_control src/mission_control_app.cpp)
-target_include_directories(mission_control PUBLIC 
+add_executable(takeoff_test src/missions/takeoff_test.cpp)
+target_include_directories(takeoff_test PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
-target_sources(mission_control PUBLIC 
+target_sources(takeoff_test PUBLIC 
   src/mission_control.cpp
   src/actions/arm.cpp
   src/actions/takeoff.cpp)
-ament_target_dependencies(mission_control 
+ament_target_dependencies(takeoff_test 
   rclcpp 
   rclcpp_action
   raptor_interface)
@@ -40,7 +40,7 @@ ament_target_dependencies(mission_control
 
 # INSTALLATION
 install(TARGETS
-  mission_control
+  takeoff_test
   DESTINATION lib/${PROJECT_NAME})
 
 
