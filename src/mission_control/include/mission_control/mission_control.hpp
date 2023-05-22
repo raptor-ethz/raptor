@@ -31,7 +31,9 @@ public:
 
   bool takeoff(const float altitude);
 
-  bool go_to_pos(const std::array<float, 3> &pos, const float yaw = 0);
+  bool land();
+
+  bool go_to_pos(const std::array<float, 3> &pos, const float yaw = 0, const float timeout_s);
 
 
 private:
