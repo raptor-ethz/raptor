@@ -69,17 +69,20 @@ int main(int argc, char *argv[])
     std::cout << "No command line argument given. Required: Vicon Identifier.\n";
     return 1;
   }
+
+  std::string vicon_identifier = "srl_" + argv[1];
+  std::string topic_name = argv[1] + std::string("_pose_nwu");
   
   // initialize ros
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ViconPublisher>("vicon_quad_pose_nwu");
+  auto node = std::make_shared<ViconPublisher>(topic_name);
 
   raptor_interface::msg::Pose message = raptor_interface::msg::Pose();
   std::string vicon_identifier = argv[1];
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-      "Initializing publisher for '%s' using the topic 'vicon_quad_pose_nwu'.",
-      vicon_identifier.c_str());
+      "Initializing publisher for '%s' using the topic '%s'.",
+      vicon_identifier.c_str(), topic_name.c_str());
   
 
   /* VICON Datastream Settings */
