@@ -26,20 +26,14 @@ public:
   MissionControl();
   ~MissionControl() {};
 
-
   // API
   bool arm();
-
   bool takeoff(const float altitude);
-
   bool land();
-
   bool go_to_pos(const std::array<float, 3> &pos, const float yaw, const float timeout_s, const bool wait = false);
-
 
   // helper functions
   void shutdown();
-
 
 private:
   // TODO add quad state
@@ -48,5 +42,4 @@ private:
   rclcpp::Client<Trigger>::SharedPtr srv_land_;
   rclcpp_action::Client<Takeoff>::SharedPtr act_takeoff_;
   rclcpp_action::Client<GoToPos>::SharedPtr act_goToPos_;
-
 };
