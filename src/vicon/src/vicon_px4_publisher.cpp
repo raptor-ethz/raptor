@@ -118,7 +118,7 @@ const int INTERVAL_RATE_HZ = 100;
 const int INTERVAL_MS = 1000. / INTERVAL_RATE_HZ;
 const int TELEMETRY_RATE_HZ = 200;
 
-const std::string VICON_IDENTIFIER = "srl_quad"; // TODO ros param
+const std::string VICON_IDENTIFIER = "srl_raptor"; // TODO ros param
 constexpr static float yaw_offset_degrees = 0; // yaw offset local frame
 constexpr static float yaw_offset_radians = yaw_offset_degrees * M_PI / 180;
 
