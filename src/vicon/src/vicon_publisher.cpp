@@ -37,8 +37,8 @@ constexpr static float y_offset = 0.;
 class ViconPublisher : public rclcpp::Node
 {
 public:
-  ViconPublisher(const std::string &topic_name)
-  : Node("vicon_publisher")
+  ViconPublisher(const std::string &node_name, const std::string &topic_name)
+  : Node(node_name)
   {
     publisher_ =
       this->create_publisher<raptor_interface::msg::Pose>(topic_name, 10);
@@ -66,23 +66,23 @@ int main(int argc, char *argv[])
   // POI
   // TODO check argument
   if (argc < 2) {
-    std::cout << "No command line argument given. Required: Vicon Identifier.\n";
+    std::cout << "No command line argument given. Required: Object name.\n";
     return 1;
   }
 
-  std::string vicon_identifier = "srl_" + argv[1];
+  std::string vicon_identifier = std::string("srl_") + argv[1];
+  std::string node_name = std::string("vicon_publisher_") + argv[1];
   std::string topic_name = argv[1] + std::string("_pose_nwu");
   
   // initialize ros
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ViconPublisher>(topic_name);
+  auto node = std::make_shared<ViconPublisher>(node_name, topic_name);
 
   raptor_interface::msg::Pose message = raptor_interface::msg::Pose();
-  std::string vicon_identifier = argv[1];
 
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-      "Initializing publisher for '%s' using the topic '%s'.",
-      vicon_identifier.c_str(), topic_name.c_str());
+  RCLCPP_INFO(node->get_logger(), 
+      "Initializing %s for '%s' using the topic '%s'.",
+      node_name.c_str(), vicon_identifier.c_str(), topic_name.c_str());
   
 
   /* VICON Datastream Settings */
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
   }
 
   // POI
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
+  RCLCPP_INFO(node->get_logger(), 
       "Connecting to '%s'...",
       HostName.c_str());
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
     if (!ok)
     {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Connection failed...");
+      RCLCPP_ERROR(node->get_logger(), "Connection failed...");
       switch (ConnectResult.Result)
       {
       case Result::ClientAlreadyConnected:
@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
 
     // POI
     // inform interface ready
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Vicon interface server is ready.");
+    RCLCPP_INFO(node->get_logger(), "Vicon interface server is ready.");
 
     size_t Counter = 0;
     const std::chrono::high_resolution_clock::time_point StartTime =
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
       // POI
       // exit if subject wasn't found
       if (!subjectFound) {
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
+        RCLCPP_INFO(node->get_logger(), 
             "Subject '%s' not found.",
             vicon_identifier.c_str());
         // std::cout << "Subject '" << vicon_identifier << "' not found.\n";
