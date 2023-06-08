@@ -1,0 +1,4 @@
+float32 left_angle_deg
+float32 right_angle_deg
+---
+bool success

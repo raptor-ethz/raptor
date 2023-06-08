@@ -23,12 +23,18 @@ endif()
 
 
 # TARGETS
-# gripper interface
-add_executable(gripper_control src/gripper_control.cpp src/serialib.cpp)
+# gripper control
+add_executable(gripper_control src/gripper_control_app.cpp)
+target_include_directories(gripper_control PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(gripper_control PUBLIC 
+  src/gripper_control.cpp
+  src/serialib.cpp)
 ament_target_dependencies(gripper_control
   rclcpp 
   raptor_interface)
-  target_include_directories(gripper_control PUBLIC include)
+# target_include_directories(gripper_control PUBLIC include)
 
 
 # INSTALLATION

@@ -1,77 +1,99 @@
-#include <iostream>
-#include <string>
-// #include <chrono>
+#include "gripper_control/gripper_control.hpp"
 
-#include "raptor_interface/srv/set_servo.hpp"
-#include "rclcpp/rclcpp.hpp"
 
-// Serial data packet
-unsigned char cmd[] = {90, 90};
 
-// serialib
-#include "serialib.h"
 
-#define SERIAL_PORT "/dev/ttyACM2"
+// #define SERIAL_PORT "/dev/ttyACM2" TODO
 
-void set_right_angle(
-    std::shared_ptr<raptor_interface::srv::SetServo::Request> request,
-    std::shared_ptr<raptor_interface::srv::SetServo::Response> response) {
-  cmd[0] = request->angle;
-  response->success = true;
-}
+Gripper::Gripper(const std::string &port) : Node("gripper_control") {
+  using namespace std::placeholders;
 
-void set_left_angle(
-    std::shared_ptr<raptor_interface::srv::SetServo::Request> request,
-    std::shared_ptr<raptor_interface::srv::SetServo::Response> response) {
-  cmd[1] = request->angle;
-  response->success = true;
-}
+  RCLCPP_INFO(this->get_logger(), "Initializing...");
 
-// command line argument: serial port, i.e. /dev/ttyUSB0
-int main(int argc, char **argv) {
-
-  if (argc != 2) {
-    std::cout << "ERROR: no serial port given as input argument" << std::endl;
-    return 0;
-  }
-  std::string serial_port = argv[1];
-  std::cout << "Initializing serial connection to port " << serial_port
-            << " ..." << std::endl;
-
-  // initialize Serial object
-  serialib serial;
-
-  // If connection fails, return the error code otherwise, display a success
-  // message
-  int serialResult = serial.openDevice(serial_port.c_str(), 115200);
+  // serial connection
+  int serialResult = serial_.openDevice(port.c_str(), 115200);
   if (serialResult == -2) {
-    std::cout << "Could not initialize serial connection to " << serial_port
-              << std::endl;
-    return -1;
+    RCLCPP_ERROR(this->get_logger(), "Failed to initialize serial connection to %s", port.c_str());
+    rclcpp::shutdown();
+    return;
   }
-  std::cout << "Successful connection to " << serial_port << std::endl;
+  RCLCPP_INFO(this->get_logger(), "Successful serial connection.");
 
-  // initialize ROS
-  rclcpp::init(argc, argv);
-
-  std::shared_ptr<rclcpp::Node> node =
-      rclcpp::Node::make_shared("gripper_interface_node");
-
-  auto leftGripper_service =
-      node->create_service<raptor_interface::srv::SetServo>("rightGripper_deg",
-                                                            &set_right_angle);
-  auto rightGripper_service =
-      node->create_service<raptor_interface::srv::SetServo>("leftGripper_deg",
-                                                            &set_left_angle);
-  for (;;) {
-    rclcpp::spin_some(node);
-    serial.writeBytes(&cmd, sizeof(cmd));
-  }
-
-  rclcpp::shutdown();
-
-  return 0;
+  // service servers
+  srv_set_gripper_ = this->create_service<SetGripper>(
+    "set_gripper", std::bind(&Gripper::setGripper, this, _1, _2));
 }
+
+void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
+                          std::shared_ptr<SetGripper::Response> response)
+{
+  cmd_[0] = request->right_angle_deg;
+  cmd_[1] = request->left_angle_deg;
+  serial_.writeBytes(&cmd_, sizeof(cmd_));
+  response->success = 1;
+}
+
+
+
+
+
+
+// TODO old code
+
+
+
+// void set_right_angle(
+//     std::shared_ptr<raptor_interface::srv::SetServo::Request> request,
+//     std::shared_ptr<raptor_interface::srv::SetServo::Response> response) {
+//   cmd[0] = request->angle;
+//   response->success = true;
+// }
+
+// void set_left_angle(
+//     std::shared_ptr<raptor_interface::srv::SetServo::Request> request,
+//     std::shared_ptr<raptor_interface::srv::SetServo::Response> response) {
+//   cmd[1] = request->angle;
+//   response->success = true;
+// }
+
+// // command line argument: serial port, i.e. /dev/ttyUSB0
+// int main(int argc, char **argv) {
+//   return 0;
+// }
+
+//   if (argc != 2) {
+//     std::cout << "ERROR: no serial port given as input argument" << std::endl;
+//     return 0;
+//   }
+//   std::string serial_port = argv[1];
+//   std::cout << "Initializing serial connection to port " << serial_port
+//             << " ..." << std::endl;
+
+
+
+
+
+//   // initialize ROS
+//   rclcpp::init(argc, argv);
+
+//   std::shared_ptr<rclcpp::Node> node =
+//       rclcpp::Node::make_shared("gripper_interface_node");
+
+//   auto leftGripper_service =
+//       node->create_service<raptor_interface::srv::SetServo>("rightGripper_deg",
+//                                                             &set_right_angle);
+//   auto rightGripper_service =
+//       node->create_service<raptor_interface::srv::SetServo>("leftGripper_deg",
+//                                                             &set_left_angle);
+//   for (;;) {
+//     rclcpp::spin_some(node);
+//     serial.writeBytes(&cmd, sizeof(cmd));
+//   }
+
+//   rclcpp::shutdown();
+
+//   return 0;
+// }
 
 // // serialib
 // #include "serialib.h"
