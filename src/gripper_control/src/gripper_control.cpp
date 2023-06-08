@@ -20,12 +20,12 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
   RCLCPP_INFO(this->get_logger(), "Successful serial connection.");
 
   // service servers
-  srv_set_gripper_ = this->create_service<SetGripper>(
-    "set_gripper", std::bind(&Gripper::setGripper, this, _1, _2));
+  srv_set_gripper_ = this->create_service<RotateGripper>(
+    "set_gripper", std::bind(&Gripper::rotateGripper, this, _1, _2));
 }
 
-void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
-                          std::shared_ptr<SetGripper::Response> response)
+void Gripper::rotateGripper(const std::shared_ptr<RotateGripper::Request> request,
+                          std::shared_ptr<RotateGripper::Response> response)
 {
   cmd_[0] = request->left_angle_deg;
   cmd_[1] = request->right_angle_deg;
