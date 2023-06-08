@@ -10,7 +10,7 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
 
   RCLCPP_INFO(this->get_logger(), "Initializing...");
 
-  // serial connection
+  // serial connection - serial port: /dev/ttyXXXX
   int serialResult = serial_.openDevice(port.c_str(), 115200);
   if (serialResult == -2) {
     RCLCPP_ERROR(this->get_logger(), "Failed to initialize serial connection to %s", port.c_str());
@@ -31,6 +31,7 @@ void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
   cmd_[1] = request->left_angle_deg;
   serial_.writeBytes(&cmd_, sizeof(cmd_));
   response->success = 1;
+  RCLCPP_INFO(this->get_logger(), "Wrote [%d, %d] to arduino", cmd_[0], cmd_[1]);
 }
 
 

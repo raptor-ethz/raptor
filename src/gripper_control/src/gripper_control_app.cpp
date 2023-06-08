@@ -18,6 +18,7 @@
 // }
 
 
+// command line argument: serial port, i.e. /dev/ttyUSB0
 int main(int argc, char *argv[])
 {
   // check command line input
