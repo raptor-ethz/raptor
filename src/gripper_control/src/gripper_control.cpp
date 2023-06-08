@@ -27,11 +27,11 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
 void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
                           std::shared_ptr<SetGripper::Response> response)
 {
-  cmd_[0] = request->right_angle_deg;
-  cmd_[1] = request->left_angle_deg;
+  cmd_[0] = request->left_angle_deg;
+  cmd_[1] = request->right_angle_deg;
   serial_.writeBytes(&cmd_, sizeof(cmd_));
   response->success = 1;
-  RCLCPP_INFO(this->get_logger(), "Wrote [%d, %d] to arduino", cmd_[0], cmd_[1]);
+  RCLCPP_INFO(this->get_logger(), "Wrote [L: %d, R: %d] to arduino", cmd_[0], cmd_[1]);
 }
 
 
