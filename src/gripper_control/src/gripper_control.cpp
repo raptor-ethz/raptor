@@ -27,6 +27,14 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
 void Gripper::rotateGripper(const std::shared_ptr<RotateGripper::Request> request,
                           std::shared_ptr<RotateGripper::Response> response)
 {
+  // check if requested values are between 0 and 90
+  if (request->left_angle_deg < 0 || request->left_angle_deg > 90 ||
+      request->right_angle_deg < 0 || request->right_angle_deg > 90) {
+    RCLCPP_ERROR(this->get_logger(), "Gripper angles must be between 0 and 90 degrees.");
+    response->success = 0;
+    return;
+  }
+  
   cmd_[0] = request->left_angle_deg;
   cmd_[1] = request->right_angle_deg;
   serial_.writeBytes(&cmd_, sizeof(cmd_));
