@@ -1,71 +1,73 @@
 #include <Servo.h>
 
-// define Servo Port numbers
+//
+// PORT NUMBERS
+//
 #define SRV_PORT_1 4 // left
 #define SRV_PORT_2 5 // right
 
-// define boundary constraints
-
-// OPEN:34 CLOSE:110
-#define SRV_1_CLOSE 111
+// 
+// SERVO PARAMETERS
+//
 #define SRV_1_OPEN 34
-#define SRV_1_INIT 34
+#define SRV_1_CLOSE 111
+#define SRV_1_DIRECTION -1 // from close to open
+#define SRV_1_RANGE 77
 
-// OPEN:138 CLOSE: 60
-#define SRV_2_CLOSE 60
 #define SRV_2_OPEN 137
-#define SRV_2_INIT 138
+#define SRV_2_CLOSE 60
+#define SRV_2_DIRECTION 1 // from close to open
+#define SRV_2_RANGE 77
 
 // Declare Servo Objects
 Servo Servo_1; // left
 Servo Servo_2; // right
 
-// create buffer for Serial receiving (RX)
+// buffer for Serial receiving (RX)
 const int RX_BUFFER_SIZE = 2;
 uint8_t rx_buffer[RX_BUFFER_SIZE];
+
+// compute factor for servo angles
+float factor_1 = float(SRV_1_RANGE) / 90.0;
+float factor_2 = float(SRV_2_RANGE) / 90.0;
+
 
 void setup() {
   // initialize Servos
   Servo_1.attach(SRV_PORT_1);
   Servo_2.attach(SRV_PORT_2);
-
-  Servo_1.write(SRV_1_INIT);
-  Servo_2.write(SRV_2_INIT);
-  //  initialize Serial
+  // initial values
+  Servo_1.write(SRV_1_OPEN);
+  Servo_2.write(SRV_2_OPEN);
+  // initialize Serial
   Serial.begin(115200);
 }
 
-int cap(int val, int lower_boundary, int upper_boundary) {
-  if (val < lower_boundary) {
-    return lower_boundary;
-  }
-  if (val > upper_boundary) {
-    return upper_boundary;
-  }
-  return val;
-}
 
 void loop() {
-
-
-  float factor = 77.0 / 90.0;
   /* SERIAL CONNECTION */
   if (Serial.available()) {
     // read in command
     Serial.readBytes(rx_buffer, RX_BUFFER_SIZE);
+
+    // check command
+    if (rx_buffer[0] < 0 || rx_buffer[0] > 90 ||
+        rx_buffer[1] < 0 || rx_buffer[1] > 90) {
+      // Serial.println("Gripper angles must be between 0 and 90 degrees.");
+      return;
+    }
+
     // write command to servo
-    Servo_1.write(SRV_1_CLOSE - float(rx_buffer[0]) * factor); // left
-    Servo_2.write(SRV_2_CLOSE + float(rx_buffer[1]) * factor); // right
+    Servo_1.write(SRV_1_CLOSE + SRV_1_DIRECTION * factor_1 * float(rx_buffer[0])); // left
+    Servo_2.write(SRV_2_CLOSE + SRV_2_DIRECTION * factor_2 * float(rx_buffer[1])); // right 
   }
 
   
   /* SERVO TEST */
-  // Servo_1.write(90);
-  // Servo_2.write(90);
-  // // Servo_2.write(0);
+  // Servo_1.write(SRV_1_OPEN);
+  // Servo_2.write(SRV_2_OPEN);
   // delay(1000);
-  // // Servo_1.write(110);
-  // Servo_1.write(170);
-  // Servo_2.write(170);
+  // Servo_1.write(SRV_1_CLOSE);
+  // Servo_2.write(SRV_2_CLOSE);
   // delay(1000);
 }
