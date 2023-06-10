@@ -27,15 +27,15 @@ endif()
 
 # TARGETS
 # quad control
-add_executable(quad_control src/quad_control_app.cpp)
+add_executable(quad_control src/apps/quad_control.cpp)
 target_include_directories(quad_control PUBLIC 
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
 target_sources(quad_control PUBLIC 
-  src/quad.cpp
+  src/quad/quad.cpp
   src/actions/takeoff.cpp
   src/actions/goToPos.cpp
-  src/mavsdk_wrapper.cpp)
+  src/wrappers/mavsdk_wrapper.cpp)
 ament_target_dependencies(quad_control 
   rclcpp 
   rclcpp_action
