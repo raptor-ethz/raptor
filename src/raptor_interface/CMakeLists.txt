@@ -23,6 +23,7 @@ set(srv_files
 set(action_files
   "action/Takeoff.action"
   "action/GoToPos.action"
+  "action/AccTest.action"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

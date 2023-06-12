@@ -1,0 +1,6 @@
+float32[3] a_m_s2
+float32[3] position_threshold_m
+---
+# result according to return codes
+int32 return_code
+---
