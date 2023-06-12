@@ -52,8 +52,6 @@ void Quad::executeGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle)
   std::array<float, 3> position_msg = {goal->x_m, goal->y_m, goal->z_m};
 
 
-
-
   for (int i = 0; i < max_iterations; ++i) {
     // check ROS shutdwon
     if (!rclcpp::ok()) {return;}
@@ -70,8 +68,6 @@ void Quad::executeGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle)
 
     loop_rate.sleep();
   }
-
-
 
 
   // success

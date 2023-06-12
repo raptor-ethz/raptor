@@ -41,8 +41,8 @@ public:
   using GoToPos = raptor_interface::action::GoToPos;
   using GoToPosGoalHandle = rclcpp_action::ServerGoalHandle<GoToPos>;
 
-    Quad(const std::string &port);
-    ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
+  Quad(const std::string &port);
+  ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
 
 
 private:
@@ -51,16 +51,15 @@ private:
   std::shared_ptr<MavsdkWrapper> mavsdk_wrapper_;
   std::shared_ptr<Telemetry> telemetry_;
 
-  // ros interface servers
+  // interface servers
   rclcpp::Service<Trigger>::SharedPtr srv_arm_;
   rclcpp::Service<Trigger>::SharedPtr srv_land_;
   rclcpp_action::Server<Takeoff>::SharedPtr act_takeoff_;
   rclcpp_action::Server<GoToPos>::SharedPtr act_goToPos_;
 
-  // ros interface clients
+  // interface clients
   rclcpp::Subscription<Pose>::SharedPtr sub_pose_;
   rclcpp::Subscription<Velocity>::SharedPtr sub_vel_;
-
 
   // subscriptions
   void pose_callback(const Pose & msg);
@@ -72,19 +71,25 @@ private:
   void land(const std::shared_ptr<Trigger::Request> request,
             std::shared_ptr<Trigger::Response> response);
 
-  // actions
+  // 
+  // ACTIONS
+  // 
+
+  // takeoff
   rclcpp_action::GoalResponse handleTakeoffGoal(const rclcpp_action::GoalUUID & uuid,
-                                                  std::shared_ptr<const Takeoff::Goal> goal);
-  rclcpp_action::CancelResponse handleTakeoffCancel(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
+                                                std::shared_ptr<const Takeoff::Goal> goal);
+  rclcpp_action::CancelResponse handleTakeoffCancel(
+    const std::shared_ptr<TakeoffGoalHandle> goal_handle);
   void handleTakeoffAccepted(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
   void executeTakeoff(const std::shared_ptr<TakeoffGoalHandle> goal_handle);
   void abortTakeoff(const std::shared_ptr<TakeoffGoalHandle> goal_handle, 
                     const int return_code, 
                     bool cancel = false);
-
+  // go to pos
   rclcpp_action::GoalResponse handleGoToPosGoal(const rclcpp_action::GoalUUID & uuid,
-                                                  std::shared_ptr<const GoToPos::Goal> goal);
-  rclcpp_action::CancelResponse handleGoToPosCancel(const std::shared_ptr<GoToPosGoalHandle> goal_handle);
+                                                std::shared_ptr<const GoToPos::Goal> goal);
+  rclcpp_action::CancelResponse handleGoToPosCancel(
+    const std::shared_ptr<GoToPosGoalHandle> goal_handle);
   void handleGoToPosAccepted(const std::shared_ptr<GoToPosGoalHandle> goal_handle);
   void executeGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle);
   void abortGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle, 
