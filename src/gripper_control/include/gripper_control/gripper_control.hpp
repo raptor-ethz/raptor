@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rclcpp/rclcpp.hpp"
-#include "raptor_interface/srv/rotate_gripper.hpp"
+#include "raptor_interface/srv/set_gripper.hpp"
 #include "serialib.h"
 
 
@@ -10,8 +10,9 @@
 class Gripper : public rclcpp::Node
 {
 public:
-  using RotateGripper = raptor_interface::srv::RotateGripper;
+  using SetGripper = raptor_interface::srv::SetGripper;
 
+  // serial port to arduino: /dev/ttyXXXY
   Gripper(const std::string &port);
   ~Gripper() {};
 
@@ -19,8 +20,8 @@ private:
   serialib serial_;
   // unsigned char cmd_[] = {90, 90}; // serial data packet
   std::array<unsigned char, 2> cmd_ = {90, 90};
-  rclcpp::Service<RotateGripper>::SharedPtr srv_set_gripper_;
+  rclcpp::Service<SetGripper>::SharedPtr srv_set_gripper_;
 
-  void rotateGripper(const std::shared_ptr<RotateGripper::Request> request,
-                  std::shared_ptr<RotateGripper::Response> response);
+  void setGripper(const std::shared_ptr<SetGripper::Request> request,
+                  std::shared_ptr<SetGripper::Response> response);
 };
