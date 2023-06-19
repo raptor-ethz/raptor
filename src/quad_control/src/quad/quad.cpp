@@ -59,7 +59,7 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     this->get_node_clock_interface(),
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
-    "goToPos",
+    "go_to_pos",
     std::bind(&Quad::handleGoToPosGoal, this, _1, _2),
     std::bind(&Quad::handleGoToPosCancel, this, _1),
     std::bind(&Quad::handleGoToPosAccepted, this, _1));

@@ -2,7 +2,7 @@
 
 
 const std::string ACT_LABEL_TAKEOFF = "takeoff";
-const std::string ACT_LABEL_GOTOPOS = "goToPos";
+const std::string ACT_LABEL_GOTOPOS = "go_to_pos";
 
 
 
