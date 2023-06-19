@@ -15,13 +15,33 @@ Raptor workspace for ROS 2 packages
 - Forward motion capture pose data from the Vicon system to the PX4 controller
 - Publish telemetry data from the PX4 controller to the ROS 2 network
 
-### Gripper Interface
+### Gripper Control
 
 - API for interactions with the gripper. 
 
 ### Raptor Interface
 
 - Custom ROS interface definitions for the raptor workspace.
+
+## Nodes
+
+- quad_control
+- mission_control
+- px4_vicon_publisher
+- px4_publisher
+- vicon_publisher_object
+- gripper_control
+
+## Interfaces
+
+Services
+- `arm`
+- `land`
+- `set_gripper`
+
+Actions
+- `takeoff`
+- `go_to_pos`
 
 # Conventions
 
