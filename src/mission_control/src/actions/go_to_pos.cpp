@@ -63,3 +63,20 @@ bool MissionControl::go_to_pos(const std::array<float, 3> &pos, const float yaw,
   RCLCPP_INFO(this->get_logger(), "GoToPos successful.");
   return true;
 }
+
+bool MissionControl::go_to_object(const std::array<float, 4> &offset, 
+                                  const float yaw, 
+                                  const float timeout_s, 
+                                  const bool wait)
+{
+  RCLCPP_INFO(this->get_logger(), "Going to object with offsets [%f, %f, %f].",
+    offset[0], offset[1], offset[2], yaw);
+
+  std::array<float, 3> target_position = {
+    object_telemetry_->getPosition()[0] + offset[0],
+    object_telemetry_->getPosition()[1] + offset[1],
+    object_telemetry_->getPosition()[2] + offset[2]
+  };
+
+  return go_to_pos(target_position, yaw, timeout_s, wait);
+}
