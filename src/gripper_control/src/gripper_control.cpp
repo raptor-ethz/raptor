@@ -20,12 +20,12 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
   RCLCPP_INFO(this->get_logger(), "Successful serial connection.");
 
   // service servers
-  srv_set_gripper_ = this->create_service<RotateGripper>(
-    "set_gripper", std::bind(&Gripper::rotateGripper, this, _1, _2));
+  srv_set_gripper_ = this->create_service<SetGripper>(
+    "set_gripper", std::bind(&Gripper::setGripper, this, _1, _2));
 }
 
-void Gripper::rotateGripper(const std::shared_ptr<RotateGripper::Request> request,
-                          std::shared_ptr<RotateGripper::Response> response)
+void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
+                          std::shared_ptr<SetGripper::Response> response)
 {
   // check if requested values are between 0 and 90
   if (request->left_angle_deg < 0 || request->left_angle_deg > 90 ||
@@ -39,7 +39,7 @@ void Gripper::rotateGripper(const std::shared_ptr<RotateGripper::Request> reques
   cmd_[1] = request->right_angle_deg;
   serial_.writeBytes(&cmd_, sizeof(cmd_));
   response->success = 1;
-  RCLCPP_INFO(this->get_logger(), "Wrote [L: %d, R: %d] to arduino", cmd_[0], cmd_[1]);
+  RCLCPP_INFO(this->get_logger(), "Set gripper to [L: %d, R: %d].", cmd_[0], cmd_[1]);
 }
 
 

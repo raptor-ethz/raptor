@@ -22,6 +22,7 @@ MissionControl::MissionControl() : Node("mission_control")
   // service clients
   srv_arm_ = this->create_client<Trigger>("arm");
   srv_land_ = this->create_client<Trigger>("land");
+  srv_set_gripper_ = this->create_client<SetGripper>("set_gripper");
 
   // action clients
   act_takeoff_ = rclcpp_action::create_client<Takeoff>(
