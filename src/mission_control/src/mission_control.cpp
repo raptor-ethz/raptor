@@ -2,20 +2,29 @@
 
 
 const std::string ACT_LABEL_TAKEOFF = "takeoff";
-const std::string ACT_LABEL_GOTOPOS = "goToPos";
+const std::string ACT_LABEL_GOTOPOS = "go_to_pos";
 
 
 
 
 MissionControl::MissionControl() : Node("mission_control")
 {
+  using namespace std::placeholders;
+
   RCLCPP_INFO(this->get_logger(), "Initializing...");
 
+  object_telemetry_ = std::make_shared<Telemetry>();
 
-  // initialize ros interface clients
+  // subscriptions
+  sub_object_pose_ = this->create_subscription<Pose>(
+    "object_pose_nwu", 10, std::bind(&MissionControl::objectPoseCallback, this, _1));
+
+  // service clients
   srv_arm_ = this->create_client<Trigger>("arm");
   srv_land_ = this->create_client<Trigger>("land");
   srv_set_gripper_ = this->create_client<SetGripper>("set_gripper");
+
+  // action clients
   act_takeoff_ = rclcpp_action::create_client<Takeoff>(
     this->get_node_base_interface(),
     this->get_node_graph_interface(),
@@ -63,4 +72,10 @@ void MissionControl::shutdown() {
   RCLCPP_ERROR(this->get_logger(), "Mission interrupted. Shutting down");
   rclcpp::shutdown();
   exit(0);
+}
+
+
+void MissionControl::objectPoseCallback(const Pose::SharedPtr msg) {
+  object_telemetry_->setPosition({msg->x_m, msg->y_m, msg->z_m});
+  // TODO attitude information
 }
