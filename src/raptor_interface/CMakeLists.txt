@@ -18,7 +18,7 @@ set(srv_files
   "srv/Trigger.srv"
   "srv/GoToPos.srv"
   "srv/QuadStatus.srv"
-  "srv/RotateGripper.srv"
+  "srv/SetGripper.srv"
 )
 set(action_files
   "action/Takeoff.action"
