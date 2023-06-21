@@ -56,11 +56,28 @@ ament_target_dependencies(square
   rclcpp_action
   raptor_interface)
 
+# swoop
+add_executable(swoop src/missions/swoop.cpp)
+target_include_directories(swoop PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(swoop PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp)
+ament_target_dependencies(swoop 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
 
 # INSTALLATION
 install(TARGETS
   takeoff_test
   square
+  swoop
   DESTINATION lib/${PROJECT_NAME})
 
 
