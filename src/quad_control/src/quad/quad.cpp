@@ -68,7 +68,7 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     this->get_node_clock_interface(),
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
-    "accTest",
+    "acc_test",
     std::bind(&Quad::handleAccTestGoal, this, _1, _2),
     std::bind(&Quad::handleAccTestCancel, this, _1),
     std::bind(&Quad::handleAccTestAccepted, this, _1));
