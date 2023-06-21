@@ -40,8 +40,9 @@ void Quad::executeAccTest(const std::shared_ptr<AccTestGoalHandle> goal_handle)
   // auto feedback = std::make_shared<AccTest::Feedback>(); no feedback
   auto result = std::make_shared<AccTest::Result>();
 
-  RCLCPP_INFO(this->get_logger(), "Executing acceleration test [%fms2 for %fm].",
-    goal->a_m_s2[0], goal->position_threshold_m[0]);
+  RCLCPP_INFO(this->get_logger(), "Executing acceleration test [%f, %f, %f | %f, %f %f].",
+    goal->a_m_s2[0], goal->a_m_s2[1], goal->a_m_s2[2],
+    goal->position_threshold_m[0], goal->position_threshold_m[1], goal->position_threshold_m[2]);
 
   // get current position
   std::array<float, 3> initial_position = telemetry_->getPosition();
@@ -53,7 +54,7 @@ void Quad::executeAccTest(const std::shared_ptr<AccTestGoalHandle> goal_handle)
   rclcpp::Rate loop_rate(rate);
   int max_iterations = timeout_s * rate;
 
-  std::array<float, 3> acceleration_msg = {goal->a_m_s2[0], 0.0, 0.0};
+  std::array<float, 3> acceleration_msg = {goal->a_m_s2[0], goal->a_m_s2[1], goal->a_m_s2[2]};
 
 
   for (int i = 0; i < max_iterations; ++i) {
@@ -71,7 +72,7 @@ void Quad::executeAccTest(const std::shared_ptr<AccTestGoalHandle> goal_handle)
     if (current_position[0] - initial_position[0] < -threshold ||
         std::abs(current_position[1] - initial_position[1]) > threshold ||
         std::abs(current_position[2] - initial_position[2]) > threshold) {
-      abortAccTest(goal_handle, 30, false);
+      abortAccTest(goal_handle, 100, false);
       return;
     }
 

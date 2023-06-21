@@ -3,6 +3,7 @@
 
 const std::string ACT_LABEL_TAKEOFF = "takeoff";
 const std::string ACT_LABEL_GOTOPOS = "goToPos";
+const std::string ACT_LABE_ACCTEST = "accTest";
 
 
 
@@ -28,6 +29,13 @@ MissionControl::MissionControl() : Node("mission_control")
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
     ACT_LABEL_GOTOPOS);
+
+  act_accTest_ = rclcpp_action::create_client<AccTest>(
+    this->get_node_base_interface(),
+    this->get_node_graph_interface(),
+    this->get_node_logging_interface(),
+    this->get_node_waitables_interface(),
+    ACT_LABE_ACCTEST);
 
 
 

@@ -7,7 +7,7 @@ bool MissionControl::acc_test(const std::array<float, 3> &acc, const std::array<
   // TODO check quad state
 
   // check if service is available TODO
-  if (!act_accTest->wait_for_action_server(std::chrono::seconds(1))) {
+  if (!act_accTest_->wait_for_action_server(std::chrono::seconds(1))) {
     RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "AccTest action not found.");
     return false;
   }
@@ -18,7 +18,7 @@ bool MissionControl::acc_test(const std::array<float, 3> &acc, const std::array<
   goal.a_m_s2 = acc;
   goal.position_threshold_m = threshold;
 
-  auto goal_handle_future = act_accTest->async_send_goal(goal); // request goal
+  auto goal_handle_future = act_accTest_->async_send_goal(goal); // request goal
 
   // wait until goal was processed
   if (rclcpp::spin_until_future_complete(
@@ -39,7 +39,7 @@ bool MissionControl::acc_test(const std::array<float, 3> &acc, const std::array<
     acc[0], acc[1], acc[2], threshold[0], threshold[1], threshold[2]);
 
   // waiting until action is completed
-  auto result_future = act_accTest->async_get_result(goal_handle);
+  auto result_future = act_accTest_->async_get_result(goal_handle);
   // check return code
   if (rclcpp::spin_until_future_complete(
     this->get_node_base_interface(), result_future, std::chrono::seconds(20)) 
