@@ -66,8 +66,8 @@ private:
   rclcpp::Subscription<Velocity>::SharedPtr sub_vel_;
 
   // subscriptions
-  void pose_callback(const Pose & msg);
-  void vel_callback(const Velocity & msg);
+  void pose_callback(const Pose::SharedPtr msg);
+  void vel_callback(const Velocity::SharedPtr msg);
 
   // services
   void arm(const std::shared_ptr<Trigger::Request> request,

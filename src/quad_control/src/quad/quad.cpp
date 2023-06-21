@@ -59,7 +59,7 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     this->get_node_clock_interface(),
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
-    "goToPos",
+    "go_to_pos",
     std::bind(&Quad::handleGoToPosGoal, this, _1, _2),
     std::bind(&Quad::handleGoToPosCancel, this, _1),
     std::bind(&Quad::handleGoToPosAccepted, this, _1));
@@ -86,15 +86,15 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////// Subscriptions
 
-void Quad::pose_callback(const Pose & msg)
+void Quad::pose_callback(const Pose::SharedPtr msg)
 {
-  telemetry_->setPosition({msg.x_m, msg.y_m, msg.z_m});
-  telemetry_->setAttitude({msg.roll_deg, msg.pitch_deg, msg.yaw_deg});
+  telemetry_->setPosition({msg->x_m, msg->y_m, msg->z_m});
+  telemetry_->setAttitude({msg->roll_deg, msg->pitch_deg, msg->yaw_deg});
 }
 
-void Quad::vel_callback(const Velocity & msg)
+void Quad::vel_callback(const Velocity::SharedPtr msg)
 {
-  telemetry_->setVelocity({msg.x_m_s, msg.y_m_s, msg.z_m_s});
+  telemetry_->setVelocity({msg->x_m_s, msg->y_m_s, msg->z_m_s});
 }
 
 
