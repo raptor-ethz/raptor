@@ -56,11 +56,29 @@ ament_target_dependencies(square
   rclcpp_action
   raptor_interface)
 
+# acceleration_test
+add_executable(acceleration_test src/missions/acceleration_test.cpp)
+target_include_directories(acceleration_test PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(acceleration_test PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp
+  src/actions/acc_test.cpp)
+ament_target_dependencies(acceleration_test 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
 
 # INSTALLATION
 install(TARGETS
   takeoff_test
   square
+  acceleration_test
   DESTINATION lib/${PROJECT_NAME})
 
 
