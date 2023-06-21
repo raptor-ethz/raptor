@@ -64,7 +64,7 @@ bool MissionControl::go_to_pos(const std::array<float, 3> &pos, const float yaw,
   return true;
 }
 
-bool MissionControl::go_to_object(const std::array<float, 4> &offset, 
+bool MissionControl::go_to_object(const std::array<float, 3> &offset, 
                                   const float yaw, 
                                   const float timeout_s, 
                                   const bool wait)
