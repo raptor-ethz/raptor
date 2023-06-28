@@ -40,16 +40,17 @@ void Quad::executeAccTest(const std::shared_ptr<AccTestGoalHandle> goal_handle)
   // auto feedback = std::make_shared<AccTest::Feedback>(); no feedback
   auto result = std::make_shared<AccTest::Result>();
 
-  RCLCPP_INFO(this->get_logger(), "Executing acceleration test [%f, %f, %f | %f, %f %f].",
+  RCLCPP_INFO(this->get_logger(), "Executing acceleration test [%f, %f, %f] with threshold front [%f, %f, %f] and back [%f, %f, %f].",
     goal->a_m_s2[0], goal->a_m_s2[1], goal->a_m_s2[2],
-    goal->position_threshold_m[0], goal->position_threshold_m[1], goal->position_threshold_m[2]);
+    goal->pos_threshold_front[0], goal->pos_threshold_front[1], goal->pos_threshold_front[2],
+    goal->pos_threshold_back[0], goal->pos_threshold_back[1], goal->pos_threshold_back[2]);
 
   // get current position
   std::array<float, 3> initial_position = telemetry_->getPosition();
+  RCLCPP_INFO(this->get_logger(), "Initial position: [%f, %f, %f]",
+    initial_position[0], initial_position[1], initial_position[2]);
 
   int timeout_s = 10; // TODO
-  float threshold = 0.3;
-
   int rate = 50;
   rclcpp::Rate loop_rate(rate);
   int max_iterations = timeout_s * rate;
@@ -68,22 +69,36 @@ void Quad::executeAccTest(const std::shared_ptr<AccTestGoalHandle> goal_handle)
     // get current position
     std::array<float, 3> current_position = telemetry_->getPosition();
 
-    // check safety margin in y, z and negative x direction
-    if (current_position[0] - initial_position[0] < -threshold ||
-        std::abs(current_position[1] - initial_position[1]) > threshold ||
-        std::abs(current_position[2] - initial_position[2]) > threshold) {
-      abortAccTest(goal_handle, 100, false);
-      return;
-    }
-
-    // check position threshold
-    if (current_position[0] - initial_position[0] > goal->position_threshold_m[0]) {
+    // check safety margins
+    float deviation_x = current_position[0] - initial_position[0];
+    float deviation_y = current_position[1] - initial_position[1];
+    float deviation_z = current_position[2] - initial_position[2];    
+    if (deviation_x > goal->pos_threshold_front[0] ||
+        deviation_x < -goal->pos_threshold_back[0] ||
+        deviation_y > goal->pos_threshold_front[1] ||
+        deviation_y < -goal->pos_threshold_back[1] ||
+        deviation_z > goal->pos_threshold_front[2] ||
+        deviation_z < -goal->pos_threshold_back[2]) {
       mavsdk_wrapper_->sendPositionMessage(current_position); // stay at current position
       result->return_code = 0; // success
       goal_handle->succeed(result);
-      RCLCPP_INFO(this->get_logger(), "Acceleration test execution successful.");
+      RCLCPP_INFO(this->get_logger(), "Acc test success: Out of bounds.");
+      RCLCPP_INFO(this->get_logger(), "Current position: [%f, %f, %f]",
+        current_position[0], current_position[1], current_position[2]);
       return;
     }
+
+    // TODO hold position with P
+    float k_p = 2.f;
+    acceleration_msg[0] = - k_p * deviation_x;
+    acceleration_msg[1] = - k_p * deviation_y;
+    acceleration_msg[2] = - k_p * deviation_z;
+
+    // TODO change acceleration after some time
+    // if (i >  1 * rate) {
+    //   acceleration_msg[0] = 6.f;
+    // }
+
 
     mavsdk_wrapper_->sendAccelerationMessage(acceleration_msg);
     loop_rate.sleep();

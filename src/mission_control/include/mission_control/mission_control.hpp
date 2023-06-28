@@ -43,7 +43,9 @@ public:
   bool land();
   bool go_to_pos(const std::array<float, 3> &pos, const float yaw, const float timeout_s, const bool wait = false);
   bool go_to_object(const std::array<float, 3> &offset, const float yaw, const float timeout_s, const bool wait = false);
-  bool acc_test(const std::array<float, 3> &acc, const std::array<float, 3> &threshold);
+  bool acc_test(const std::array<float, 3> &acc, 
+                const std::array<float, 3> &threshold_front,
+                const std::array<float, 3> &threshold_back);
 
   // helper functions
   void shutdown();
