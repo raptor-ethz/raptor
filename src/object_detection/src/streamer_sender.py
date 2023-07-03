@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from realsense import RSCamera
 import imagezmq
-from utils import truncate
+# from utils import truncate
 from threading import Thread
 import multiprocessing
 

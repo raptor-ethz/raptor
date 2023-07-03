@@ -126,7 +126,7 @@ class DetectionNode(Node):
     def __init__(self):
         super().__init__('detection_node')
         self.starting_time = time.time()
-        self.color_sub = self.create_subscription(
+        self.color_sub = Subscriber(
             self,
             Image,
             'color_images')
