@@ -43,7 +43,7 @@ std::array<std::array<float, 3>, 5> big_square = {
   edge_5
 };
 
-std::array<std::array<float, 3>, 5> 3d_square = {
+std::array<std::array<float, 3>, 5> big_square_3d = {
   edge_9,
   edge_10,
   edge_11,
@@ -51,7 +51,25 @@ std::array<std::array<float, 3>, 5> 3d_square = {
   edge_9
 };
 
-auto waypoints = small_square; // choose which square to fly
+
+std::array<std::array<float, 3>, 9> small_big_square_3d = {
+  // small
+  edge_1,
+  edge_2,
+  edge_3,
+  edge_4,
+  edge_1,
+  // big
+  // edge_9,
+  edge_10,
+  edge_11,
+  edge_12,
+  edge_9
+};
+
+
+
+auto waypoints = small_big_square_3d; // choose which square to fly
 
 
 int main(int argc, char *argv[])
