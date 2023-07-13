@@ -8,6 +8,7 @@ project(mission_control)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(std_msgs REQUIRED)
 # ros custom
 find_package(raptor_interface REQUIRED)
 
@@ -105,6 +106,16 @@ ament_target_dependencies(gripper_test
   rclcpp_action
   raptor_interface)
 
+# dev_publisher
+add_executable(dev_publisher src/missions/dev_publisher.cpp)
+target_include_directories(dev_publisher PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(dev_publisher PUBLIC src/missions/dev_publisher.cpp)
+ament_target_dependencies(dev_publisher 
+  rclcpp
+  std_msgs)
+
 
 # INSTALLATION
 install(TARGETS
@@ -113,6 +124,7 @@ install(TARGETS
   swoop
   grasp
   gripper_test
+  dev_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 
