@@ -76,7 +76,8 @@ void Quad::executeHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle
   // success
   result->return_code = 0;
   goal_handle->succeed(result);
-  RCLCPP_INFO(this->get_logger(), "Hover (acc) execution successful.");
+  RCLCPP_INFO(this->get_logger(), "Hover (acc) execution successful. (Current position: [%f, %f, %f])",
+    telemetry_->getPosition()[0], telemetry_->getPosition()[1], telemetry_->getPosition()[2]);
 }
 
 
