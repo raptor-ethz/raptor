@@ -8,9 +8,15 @@
 std::array<float, 3> home_position = {0.0, 0.0, 0.7};
 std::array<float, 3> home_position_low = {0.0, 0.0, 0.4};
 
+// soft swoop
 std::array<float, 3> start_position = {-0.5, -1.0, 1.5};
 std::array<float, 3> swoop_position = {1.0, -1.0, 0.7};
 std::array<float, 3> end_position = {2.5, -1.0, 1.5};
+
+// aggressive swoop
+// std::array<float, 3> start_position = {-0.5, -1.0, 1.5};
+// std::array<float, 3> swoop_position = {1.0, -1.0, 0.5};
+// std::array<float, 3> end_position = {2.5, -1.0, 1.5};
 
 
 int main(int argc, char *argv[])

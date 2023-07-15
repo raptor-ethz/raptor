@@ -8,24 +8,23 @@
 std::array<float, 3> home_position = {0.0, 0.0, 0.7};
 std::array<float, 3> home_position_low = {0.0, 0.0, 0.4};
 
-std::array<float, 3> edge_1 = {0.0, -1.0, 0.7};
-std::array<float, 3> edge_2 = {1.0, -1.0, 0.7};
-std::array<float, 3> edge_3 = {1.0, 0.0, 0.7};
-std::array<float, 3> edge_4 = {0.0, 0.0, 0.7};
+// small square
+std::array<float, 3> edge_1 = {-0.5, -2.0, 0.7};
+std::array<float, 3> edge_2 = {0.5, -2.0, 0.7};
+std::array<float, 3> edge_3 = {0.5, -1.0, 0.7};
+std::array<float, 3> edge_4 = {-0.5, -1.0, 0.7};
 
+// big square
 std::array<float, 3> edge_5 = {-0.5, -2.0, 1.0};
 std::array<float, 3> edge_6 = {1.5, -2.0, 1.0};
 std::array<float, 3> edge_7 = {1.5, 0.0, 1.0};
 std::array<float, 3> edge_8 = {-0.5, 0.0, 1.0};
 
+// 3d square
 std::array<float, 3> edge_9 = {-0.5, -2.0, 0.7};
-std::array<float, 3> edge_10 = {1.5, -2.0, 1.5};
-std::array<float, 3> edge_11 = {1.5, 0.0, 1.0};
-std::array<float, 3> edge_12 = {-0.5, 0.0, 0.7};
-
-std::array<float, 3> edge_13 = {-0.5, -1.0, 1.5};
-std::array<float, 3> edge_14 = {0.5, -1.0, 0.7};
-std::array<float, 3> edge_15 = {2.0, -1.0, 1.5};
+std::array<float, 3> edge_10 = {1.5, -2.0, 2.0};
+std::array<float, 3> edge_11 = {1.5, 0.0, 1.5};
+std::array<float, 3> edge_12 = {-0.5, 0.0, 1.0};
 
 
 std::array<std::array<float, 3>, 5> small_square = {
@@ -44,7 +43,7 @@ std::array<std::array<float, 3>, 5> big_square = {
   edge_5
 };
 
-std::array<std::array<float, 3>, 5> height_square = {
+std::array<std::array<float, 3>, 5> big_square_3d = {
   edge_9,
   edge_10,
   edge_11,
@@ -52,7 +51,25 @@ std::array<std::array<float, 3>, 5> height_square = {
   edge_9
 };
 
-auto waypoints = small_square;
+
+std::array<std::array<float, 3>, 9> small_big_square_3d = {
+  // small
+  edge_1,
+  edge_2,
+  edge_3,
+  edge_4,
+  edge_1,
+  // big
+  // edge_9,
+  edge_10,
+  edge_11,
+  edge_12,
+  edge_9
+};
+
+
+
+auto waypoints = small_big_square_3d; // choose which square to fly
 
 
 int main(int argc, char *argv[])

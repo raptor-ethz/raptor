@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
   mission_control_node->setGripper(0, 0); // close gripper
   std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // wait a bit
   mission_control_node->setGripper(90, 90); // open gripper again
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // wait a bit
 
   // land
   if(!mission_control_node->go_to_pos(home_position, 0.0, 4.0, true)) {mission_control_node->shutdown();}

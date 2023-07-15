@@ -28,7 +28,7 @@
 
 
 // parameters TODO
-const int PUBLISHER_INTERVAL_MS = 20;
+const int PUBLISHER_INTERVAL_MS = 10;
 // constexpr static float x_offset = 0.5;
 // constexpr static float y_offset = 0.5;
 constexpr static float x_offset = 0.;
