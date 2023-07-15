@@ -120,3 +120,32 @@ void Quad::abortHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle,
   goal_handle->abort(result);
   return;
 }
+
+
+bool Quad::doHoverAccStep(const std::array<float, 3> &initial_position,
+                          const std::array<float, 3> &pos_threshold_m)
+{
+  // get current position
+  std::array<float, 3> current_position = telemetry_->getPosition();
+
+  // check safety margins
+  std::array<float, 3> deviation = {current_position[0] - initial_position[0],
+                                    current_position[1] - initial_position[1],
+                                    current_position[2] - initial_position[2]}
+  if (std::abs(deviation[0]) > pos_threshold_m[0] ||
+      std::abs(deviation[1]) > pos_threshold_m[1] ||
+      std::abs(deviation[2]) > pos_threshold_m[2]) {
+    RCLCPP_INFO(this->get_logger(), "Out of bounds [%f, %f, %f].",
+      current_position[0], current_position[1], current_position[2]);
+    return false;
+  }
+
+  // P control
+  float k_p = 2.f;
+  std::array<float, 3> acceleration_msg = {- k_p * deviation[0],
+                                           - k_p * deviation[1],
+                                           - k_p * deviation[2]};
+
+  mavsdk_wrapper_->sendAccelerationMessage(acceleration_msg);
+  return true;
+}

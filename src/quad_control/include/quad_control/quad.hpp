@@ -109,4 +109,6 @@ private:
   void abortHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle, 
                     const int return_code, 
                     bool cancel = false);
+  bool doHoverAccStep(const std::array<float, 3> &initial_position,
+                      const std::array<float, 3> &pos_threshold_m);
 };
