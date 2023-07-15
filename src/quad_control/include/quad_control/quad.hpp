@@ -99,7 +99,7 @@ private:
   void abortGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle, 
                     const int return_code, 
                     bool cancel = false);
-  // hover with acceleration control
+  // hover (acc)
   rclcpp_action::GoalResponse handleHoverAccGoal(const rclcpp_action::GoalUUID & uuid,
                                                 std::shared_ptr<const HoverAcc::Goal> goal);
   rclcpp_action::CancelResponse handleHoverAccCancel(
