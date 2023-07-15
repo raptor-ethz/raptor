@@ -36,10 +36,12 @@ void Quad::handleHoverAccAccepted(const std::shared_ptr<HoverAccGoalHandle> goal
 
 void Quad::executeHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle)
 {
+  // prepare action variables
   const auto goal = goal_handle->get_goal();
   // auto feedback = std::make_shared<HoverAcc::Feedback>(); no feedback
   auto result = std::make_shared<HoverAcc::Result>();
 
+  // information
   RCLCPP_INFO(this->get_logger(), "Executing hover (acc) for %ds with threshold [%f, %f, %f].",
     goal->time_s,
     goal->pos_threshold_m[0], goal->pos_threshold_m[1], goal->pos_threshold_m[2]);
@@ -49,47 +51,29 @@ void Quad::executeHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle
   RCLCPP_INFO(this->get_logger(), "Initial position: [%f, %f, %f]",
     initial_position[0], initial_position[1], initial_position[2]);
 
+  // timing parameters
   int rate = 50;
   rclcpp::Rate loop_rate(rate);
   int max_iterations = goal->time_s * rate;
 
   std::array<float, 3> acceleration_msg = {0.f, 0.f, 0.f};
 
-
+  // control loop
   for (int i = 0; i < max_iterations; ++i) {
     if (!rclcpp::ok()) {return;} // check ROS shutdwon
-
     if (goal_handle->is_canceling()) { // check cancellation
       abortHoverAcc(goal_handle, 30, true);
       return;
     }
 
-    // get current position
-    std::array<float, 3> current_position = telemetry_->getPosition();
-
-    // check safety margins
-    float deviation_x = current_position[0] - initial_position[0];
-    float deviation_y = current_position[1] - initial_position[1];
-    float deviation_z = current_position[2] - initial_position[2];    
-    if (std::abs(deviation_x) > goal->pos_threshold_m[0] ||
-        std::abs(deviation_y) > goal->pos_threshold_m[1] ||
-        std::abs(deviation_z) > goal->pos_threshold_m[2]) {
-      RCLCPP_INFO(this->get_logger(), "Out of bounds [%f, %f, %f].",
-        current_position[0], current_position[1], current_position[2]);
+    // do control step
+    if (!doHoverAccStep(initial_position, goal->pos_threshold_m)) {
       abortHoverAcc(goal_handle, 100, false);
       return;
     }
 
-    // P control
-    float k_p = 2.f;
-    acceleration_msg[0] = - k_p * deviation_x;
-    acceleration_msg[1] = - k_p * deviation_y;
-    acceleration_msg[2] = - k_p * deviation_z;
-
-    mavsdk_wrapper_->sendAccelerationMessage(acceleration_msg);
     loop_rate.sleep();
   }
-
 
   // success
   result->return_code = 0;
