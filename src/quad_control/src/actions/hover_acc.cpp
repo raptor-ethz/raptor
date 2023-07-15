@@ -56,8 +56,6 @@ void Quad::executeHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle
   rclcpp::Rate loop_rate(rate);
   int max_iterations = goal->time_s * rate;
 
-  std::array<float, 3> acceleration_msg = {0.f, 0.f, 0.f};
-
   // control loop
   for (int i = 0; i < max_iterations; ++i) {
     if (!rclcpp::ok()) {return;} // check ROS shutdwon
@@ -115,7 +113,7 @@ bool Quad::doHoverAccStep(const std::array<float, 3> &initial_position,
   // check safety margins
   std::array<float, 3> deviation = {current_position[0] - initial_position[0],
                                     current_position[1] - initial_position[1],
-                                    current_position[2] - initial_position[2]}
+                                    current_position[2] - initial_position[2]};
   if (std::abs(deviation[0]) > pos_threshold_m[0] ||
       std::abs(deviation[1]) > pos_threshold_m[1] ||
       std::abs(deviation[2]) > pos_threshold_m[2]) {
