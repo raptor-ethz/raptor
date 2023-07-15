@@ -15,6 +15,7 @@
 #include "raptor_interface/srv/set_gripper.hpp"
 #include "raptor_interface/action/takeoff.hpp"
 #include "raptor_interface/action/go_to_pos.hpp"
+#include "raptor_interface/action/hover_acc.hpp"
 
 
 
@@ -29,6 +30,8 @@ public:
   using TakeoffGoalHandle = rclcpp_action::ClientGoalHandle<Takeoff>;
   using GoToPos = raptor_interface::action::GoToPos;
   using GoToPosGoalHandle = rclcpp_action::ClientGoalHandle<GoToPos>;
+  using HoverAcc = raptor_interface::action::HoverAcc;
+  using HoverAccGoalHandle = rclcpp_action::ServerGoalHandle<HoverAcc>;
 
   MissionControl();
   ~MissionControl() {};
@@ -40,6 +43,7 @@ public:
   bool land();
   bool go_to_pos(const std::array<float, 3> &pos, const float yaw, const float timeout_s, const bool wait = false);
   bool go_to_object(const std::array<float, 3> &offset, const float yaw, const float timeout_s, const bool wait = false);
+  bool hover_acc(const std::array<float, 3> &threshold_m, int time_s);
 
   // helper functions
   void shutdown();
@@ -56,6 +60,7 @@ private:
   rclcpp::Client<SetGripper>::SharedPtr srv_set_gripper_;
   rclcpp_action::Client<Takeoff>::SharedPtr act_takeoff_;
   rclcpp_action::Client<GoToPos>::SharedPtr act_goToPos_;
+  rclcpp_action::Client<HoverAcc>::SharedPtr act_hoverAcc_;
 
   // subscriptions
   void objectPoseCallback(const Pose::SharedPtr msg);

@@ -106,6 +106,23 @@ ament_target_dependencies(gripper_test
   rclcpp_action
   raptor_interface)
 
+# acceleration_test
+add_executable(acceleration_test src/missions/acceleration_test.cpp)
+target_include_directories(acceleration_test PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(acceleration_test PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp
+  src/actions/hover_acc.cpp)
+ament_target_dependencies(acceleration_test 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
 # dev_publisher
 add_executable(dev_publisher src/missions/dev_publisher.cpp)
 target_include_directories(dev_publisher PUBLIC 
@@ -124,6 +141,7 @@ install(TARGETS
   swoop
   grasp
   gripper_test
+  acceleration_test
   dev_publisher
   DESTINATION lib/${PROJECT_NAME})
 

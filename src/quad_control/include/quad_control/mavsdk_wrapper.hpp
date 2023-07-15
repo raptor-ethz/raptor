@@ -55,6 +55,8 @@ public:
 
   int sendPositionMessage (const std::array<float,3> &position, const float yaw = 0) const;
 
+  int sendAccelerationMessage (const std::array<float,3> &acceleration) const;
+
   bool isArmable() const;
 
   bool isLocalPositionOk() const;

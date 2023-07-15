@@ -64,6 +64,18 @@ int MavsdkWrapper::sendPositionMessage (const std::array<float,3> &position, con
   return int(offboard_->set_position_ned(pos_msg)); // TODO is this thread safe?
 }
 
+int MavsdkWrapper::sendAccelerationMessage (const std::array<float,3> &acceleration) const
+{
+  mavsdk::Offboard::AccelerationNed acc_msg{};
+
+  // transform from north-west-up to PX4's north-east-down frame
+  acc_msg.north_m_s2 = acceleration[0];
+  acc_msg.east_m_s2 = -acceleration[1];
+  acc_msg.down_m_s2 = -acceleration[2];
+
+  return int(offboard_->set_acceleration_ned(acc_msg));
+}
+
 
 bool MavsdkWrapper::isArmable() const
 {

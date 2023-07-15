@@ -19,6 +19,7 @@
 #include "raptor_interface/msg/velocity.hpp"
 #include "raptor_interface/action/takeoff.hpp"
 #include "raptor_interface/action/go_to_pos.hpp"
+#include "raptor_interface/action/hover_acc.hpp"
 
 // mavsdk
 #include <mavsdk/mavsdk.h>
@@ -40,6 +41,8 @@ public:
   using TakeoffGoalHandle = rclcpp_action::ServerGoalHandle<Takeoff>;
   using GoToPos = raptor_interface::action::GoToPos;
   using GoToPosGoalHandle = rclcpp_action::ServerGoalHandle<GoToPos>;
+  using HoverAcc = raptor_interface::action::HoverAcc;
+  using HoverAccGoalHandle = rclcpp_action::ServerGoalHandle<HoverAcc>;
 
   Quad(const std::string &port);
   ~Quad() {}; // TODO should we explicitly reset the shared pointers here?
@@ -56,6 +59,7 @@ private:
   rclcpp::Service<Trigger>::SharedPtr srv_land_;
   rclcpp_action::Server<Takeoff>::SharedPtr act_takeoff_;
   rclcpp_action::Server<GoToPos>::SharedPtr act_goToPos_;
+  rclcpp_action::Server<HoverAcc>::SharedPtr act_hoverAcc_;
 
   // interface clients
   rclcpp::Subscription<Pose>::SharedPtr sub_pose_;
@@ -95,4 +99,16 @@ private:
   void abortGoToPos(const std::shared_ptr<GoToPosGoalHandle> goal_handle, 
                     const int return_code, 
                     bool cancel = false);
+  // hover (acc)
+  rclcpp_action::GoalResponse handleHoverAccGoal(const rclcpp_action::GoalUUID & uuid,
+                                                std::shared_ptr<const HoverAcc::Goal> goal);
+  rclcpp_action::CancelResponse handleHoverAccCancel(
+    const std::shared_ptr<HoverAccGoalHandle> goal_handle);
+  void handleHoverAccAccepted(const std::shared_ptr<HoverAccGoalHandle> goal_handle);
+  void executeHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle);
+  void abortHoverAcc(const std::shared_ptr<HoverAccGoalHandle> goal_handle, 
+                    const int return_code, 
+                    bool cancel = false);
+  bool doHoverAccStep(const std::array<float, 3> &initial_position,
+                      const std::array<float, 3> &pos_threshold_m);
 };

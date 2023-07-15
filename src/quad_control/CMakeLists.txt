@@ -35,6 +35,7 @@ target_sources(quad_control PUBLIC
   src/quad/quad.cpp
   src/actions/takeoff.cpp
   src/actions/goToPos.cpp
+  src/actions/hover_acc.cpp
   src/wrappers/mavsdk_wrapper.cpp)
 ament_target_dependencies(quad_control 
   rclcpp 

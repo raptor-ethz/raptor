@@ -3,6 +3,7 @@
 
 const std::string ACT_LABEL_TAKEOFF = "takeoff";
 const std::string ACT_LABEL_GOTOPOS = "go_to_pos";
+const std::string ACT_LABEL_HOVERACC = "hover_acc";
 
 
 
@@ -39,6 +40,13 @@ MissionControl::MissionControl() : Node("mission_control")
     this->get_node_waitables_interface(),
     ACT_LABEL_GOTOPOS);
 
+  act_hoverAcc_ = rclcpp_action::create_client<HoverAcc>(
+    this->get_node_base_interface(),
+    this->get_node_graph_interface(),
+    this->get_node_logging_interface(),
+    this->get_node_waitables_interface(),
+    ACT_LABEL_HOVERACC);
+
 
 
   // check if servers are available
@@ -60,6 +68,11 @@ MissionControl::MissionControl() : Node("mission_control")
   }
   if(!act_goToPos_->wait_for_action_server(std::chrono::seconds(3))) {
     RCLCPP_ERROR(this->get_logger(), "GoToPos action server not available");
+    rclcpp::shutdown();
+    return;
+  }
+  if(!act_hoverAcc_->wait_for_action_server(std::chrono::seconds(3))) {
+    RCLCPP_ERROR(this->get_logger(), "Hover (acc) action server not available");
     rclcpp::shutdown();
     return;
   }
