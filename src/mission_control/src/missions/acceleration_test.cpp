@@ -33,9 +33,6 @@ int main(int argc, char *argv[])
   std::array<float, 3> threshold = {0.3, 0.3, 0.3};
   mission_control_node->hover_acc(threshold, 5);
 
-  // wait a bit
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-
   // land
   if(!mission_control_node->go_to_pos(home_position, 0.0, 4.0, true)) {mission_control_node->shutdown();}
   if(!mission_control_node->go_to_pos(home_position_low, 0.0, 2.0, true)) {mission_control_node->shutdown();}
