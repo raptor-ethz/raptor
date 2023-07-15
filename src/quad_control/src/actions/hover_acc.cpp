@@ -123,11 +123,14 @@ bool Quad::doHoverAccStep(const std::array<float, 3> &initial_position,
     return false;
   }
 
-  // P control
+  // P control TODO tune
   float k_p = 2.f;
-  std::array<float, 3> acceleration_msg = {- k_p * deviation[0],
-                                           - k_p * deviation[1],
-                                           - k_p * deviation[2]};
+  float k_d = 0.5f;
+
+  std::array<float, 3> acceleration_msg = 
+      {- k_p * deviation[0] - k_d * telemetry_->getVelocity()[0],
+        - k_p * deviation[1] - k_d * telemetry_->getVelocity()[1],
+        - k_p * deviation[2] - k_d * telemetry_->getVelocity()[2]};
 
   mavsdk_wrapper_->sendAccelerationMessage(acceleration_msg);
   return true;
