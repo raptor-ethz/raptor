@@ -63,15 +63,15 @@ Quad::Quad(const std::string &port) : Node("quad_control") {
     std::bind(&Quad::handleGoToPosGoal, this, _1, _2),
     std::bind(&Quad::handleGoToPosCancel, this, _1),
     std::bind(&Quad::handleGoToPosAccepted, this, _1));
-  act_accTest_ = rclcpp_action::create_server<AccTest>(
+  act_hoverAcc_ = rclcpp_action::create_server<HoverAcc>(
     this->get_node_base_interface(),
     this->get_node_clock_interface(),
     this->get_node_logging_interface(),
     this->get_node_waitables_interface(),
-    "acc_test",
-    std::bind(&Quad::handleAccTestGoal, this, _1, _2),
-    std::bind(&Quad::handleAccTestCancel, this, _1),
-    std::bind(&Quad::handleAccTestAccepted, this, _1));
+    "hover_acc",
+    std::bind(&Quad::handleHoverAccGoal, this, _1, _2),
+    std::bind(&Quad::handleHoverAccCancel, this, _1),
+    std::bind(&Quad::handleHoverAccAccepted, this, _1));
 
 
 

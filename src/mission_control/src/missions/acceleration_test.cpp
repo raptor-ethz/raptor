@@ -29,11 +29,9 @@ int main(int argc, char *argv[])
   // sleep for 5s
   std::this_thread::sleep_for(std::chrono::seconds(5));
 
-  // let quad hover with acceleration commands
-  std::array<float, 3> acc = {3.0, 0.0, 0.0};
-  std::array<float, 3> threshold_front = {3.0, 0.3, 0.3};
-  std::array<float, 3> threshold_back = {0.3, 0.3, 0.3};
-  mission_control_node->acc_test(acc, threshold_front, threshold_back);
+  // let quad hover at current position for 10s
+  std::array<float, 3> threshold = {0.3, 0.3, 0.3};
+  mission_control_node->hover_acc(threshold, 5);
 
   // wait a bit
   std::this_thread::sleep_for(std::chrono::seconds(5));

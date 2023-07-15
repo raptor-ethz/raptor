@@ -42,6 +42,7 @@ Services
 Actions
 - `takeoff`
 - `go_to_pos`
+- `hover_acc`
 
 # Conventions
 

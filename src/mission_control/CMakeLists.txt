@@ -116,7 +116,7 @@ target_sources(acceleration_test PUBLIC
   src/actions/land.cpp
   src/actions/takeoff.cpp
   src/actions/go_to_pos.cpp
-  src/actions/acc_test.cpp)
+  src/actions/hover_acc.cpp)
 ament_target_dependencies(acceleration_test 
   rclcpp 
   rclcpp_action
