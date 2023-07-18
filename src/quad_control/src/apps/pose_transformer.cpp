@@ -1,5 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/bool.hpp"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2/LinearMath/Matrix3x3.h"
+#include "geometry_msgs/msg/pose.hpp"
 #include "raptor_interface/msg/pose.hpp"
 
 
@@ -8,10 +10,10 @@ class PoseTransformer : public rclcpp::Node
 public:
   PoseTransformer() : Node("pose_transformer_node")
   {
-    // create subscirber to geometry_msgs::msg::Pose 
+    // create subscirber to std_msgs::msg::Pose 
     sub_ = this->create_subscription<geometry_msgs::msg::Pose>("/slam/odometry", 10, std::bind(&PoseTransformer::poseCallback, this, std::placeholders::_1));
     // create publisher
-    pub_ = this->create_publisher<std_msgs::msg::Bool>("slam_pose_nwu", 10);
+    pub_ = this->create_publisher<raptor_interface::msg::Pose>("slam_pose_nwu", 10);
   }
 
 private:
@@ -28,7 +30,7 @@ private:
       received_msg->orientation.y,
       received_msg->orientation.z,
       received_msg->orientation.w);
-    tf2::Matrix3x3 m(q);
+    tf2::Matrix3x3 m(q); 
 
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
@@ -41,7 +43,8 @@ private:
     pub_->publish(outgoing_msg);
   }
 
-  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_;
+  rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr sub_;
+  rclcpp::Publisher<raptor_interface::msg::Pose>::SharedPtr pub_;
   rclcpp::TimerBase::SharedPtr timer_;
 };
 

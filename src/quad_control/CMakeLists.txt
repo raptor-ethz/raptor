@@ -7,6 +7,8 @@ project(quad_control)
 # ros default
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 # ros custom
 find_package(raptor_interface REQUIRED)
@@ -43,10 +45,23 @@ ament_target_dependencies(quad_control
   raptor_interface)
 target_link_libraries(quad_control MAVSDK::mavsdk)
 
+# pose transformer
+add_executable(pose_transformer src/apps/pose_transformer.cpp)
+target_include_directories(pose_transformer PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(pose_transformer PUBLIC)
+ament_target_dependencies(pose_transformer
+  rclcpp
+  tf2
+  geometry_msgs
+  raptor_interface)
+
 
 # INSTALLATION
 install(TARGETS
   quad_control
+  pose_transformer
   DESTINATION lib/${PROJECT_NAME})
 
 
