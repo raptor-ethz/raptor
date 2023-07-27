@@ -41,10 +41,10 @@ SHOW_WINDOW_VIS = True
 
 # Send output to external target application using ZMQ 
 # If this is enabled and the target application isn't connected, this application won't work
-SEND_OUTPUT = True
+SEND_OUTPUT = False
 
 # Use a naive localization method for the object centroid, just picking the center of the pointcloud
-SIMPLE_LOC = False
+SIMPLE_LOC = True
 
 # Filtering of the grasp that is sent to the external target application
 SEND_RAW = False
@@ -56,71 +56,6 @@ RECORD_PCD_DATA = False
 
 # Target object the system will publish coordinates for
 TARGET_OBJECT = 'book'
-
-# The cam object holds the intrinsics of the Intel RealSense D455 camera, adapt if needed
-cam = utils.RSCameraMockup()
-
-# The grasp object stores the point cloud of the object and implements grasp planning
-grasp = GraspCandidate()
-
-# The receiver for the image frames sent over the local network
-receiver = VideoReceiver()
-
-
-# VideoWriter outputs to store the analyzed frames at different points in time
-output = cv2.VideoWriter(utils.VIDEO_FILE, cv2.VideoWriter_fourcc(
-            'M', 'J', 'P', 'G'), 10, (cam.width, cam.height))
-
-output_depth = cv2.VideoWriter(utils.VIDEO_DEPTH_FILE, cv2.VideoWriter_fourcc(
-    'M', 'J', 'P', 'G'), 10, (cam.width, cam.height))
-
-output_raw = cv2.VideoWriter(utils.VIDEO_RAW_FILE, cv2.VideoWriter_fourcc(
-    'M', 'J', 'P', 'G'), 10, (cam.width, cam.height))
-
-output_grasp = cv2.VideoWriter(utils.VIDEO_GRASP_FILE, cv2.VideoWriter_fourcc(
-    'M', 'J', 'P', 'G'), 10, (cam.width, cam.height))
-
-
-# Setup for a custom logger
-logger = Logger()
-records = np.empty((0, logger.cols))
-time_logger = Logger()
-
-# Holds transit times of frames for debugging
-times = []
-
-
-# detectron2 setup - change as needed
-cfg = get_cfg()
-cfg.merge_from_file(model_zoo.get_config_file('COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml'))
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
-cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url('COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml')
-predictor = DefaultPredictor(cfg)
-metadata = MetadataCatalog.get(cfg.DATASETS.TRAIN[0])
-v = VideoVisualizer(metadata)
-
-# This line is particularly important to get the class labels
-class_catalog = metadata.thing_classes
-
-# Initialize the ZMQ socket for connecting to an external target application
-# context = zmq.Context()
-# socket = context.socket(zmq.REP)
-
-# if SEND_OUTPUT:
-#     socket.connect('tcp://localhost:2222')
-
-
-starting_time = time.time()
-frame_counter = 0
-
-# Counts frames in which the target object was found
-success_frame_counter = 0
-elapsed_time = 0
-
-# serial_msg is the message that will be sent to the external target application
-# quad_pose is the pose we will receive from the external target application to perform frame transformations
-serial_msg = None
-quad_pose = None
 
 class DetectionNode(Node):
     def __init__(self):
@@ -134,40 +69,103 @@ class DetectionNode(Node):
             self,
             Image,
             'depth_images')
-        self.publisher = self.create_publisher(Detection, 'detection')
+        self.publisher = self.create_publisher(Detection, 'detection', 10)
+        # The receiver for the image frames sent over the local network
+        # self.receiver = VideoReceiver()
+        self.cam = utils.RSCameraMockup()
+
+        self.output = cv2.VideoWriter(utils.VIDEO_FILE, cv2.VideoWriter_fourcc(
+                'M', 'J', 'P', 'G'), 10, (self.cam.width, self.cam.height))
+
+        self.output_depth = cv2.VideoWriter(utils.VIDEO_DEPTH_FILE, cv2.VideoWriter_fourcc(
+            'M', 'J', 'P', 'G'), 10, (self.cam.width, self.cam.height))
+
+        self.output_raw = cv2.VideoWriter(utils.VIDEO_RAW_FILE, cv2.VideoWriter_fourcc(
+            'M', 'J', 'P', 'G'), 10, (self.cam.width, self.cam.height))
+
+        self.output_grasp = cv2.VideoWriter(utils.VIDEO_GRASP_FILE, cv2.VideoWriter_fourcc(
+            'M', 'J', 'P', 'G'), 10, (self.cam.width, self.cam.height))
+
+
+        # detectron2 setup - change as needed
+        cfg = get_cfg()
+        cfg.merge_from_file(model_zoo.get_config_file('COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml'))
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+        cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url('COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml')
+        self.predictor = DefaultPredictor(cfg)
+
+        self.bridge = CvBridge()
+
+        metadata = MetadataCatalog.get(cfg.DATASETS.TRAIN[0])
+        self.v = VideoVisualizer(metadata)
+
+        # Setup for a custom logger
+        self.logger = Logger()
+        self.records = np.empty((0, self.logger.cols))
+        self.time_logger = Logger()
+
+        # Holds transit times of frames for debugging
+        self.times = []
+
+        # Initialize the ZMQ socket for connecting to an external target application
+        # context = zmq.Context()
+        # socket = context.socket(zmq.REP)
+
+        # if SEND_OUTPUT:
+        #     socket.connect('tcp://localhost:2222')
+        self.grasp = GraspCandidate()
+
+        self.starting_time = time.time()
+        self.frame_counter = 0
+
+        # Counts frames in which the target object was found
+        self.success_frame_counter = 0
+        self.elapsed_time = 0
+
+        # serial_msg is the message that will be sent to the external target application
+        # quad_pose is the pose we will receive from the external target application to perform frame transformations
+        self.serial_msg = None
+        self.quad_pose = None
+
+        # This line is particularly important to get the class labels
+        self.class_catalog = metadata.thing_classes
 
         ts = ApproximateTimeSynchronizer([self.color_sub, self.depth_sub], queue_size=10, slop=0.1, allow_headerless=True)
         ts.registerCallback(self.callback)
 
     def callback(self, frame, depth_frame):
         # Receive the frames from the ARM computer
-        frame, depth_frame = receiver.recv_frames()
+        # frame, depth_frame = self.receiver.recv_frames()
+        serial_msg = None
   
-        cam_intrinsics = cam.intrinsics
+        cam_intrinsics = self.cam.intrinsics
+
+        frame = self.bridge.imgmsg_to_cv2(frame, desired_encoding='passthrough').astype(np.uint8)
+        depth_frame = self.bridge.imgmsg_to_cv2(depth_frame, desired_encoding='passthrough').astype(np.uint8)
 
         # Write the RGB frame to the output without annotations        
-        output_raw.write(frame)
+        self.output_raw.write(frame)
 
         # Get detectron2 output
-        outputs = predictor(frame)
+        outputs = self.predictor(frame)
         detected_class_idxs = outputs['instances'].pred_classes
         pred_boxes = outputs['instances'].pred_boxes
         
         # Show visualization if enabled
         if SHOW_WINDOW_VIS:
-            out = v.draw_instance_predictions(frame, outputs['instances'].to('cpu'))
+            out = self.v.draw_instance_predictions(frame, outputs['instances'].to('cpu'))
             vis_frame = np.asarray(out.get_image())
 
         # This holds the masks generated by detectron2
         mask_array = outputs['instances'].pred_masks.to('cpu').numpy()
         mask_array = np.moveaxis(mask_array, 0, -1)
-        num_instances = mask_array.shape[0]
+        num_instances = mask_array.shape[-1]
         mask_array_instance = []
         
         # Loop over instances that have been detected
         for i in range(num_instances):
             class_idx = detected_class_idxs[i]
-            class_name = class_catalog[class_idx]
+            class_name = self.class_catalog[class_idx]
             
             # Get bounding box if needed
             bbox = pred_boxes[i].to('cpu')
@@ -185,10 +183,10 @@ class DetectionNode(Node):
                 center_x = (xmax - xmin)//2 + xmin
                 center_y = (ymax - ymin)//2 + ymin
 
-                if center_y < cam.height and center_x < cam.width:
+                if center_y < self.cam.height and center_x < self.cam.width:
                             depth = depth_frame[center_y,
                                 center_x].astype(float)
-                            distance = depth * cam.depth_scale
+                            distance = depth * self.cam.depth_scale
                 else:
                     # No valid distance found
                     distance = 0.0
@@ -196,7 +194,7 @@ class DetectionNode(Node):
 
 
                 # Get translation vector relative to the camera frame
-                tvec = cam.deproject(cam_intrinsics, center_x, center_y, distance)
+                tvec = self.cam.deproject(cam_intrinsics, center_x, center_y, distance)
                 easy_center = tvec
                 
                 # Realsense y-axis points down by default
@@ -223,10 +221,10 @@ class DetectionNode(Node):
 
                     # Holds the translation from the drone frame to the global frame
                     translation = [
-                        quad_pose.x, quad_pose.y, quad_pose.z]
+                        self.quad_pose.x, self.quad_pose.y, self.quad_pose.z]
                     # Holds the rotation from the drone frame to the global frame
                     rotation = [
-                        quad_pose.roll, -quad_pose.pitch, quad_pose.yaw]
+                        self.quad_pose.roll, -self.quad_pose.pitch, self.quad_pose.yaw]
 
                     # Align axes accordingly to motion capture system
                     # Turn into 4-vector for homogenous coordinates
@@ -269,18 +267,18 @@ class DetectionNode(Node):
                 grasp_points = None
                 try:
                     # Create point cloud 
-                    grasp.set_point_cloud_from_aligned_masked_frames(masked_frame, depth_frame, cam_intrinsics)
-                    centroid = grasp.find_centroid()
-                    axis_ext, _, _ = grasp.find_largest_axis()
+                    self.grasp.set_point_cloud_from_aligned_masked_frames(masked_frame, depth_frame, cam_intrinsics)
+                    centroid = self.grasp.find_centroid()
+                    axis_ext, _, _ = self.grasp.find_largest_axis()
                     # Get longest axis
                     axis = axis_ext[0]
                     # Rotate copy of point cloud around longest axis
-                    pcd = grasp.rotate_pcd_around_axis(grasp.pointcloud, centroid, math.pi, axis)
-                    grasp.pointcloud += pcd
-                    grasp.save_pcd(f'pcd/pointcloud_{TARGET_OBJECT}_{utils.RECORD_COUNTER}.pcd')
-                    
+                    pcd = self.grasp.rotate_pcd_around_axis(self.grasp.pointcloud, centroid, math.pi, axis)
+                    self.grasp.pointcloud += pcd
+                    self.grasp.save_pcd(f'pcd/pointcloud_{TARGET_OBJECT}_{utils.RECORD_COUNTER}.pcd')
+                
                     # Find grasping points
-                    grasp_points = grasp.find_grasping_points()
+                    grasp_points = self.grasp.find_grasping_points()
                     
                 except Exception as e:
                     # Sometimes, qhull fails and throws an error and we don't want the program to crash
@@ -291,8 +289,8 @@ class DetectionNode(Node):
                 # Yaw computation needs to be adapted to current way of grasping along the flight axis
                 if grasp_points is not None:
                     # Get points in pixels (project back into image from 3D point)
-                    p1 = np.asanyarray(cam.project(cam_intrinsics, grasp_points[0]))
-                    p2 = np.asanyarray(cam.project(cam_intrinsics, grasp_points[1]))
+                    p1 = np.asanyarray(self.cam.project(cam_intrinsics, grasp_points[0]))
+                    p2 = np.asanyarray(self.cam.project(cam_intrinsics, grasp_points[1]))
 
                     img = cv2.circle(frame, (int(p1[0]), int(p1[1])), 3, (0,255,0))
                     img = cv2.circle(frame, (int(p2[0]), int(p2[1])), 3, (0,255,0))
@@ -312,9 +310,9 @@ class DetectionNode(Node):
                     cam_2_drone_orientation = [0, -30, 0]
 
                     translation = [
-                        quad_pose.x, quad_pose.y, quad_pose.z]
+                        self.quad_pose.x, self.quad_pose.y, self.quad_pose.z]
                     rotation = [
-                        quad_pose.roll, -quad_pose.pitch, quad_pose.yaw]
+                        self.quad_pose.roll, -self.quad_pose.pitch, self.quad_pose.yaw]
 
                     # Align to motion capture frame axis assignment from camera frame 
                     tvec = [tvec[2], tvec[0], tvec[1], 1]
@@ -326,20 +324,20 @@ class DetectionNode(Node):
                         rotation, translation, tvec, degrees=False)
                                     
                 # Log output location and other metadata
-                logger.record_value([np.array(
-                        [tvec[0], tvec[1], tvec[2], elapsed_time, 0, class_name, quad_pose.x, quad_pose.y, quad_pose.z, quad_pose.roll, quad_pose.pitch, quad_pose.yaw]), ])
+                # self.logger.record_value([np.array(
+                #         [tvec[0], tvec[1], tvec[2], self.elapsed_time, 0, class_name, self.quad_pose.x, self.quad_pose.y, self.quad_pose.z, self.quad_pose.roll, self.quad_pose.pitch, self.quad_pose.yaw]), ])
                 print(f'logged {tvec}')
-                success_frame_counter += 1
+                self.success_frame_counter += 1
 
 
                 # Different output filtering
 
                 # Send mean of records
-                length = len(logger.records[:,0].astype(float))
+                length = len(self.logger.records[:,0].astype(float))
                 if SEND_MEAN and length > 9:
-                    x_mean = np.mean(logger.records[:, 0].astype(float))
-                    y_mean = np.mean(logger.records[:, 1].astype(float))
-                    z_mean = np.mean(logger.records[:, 2].astype(float))
+                    x_mean = np.mean(self.logger.records[:, 0].astype(float))
+                    y_mean = np.mean(self.logger.records[:, 1].astype(float))
+                    z_mean = np.mean(self.logger.records[:, 2].astype(float))
                     msg.x = x_mean
                     msg.y = y_mean
                     msg.z = z_mean
@@ -348,9 +346,9 @@ class DetectionNode(Node):
                 # Send rolling average of last 10 records
                 if SEND_ROLLING_AVG and length > 9:
                     num_records = 10 if length > 9 else length
-                    x_avg = np.average(logger.records[-num_records:, 0].astype(float))
-                    y_avg = np.average(logger.records[-num_records:, 1].astype(float))
-                    z_avg = np.average(logger.records[-num_records:, 2].astype(float))
+                    x_avg = np.average(self.logger.records[-num_records:, 0].astype(float))
+                    y_avg = np.average(self.logger.records[-num_records:, 1].astype(float))
+                    z_avg = np.average(self.logger.records[-num_records:, 2].astype(float))
                     msg.x = x_avg
                     msg.y = y_avg
                     msg.z = z_avg
@@ -363,23 +361,25 @@ class DetectionNode(Node):
                     pass
 
                 # Create rest of message and serialize
-                msg.yaw = yaw
+                print(yaw)
+                msg.yaw = float(yaw)
                 msg.label = class_name
-                msg.confidence = 0
+                msg.confidence = 0.
                 # serial_msg = msg.SerializeToString()
                 
         # Time it took to analyse one frame 
-        elapsed_time = time.time() - starting_time
+        # elapsed_time = time.time() - starting_time
 
         # Show output frame
         if SHOW_WINDOW_VIS:
-            output.write(vis_frame)
+            self.output.write(vis_frame)
             cv2.imshow('output', vis_frame)
         
         # Send output, if the target object wasn't detected, send default message
         if SEND_OUTPUT:
             if serial_msg is not None:
-                self.publisher.publish(serial_msg)
+                self.publisher.publish(msg)
+                # pass
 
             else:
                 msg = Detection()
@@ -389,12 +389,12 @@ class DetectionNode(Node):
                 msg.label = 'Nothing'
                 msg.confidence = 0.0
                 # serial_msg = msg.SerializeToString()
-                self.publisher.publish(serial_msg)
+                self.publisher.publish(msg)
         
 
-        print(f'ELAPSED TIME (ms): {elapsed_time * 1000}')
-        times.append(elapsed_time)
-        frame_counter += 1
+        # print(f'ELAPSED TIME (ms): {elapsed_time * 1000}')
+        # times.append(elapsed_time)
+        self.frame_counter += 1
 
     def close(self):
         # Ctrl + C was pressed and we want to close gracefully
@@ -418,11 +418,11 @@ class DetectionNode(Node):
         # Close network connections and release video writers
         # Save logs
         receiver.close()
-        output.release()
-        output_depth.release()
-        output_raw.release()
-        output_grasp.release()
-        cam.release()
+        self.output.release()
+        self.output_depth.release()
+        self.output_raw.release()
+        self.output_grasp.release()
+        self.cam.release()
         receiver.image_hub.close()
         cv2.destroyAllWindows()
         print(f'saving file to {utils.LOG_FILE}')
@@ -722,10 +722,21 @@ class DetectionNode(Node):
 #         output_raw.release()
 #         output_grasp.release()
 #         cam.release()
-#         socket.close()
-#         receiver.image_hub.close()
-#         cv2.destroyAllWindows()
-#         print(f'saving file to {utils.LOG_FILE}')
-#         logger.export_to_csv(utils.LOG_FILE)
-#         break
+#         socket.close() # Setup for a custom logger
+def main(args=None):
+    rclpy.init(args=args)
 
+    # The grasp object stores the point cloud of the object and implements grasp planning
+
+    # rclpy.init()
+
+
+    # VideoWriter outputs to store the analyzed frames at different points in time
+
+    node = DetectionNode()
+    rclpy.spin(node)
+    node.close()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()

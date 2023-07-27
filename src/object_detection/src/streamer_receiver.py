@@ -94,8 +94,9 @@ class VideoReceiver(Node):
 
         print("Color image received")
 
-        delay = (self.get_clock().now().nanoseconds() - msg.header.stamp.nanoseconds()) / 1e9
-        print(f'Color image arrived with delay of {delay}')
+        # delay = (self.get_clock().now().nanoseconds() - msg.header.stamp.nanosec) / 1e9
+        # print(msg.header)
+        # print(f'Color image arrived with delay of {delay}')
 
     def depth_callback(self, msg):
         # Convert the ROS Image message to a CV Image
@@ -103,13 +104,13 @@ class VideoReceiver(Node):
 
         print("Depth image received")
 
-        delay = (self.get_clock().now().nanoseconds() - msg.header.stamp.nanoseconds()) / 1e9
-        print(f'Depth image arrived with delay of {delay}')
+        # delay = (self.get_clock().now().nanoseconds() - msg.header.stamp.nanoseconds) / 1e9
+        # print(f'Depth image arrived with delay of {delay}')
 
-    def close(self):
-        self.logger.records = np.asarray(self.delays)
-        self.logger.export_single_col_csv(f'logs/cam_delays_{RECORD_COUNTER}.csv')
-        print('delays exported')
+    # def close(self):
+    #     self.logger.records = np.asarray(self.delays)
+    #     self.logger.export_single_col_csv(f'logs/cam_delays_{RECORD_COUNTER}.csv')
+    #     print('delays exported')
 
 def main(args=None):
     rclpy.init(args=args)
