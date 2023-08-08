@@ -17,6 +17,8 @@
   <!-- ros dependencies -->
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
+  <depend>tf2</depend>
+  <depend>nav_msgs</depend>
   
   <!-- test dependencies -->
   <test_depend>ament_lint_auto</test_depend>

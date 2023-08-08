@@ -7,6 +7,8 @@ project(vicon)
 # ros default
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(nav_msgs REQUIRED)
 # ros custom
 find_package(raptor_interface REQUIRED)
 # external
@@ -54,12 +56,25 @@ ament_target_dependencies(px4_publisher
   raptor_interface)
 target_link_libraries(px4_publisher MAVSDK::mavsdk)
 
+# kimera pose transformer
+add_executable(kimera_pose_transformer src/kimera_pose_transformer.cpp)
+target_include_directories(kimera_pose_transformer PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+# target_sources(kimera_pose_transformer PUBLIC)
+ament_target_dependencies(kimera_pose_transformer
+  rclcpp
+  tf2
+  nav_msgs
+  raptor_interface)
+
 
 # INSTALLATION
 install(TARGETS
   vicon_publisher
   vicon_px4_publisher
   px4_publisher
+  kimera_pose_transformer
   DESTINATION lib/${PROJECT_NAME})
 
 
