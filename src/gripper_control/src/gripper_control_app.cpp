@@ -7,15 +7,16 @@
 /**
  * Print error message when no port is provided as argument. TODO
 */
-// void usage(const std::string &bin_name) {
-//   std::cerr
-//       << "Usage : " << bin_name << " <connection_url>\n"
-//       << "Connection URL format should be :\n"
-//       << " For TCP : tcp://[server_host][:server_port]\n"
-//       << " For UDP : udp://[bind_host][:bind_port]\n"
-//       << " For Serial : serial:///path/to/serial/dev[:baudrate]\n"
-//       << "For example, to connect to the simulator use URL: udp://:14540\n";
-// }
+void usage(const std::string &bin_name) {
+  std::cerr
+      << "ERROR: No serial port provided.\n"
+      << "Usage : " << bin_name << " <connection_url>\n"
+      << "Connection URL format should be :\n"
+      << " For TCP : tcp://[server_host][:server_port]\n"
+      << " For UDP : udp://[bind_host][:bind_port]\n"
+      << " For Serial : serial:///path/to/serial/dev[:baudrate]\n"
+      << "For example, to connect to the simulator use URL: udp://:14540\n";
+}
 
 
 // command line argument: serial port, i.e. /dev/ttyUSB0
@@ -24,9 +25,8 @@ int main(int argc, char *argv[])
   // check command line input
   if (argc < 2)
   {
-    std::cout << "ERROR: no serial port given as input argument" << std::endl;
+    usage(argv[0]);
     return 1;
-    // usage(argv[0]);
   }
 
   // initialize ros
