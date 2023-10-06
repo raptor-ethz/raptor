@@ -12,7 +12,7 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
 
   // serial connection - serial port: /dev/ttyXXXX
   int serialResult = serial_.openDevice(port.c_str(), 115200);
-  if (serialResult == -2) {
+  if (serialResult == -2) { // TODO is this the only failure code?
     RCLCPP_ERROR(this->get_logger(), "Failed to initialize serial connection to %s", port.c_str());
     rclcpp::shutdown();
     return;
@@ -28,7 +28,7 @@ void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
                           std::shared_ptr<SetGripper::Response> response)
 {
   // check if requested values are between 0 and 90
-  if (request->left_angle_deg < 0 || request->left_angle_deg > 90 ||
+  if (request->left_angle_deg < 0 || request->left_angle_deg > 90 || // TODO change to front and back
       request->right_angle_deg < 0 || request->right_angle_deg > 90) {
     RCLCPP_ERROR(this->get_logger(), "Gripper angles must be between 0 and 90 degrees.");
     response->success = 0;
