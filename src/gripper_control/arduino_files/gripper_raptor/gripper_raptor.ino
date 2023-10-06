@@ -3,42 +3,44 @@
 //
 // PORT NUMBERS
 //
-#define SRV_PORT_1 4 // left
-#define SRV_PORT_2 5 // right
+#define SRV_0_PORT 6 // front (left) servo facing +x
+#define SRV_1_PORT 9 // back (right) servo facing -x
 
 // 
 // SERVO PARAMETERS
 //
-#define SRV_1_OPEN 34
-#define SRV_1_CLOSE 111
-#define SRV_1_DIRECTION -1 // from close to open
-#define SRV_1_RANGE 77
+#define SRV_0_OPEN 172 // 172
+#define SRV_0_CLOSE 82 
+const int SRV_0_RANGE = SRV_0_OPEN - SRV_0_CLOSE;
+const float SRV_0_FACTOR = float(SRV_0_RANGE) / 90.0;
 
-#define SRV_2_OPEN 137
-#define SRV_2_CLOSE 60
-#define SRV_2_DIRECTION 1 // from close to open
-#define SRV_2_RANGE 77
+#define SRV_1_OPEN 4 // 5
+#define SRV_1_CLOSE 94
+const int SRV_1_RANGE = SRV_1_OPEN - SRV_1_CLOSE;
+const float SRV_1_FACTOR = float(SRV_1_RANGE) / 90.0;
 
 // Declare Servo Objects
-Servo Servo_1; // left
-Servo Servo_2; // right
+Servo Servo_0; // front (left)
+Servo Servo_1; // back (right)
 
 // buffer for Serial receiving (RX)
 const int RX_BUFFER_SIZE = 2;
 uint8_t rx_buffer[RX_BUFFER_SIZE];
 
-// compute factor for servo angles
-float factor_1 = float(SRV_1_RANGE) / 90.0;
-float factor_2 = float(SRV_2_RANGE) / 90.0;
-
 
 void setup() {
   // initialize Servos
-  Servo_1.attach(SRV_PORT_1);
-  Servo_2.attach(SRV_PORT_2);
+  Servo_0.attach(SRV_0_PORT);
+  Servo_1.attach(SRV_1_PORT);
+
   // initial values
+  Servo_0.write(SRV_0_OPEN);
   Servo_1.write(SRV_1_OPEN);
-  Servo_2.write(SRV_2_OPEN);
+
+  // DEV
+  // Servo_0.write(SRV_0_CLOSE);
+  // Servo_1.write(SRV_1_CLOSE);
+
   // initialize Serial
   Serial.begin(115200);
 }
@@ -58,16 +60,16 @@ void loop() {
     }
 
     // write command to servo
-    Servo_1.write(SRV_1_CLOSE + SRV_1_DIRECTION * factor_1 * float(rx_buffer[0])); // left
-    Servo_2.write(SRV_2_CLOSE + SRV_2_DIRECTION * factor_2 * float(rx_buffer[1])); // right 
+    Servo_0.write(SRV_0_CLOSE + SRV_0_FACTOR * float(rx_buffer[0])); // front (left)
+    Servo_1.write(SRV_1_CLOSE + SRV_0_FACTOR * float(rx_buffer[1])); // back (right)
   }
 
   
   /* SERVO TEST */
+  // Servo_0.write(SRV_0_OPEN);
   // Servo_1.write(SRV_1_OPEN);
-  // Servo_2.write(SRV_2_OPEN);
   // delay(1000);
+  // Servo_0.write(SRV_0_CLOSE);
   // Servo_1.write(SRV_1_CLOSE);
-  // Servo_2.write(SRV_2_CLOSE);
   // delay(1000);
 }
