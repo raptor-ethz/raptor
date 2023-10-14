@@ -10,7 +10,7 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
 
   RCLCPP_INFO(this->get_logger(), "Initializing...");
 
-  // serial connection - serial port: /dev/ttyXXXX
+  // serial connection - serial port: /dev/ttyXXXX TODO make this more clear for the interface
   int serialResult = serial_.openDevice(port.c_str(), 115200);
   if (serialResult == -2) { // TODO is this the only failure code?
     RCLCPP_ERROR(this->get_logger(), "Failed to initialize serial connection to %s", port.c_str());
