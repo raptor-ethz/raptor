@@ -61,7 +61,7 @@ void loop() {
 
     // write command to servo
     Servo_0.write(SRV_0_CLOSE + SRV_0_FACTOR * float(rx_buffer[0])); // front (left)
-    Servo_1.write(SRV_1_CLOSE + SRV_0_FACTOR * float(rx_buffer[1])); // back (right)
+    Servo_1.write(SRV_1_CLOSE + SRV_1_FACTOR * float(rx_buffer[1])); // back (right)
   }
 
   
