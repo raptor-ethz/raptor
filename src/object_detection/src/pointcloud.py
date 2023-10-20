@@ -37,7 +37,9 @@ class GraspCandidate:
 
     def set_point_cloud_from_aligned_masked_frames(self, frame, depth_frame, cam_intrinsics):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        img_depth = o3d.geometry.Image(depth_frame)
+        # print(np.isnan(depth_frame).any())
+        # img_depth = o3d.geometry.Image(depth_frame)
+        # img_depth = o3d.geometry.Image(depth_frame.tobytes(), depth_frame.shape[1], depth_frame.shape[0], 2)
         img_color = o3d.geometry.Image(frame)
         
         rgbd = o3d.geometry.RGBDImage.create_from_color_and_depth(img_color, img_depth, convert_rgb_to_intensity=False)

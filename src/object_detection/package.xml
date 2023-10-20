@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>object_detection</name>
+  <version>0.9.0</version>
+  <description>Trajectory generation and other drone specific commands</description>
+  <maintainer email="raptor@ethz.ch">RAPTOR</maintainer>
+  <license>http://www.apache.org/licenses/LICENSE-2.0</license>
+  <license file="LICENSE">Apache 2.0</license>
+
+  <url type="website">https://raptor.ethz.ch/</url>
+  <url type="repository">https://github.com/raptor-ethz/raptor</url>
+  <url type="bugtracker">https://github.com/raptor-ethz/raptor/issues</url>
+  <author>RAPTOR</author>
+  <author email="raptor@ethz.ch">RAPTOR</author>
+
+  <!-- ros rependencies -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+
+  <!-- test dependencies -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <!-- custom interfaces -->
+  <depend>raptor_interface</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

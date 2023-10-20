@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from detectron2.utils.logger import setup_logger
 
 
@@ -32,7 +33,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-from raptor_interface.msg import Detection
+from raptor_interface.msg import Detection, Pose
 
 # Different runtime options
 
@@ -41,7 +42,7 @@ SHOW_WINDOW_VIS = True
 
 # Send output to external target application using ZMQ 
 # If this is enabled and the target application isn't connected, this application won't work
-SEND_OUTPUT = False
+SEND_OUTPUT = True
 
 # Use a naive localization method for the object centroid, just picking the center of the pointcloud
 SIMPLE_LOC = True
@@ -127,10 +128,16 @@ class DetectionNode(Node):
         self.serial_msg = None
         self.quad_pose = None
 
+        self.quad_sub = Subscriber(
+            self,
+            Pose,
+            'px4_pose_nwu')
+
         # This line is particularly important to get the class labels
         self.class_catalog = metadata.thing_classes
 
         ts = ApproximateTimeSynchronizer([self.color_sub, self.depth_sub], queue_size=10, slop=0.1, allow_headerless=True)
+        # ts = ApproximateTimeSynchronizer([self.color_sub, self.depth_sub, self.quad_sub], queue_size=10, slop=0.1, allow_headerless=True)
         ts.registerCallback(self.callback)
 
     def callback(self, frame, depth_frame):
@@ -140,11 +147,15 @@ class DetectionNode(Node):
   
         cam_intrinsics = self.cam.intrinsics
 
-        frame = self.bridge.imgmsg_to_cv2(frame, desired_encoding='passthrough').astype(np.uint8)
-        depth_frame = self.bridge.imgmsg_to_cv2(depth_frame, desired_encoding='passthrough').astype(np.uint8)
+        frame = self.bridge.imgmsg_to_cv2(frame, desired_encoding='passthrough')
+        depth_frame = self.bridge.imgmsg_to_cv2(depth_frame, desired_encoding='passthrough')
 
         # Write the RGB frame to the output without annotations        
-        self.output_raw.write(frame)
+        # self.output_raw.write(frame)
+        # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # print(frame.shape, depth_frame.shape)
+        # print(depth_frame.dtype)  # Should be np.uint8, np.uint16 or np.float32
 
         # Get detectron2 output
         outputs = self.predictor(frame)
@@ -247,6 +258,7 @@ class DetectionNode(Node):
 
                 # First, apply mask to RGB frame
                 masked_frame = cv2.bitwise_and(frame, obj_mask)
+                print("MASK:",masked_frame.dtype)
                 # cv2.imwrite('masked_frame.png', masked_frame)
                 
                 # Debugging
@@ -294,7 +306,7 @@ class DetectionNode(Node):
 
                     img = cv2.circle(frame, (int(p1[0]), int(p1[1])), 3, (0,255,0))
                     img = cv2.circle(frame, (int(p2[0]), int(p2[1])), 3, (0,255,0))
-                    output_grasp.write(img)
+                    # output_grasp.write(img)
                     delta_x = p1[0] - p2[0]
                     delta_y = np.abs(p1[1] - p2[1])
 
@@ -374,6 +386,7 @@ class DetectionNode(Node):
         if SHOW_WINDOW_VIS:
             self.output.write(vis_frame)
             cv2.imshow('output', vis_frame)
+            cv2.waitKey(1)
         
         # Send output, if the target object wasn't detected, send default message
         if SEND_OUTPUT:
@@ -396,37 +409,37 @@ class DetectionNode(Node):
         # times.append(elapsed_time)
         self.frame_counter += 1
 
-    def close(self):
-        # Ctrl + C was pressed and we want to close gracefully
-        # except KeyboardInterrupt as e:
-        print('Closing handler called')
+    # def close(self):
+    #     # Ctrl + C was pressed and we want to close gracefully
+    #     # except KeyboardInterrupt as e:
+    #     print('Closing handler called')
         
-        # Send message to bridge process to stop running
-        # msg = detection_msg_pb2.Detection()
-        # msg.x = 0.0
-        # msg.y = 0.0
-        # msg.z = 0.0
-        # msg.label = 'closing'
-        # msg.confidence = 0.0
-        # serial_msg = msg.SerializeToString()
-        # socket.send(serial_msg)
+    #     # Send message to bridge process to stop running
+    #     # msg = detection_msg_pb2.Detection()
+    #     # msg.x = 0.0
+    #     # msg.y = 0.0
+    #     # msg.z = 0.0
+    #     # msg.label = 'closing'
+    #     # msg.confidence = 0.0
+    #     # serial_msg = msg.SerializeToString()
+    #     # socket.send(serial_msg)
 
-        # Export logs of frame analysis times
-        time_logger.records = np.asarray(times)
-        time_logger.export_single_col_csv(f'logs/main_times_{utils.RECORD_COUNTER}.csv')
+    #     # Export logs of frame analysis times
+    #     time_logger.records = np.asarray(times)
+    #     time_logger.export_single_col_csv(f'logs/main_times_{utils.RECORD_COUNTER}.csv')
         
-        # Close network connections and release video writers
-        # Save logs
-        receiver.close()
-        self.output.release()
-        self.output_depth.release()
-        self.output_raw.release()
-        self.output_grasp.release()
-        self.cam.release()
-        receiver.image_hub.close()
-        cv2.destroyAllWindows()
-        print(f'saving file to {utils.LOG_FILE}')
-        logger.export_to_csv(utils.LOG_FILE)
+    #     # Close network connections and release video writers
+    #     # Save logs
+    #     receiver.close()
+    #     self.output.release()
+    #     self.output_depth.release()
+    #     self.output_raw.release()
+    #     self.output_grasp.release()
+    #     self.cam.release()
+    #     receiver.image_hub.close()
+    #     cv2.destroyAllWindows()
+    #     print(f'saving file to {utils.LOG_FILE}')
+    #     logger.export_to_csv(utils.LOG_FILE)
 
 # while True:
 #     starting_time = time.time()

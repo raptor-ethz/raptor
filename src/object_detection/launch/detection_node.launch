@@ -1,0 +1,9 @@
+<launch>
+    <arg name="pkg_name" value="object_detection"/>
+    <arg name="node_name" default="detection_node"/>
+    <arg name="node_type" default="detection.py"/>
+
+    <arg name="req" default="true"/>
+    <arg name="output" default="screen"/>
+
+</launch>
