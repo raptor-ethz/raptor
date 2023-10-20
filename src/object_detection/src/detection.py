@@ -42,7 +42,7 @@ SHOW_WINDOW_VIS = True
 
 # Send output to external target application using ZMQ 
 # If this is enabled and the target application isn't connected, this application won't work
-SEND_OUTPUT = True
+SEND_OUTPUT = False
 
 # Use a naive localization method for the object centroid, just picking the center of the pointcloud
 SIMPLE_LOC = True
@@ -56,7 +56,7 @@ SEND_ROLLING_AVG = True
 RECORD_PCD_DATA = False
 
 # Target object the system will publish coordinates for
-TARGET_OBJECT = 'book'
+TARGET_OBJECT = 'person'
 
 class DetectionNode(Node):
     def __init__(self):
@@ -65,11 +65,11 @@ class DetectionNode(Node):
         self.color_sub = Subscriber(
             self,
             Image,
-            'color_images')
+            '/camera/color/image_raw')
         self.depth_sub = Subscriber(
             self,
             Image,
-            'depth_images')
+            '/camera/depth/image_rect_raw')
         self.publisher = self.create_publisher(Detection, 'detection', 10)
         # The receiver for the image frames sent over the local network
         # self.receiver = VideoReceiver()
@@ -126,12 +126,9 @@ class DetectionNode(Node):
         # serial_msg is the message that will be sent to the external target application
         # quad_pose is the pose we will receive from the external target application to perform frame transformations
         self.serial_msg = None
-        self.quad_pose = None
+        self.quad_pose = Detection()
 
-        self.quad_sub = Subscriber(
-            self,
-            Pose,
-            'px4_pose_nwu')
+        # self.quad_sub = self.create_subscription(Pose, 'px4_pose_nwu', self.quad_callback, 10)
 
         # This line is particularly important to get the class labels
         self.class_catalog = metadata.thing_classes
@@ -139,6 +136,15 @@ class DetectionNode(Node):
         ts = ApproximateTimeSynchronizer([self.color_sub, self.depth_sub], queue_size=10, slop=0.1, allow_headerless=True)
         # ts = ApproximateTimeSynchronizer([self.color_sub, self.depth_sub, self.quad_sub], queue_size=10, slop=0.1, allow_headerless=True)
         ts.registerCallback(self.callback)
+    
+    # def quad_callback(self, quad_pose):
+    #     self.quad_pose.x = quad_pose.x_m
+    #     self.quad_pose.y = quad_pose.y_m
+    #     self.quad_pose.z = quad_pose.z_m
+    #     self.quad_pose.roll = quad_pose.roll_deg
+    #     self.quad_pose.pitch = quad_pose.pitch_deg
+    #     self.quad_pose.yaw = quad_pose.yaw_deg
+        # print("Quad message received")
 
     def callback(self, frame, depth_frame):
         # Receive the frames from the ARM computer
@@ -146,6 +152,8 @@ class DetectionNode(Node):
         serial_msg = None
   
         cam_intrinsics = self.cam.intrinsics
+
+        # print("Image message received")
 
         frame = self.bridge.imgmsg_to_cv2(frame, desired_encoding='passthrough')
         depth_frame = self.bridge.imgmsg_to_cv2(depth_frame, desired_encoding='passthrough')
