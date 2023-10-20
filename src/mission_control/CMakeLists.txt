@@ -56,11 +56,63 @@ ament_target_dependencies(square
   rclcpp_action
   raptor_interface)
 
+# swoop
+add_executable(swoop src/missions/swoop.cpp)
+target_include_directories(swoop PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(swoop PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp)
+ament_target_dependencies(swoop 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
+# grasp
+add_executable(grasp src/missions/grasp.cpp)
+target_include_directories(grasp PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(grasp PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp)
+ament_target_dependencies(grasp 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
+# gripper_test
+add_executable(gripper_test src/missions/gripper_test.cpp)
+target_include_directories(gripper_test PUBLIC 
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>")
+target_sources(gripper_test PUBLIC 
+  src/mission_control.cpp
+  src/actions/arm.cpp
+  src/actions/land.cpp
+  src/actions/takeoff.cpp
+  src/actions/go_to_pos.cpp
+  src/actions/set_gripper.cpp)
+ament_target_dependencies(gripper_test 
+  rclcpp 
+  rclcpp_action
+  raptor_interface)
+
 
 # INSTALLATION
 install(TARGETS
   takeoff_test
   square
+  swoop
+  grasp
+  gripper_test
   DESTINATION lib/${PROJECT_NAME})
 
 
