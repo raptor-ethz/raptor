@@ -72,6 +72,23 @@ bool MissionControl::go_to_object(const std::array<float, 3> &offset,
   RCLCPP_INFO(this->get_logger(), "Going to object with offsets [%f, %f, %f].",
     offset[0], offset[1], offset[2]);
 
+  // check if object position is within the following bounds:
+  // x: [-2.5, 2.5]
+  // y: [-2.5, 2.5]
+  // z: [0.0, 1.0]
+  if (object_telemetry_->getPosition()[0] + offset[0] < -2.5 || object_telemetry_->getPosition()[0] + offset[0] > 2.5) {
+    RCLCPP_ERROR(this->get_logger(), "Object position out of bounds (x).");
+    return false;
+  }
+  if (object_telemetry_->getPosition()[1] + offset[1] < -2.5 || object_telemetry_->getPosition()[1] + offset[1] > 2.5) {
+    RCLCPP_ERROR(this->get_logger(), "Object position out of bounds (y).");
+    return false;
+  }
+  if (object_telemetry_->getPosition()[2] + offset[2] < 0.0 || object_telemetry_->getPosition()[2] + offset[2] > 1.0) {
+    RCLCPP_ERROR(this->get_logger(), "Object position out of bounds (z).");
+    return false;
+  }
+
   std::array<float, 3> target_position = {
     object_telemetry_->getPosition()[0] + offset[0],
     object_telemetry_->getPosition()[1] + offset[1],
