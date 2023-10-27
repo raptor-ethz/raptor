@@ -65,6 +65,9 @@ using std::chrono::milliseconds;
 using std::chrono::seconds;
 using std::this_thread::sleep_for;
 
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // MavSDK helper
 
@@ -111,16 +114,23 @@ std::shared_ptr<System> get_system(Mavsdk &mavsdk)
   return fut.get();
 }
 
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // parameters
 
-const int INTERVAL_RATE_HZ = 100;
-const int INTERVAL_MS = 1000. / INTERVAL_RATE_HZ;
+const int LOOP_RATE_HZ = 100;
 const int TELEMETRY_RATE_HZ = 100;
+// const int INTERVAL_MS = 1000. / LOOP_RATE_HZ;
+rclcpp::Rate loop_rate(LOOP_RATE_HZ);
 
 const std::string VICON_IDENTIFIER = "srl_raptor"; // TODO ros param
 constexpr static float yaw_offset_degrees = 0; // yaw offset local frame
 constexpr static float yaw_offset_radians = yaw_offset_degrees * M_PI / 180;
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // ROS publisher
@@ -133,7 +143,7 @@ public:
   {
     pose_publisher_ = this->create_publisher<raptor_interface::msg::Pose>("px4_pose_nwu", 10);
     velocity_publisher_ = this->create_publisher<raptor_interface::msg::Velocity>("px4_vel_nwu", 10);
-    acceleration_publisher_ = this->create_publisher<raptor_interface::msg::Acceleration>("px4_acc_flu", 10);
+    // acceleration_publisher_ = this->create_publisher<raptor_interface::msg::Acceleration>("px4_acc_flu", 10);
   }
 
   void publish_pose(raptor_interface::msg::Pose &message) 
@@ -146,16 +156,19 @@ public:
     velocity_publisher_->publish(message);
   }
 
-  void publish_acceleration(raptor_interface::msg::Acceleration &message) 
-  {
-    acceleration_publisher_->publish(message);
-  }
+  // void publish_acceleration(raptor_interface::msg::Acceleration &message) 
+  // {
+  //   acceleration_publisher_->publish(message);
+  // }
 
 private:
   rclcpp::Publisher<raptor_interface::msg::Pose>::SharedPtr pose_publisher_;
   rclcpp::Publisher<raptor_interface::msg::Velocity>::SharedPtr velocity_publisher_;
-  rclcpp::Publisher<raptor_interface::msg::Acceleration>::SharedPtr acceleration_publisher_;
+  // rclcpp::Publisher<raptor_interface::msg::Acceleration>::SharedPtr acceleration_publisher_;
 };
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // main
@@ -206,11 +219,11 @@ int main(int argc, char *argv[])
    std::cout << "Failed to set subscription rate for attitude: " << (int)sub_rate_result << std::endl;
     return 1;
   }
-  sub_rate_result = telemetry.set_rate_imu(TELEMETRY_RATE_HZ);
-  if (sub_rate_result != mavsdk::Telemetry::Result::Success) {
-   std::cout << "Failed to set subscription rate for imu: " << (int)sub_rate_result << std::endl;
-    return 1;
-  }
+  // sub_rate_result = telemetry.set_rate_imu(TELEMETRY_RATE_HZ);
+  // if (sub_rate_result != mavsdk::Telemetry::Result::Success) {
+  //  std::cout << "Failed to set subscription rate for imu: " << (int)sub_rate_result << std::endl;
+  //   return 1;
+  // }
   std::cout << "Successfully set subscription rates for pos_vel, attitude, and imu." << std::endl;
 
   // Prepare MavSDK mocap command
@@ -358,12 +371,8 @@ int main(int argc, char *argv[])
 
     ViconDataStreamSDK::CPP::Client &MyClient(DirectClient);
 
-    // timing
-    std::chrono::steady_clock clock;
-    std::chrono::time_point<std::chrono::steady_clock> loop_start_time = clock.now();
-    std::chrono::duration<double, std::milli> loop_time_ms;
-    // const std::chrono::high_resolution_clock::time_point StartTime =
-    //     std::chrono::high_resolution_clock::now();
+
+
 
     ////////////////////////////////////////////////////////////// main loop POI
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Vicon interface is ready.");
@@ -379,15 +388,21 @@ int main(int argc, char *argv[])
       // OutputStream << "Waiting for new frame...";
       while (MyClient.GetFrame().Result != Result::Success)
       {
-// Sleep a little so that we don't lumber the CPU with a busy poll
-#ifdef WIN32
-        Sleep(200);
-#else
-        sleep(1);
-#endif
+        // Sleep a little so that we don't lumber the CPU with a busy poll
+        // #ifdef WIN32
+        //         Sleep(200);
+        // #else
+        //         sleep(1);
+        // #endif
 
-        OutputStream << ".";
-        OutputStream << std::endl;
+        // OutputStream << "No frame received from Vicon.";
+        // OutputStream << std::endl;
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "No frame received from Vicon.");
+        if (!rclcpp::ok()) {
+          rclcpp::shutdown();
+          exit(0);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
       }
 
       // We have to call this after the call to get frame, otherwise we don't
@@ -587,29 +602,28 @@ int main(int argc, char *argv[])
       //   OutputStream << "    Quality: " << Quality << std::endl;
       // }
 
-      /////////////////////////////////////////////////////////// POI
-      // timer
-      loop_time_ms = clock.now() - loop_start_time;
-      // Run at requested interval
-      std::this_thread::sleep_until(loop_start_time + std::chrono::milliseconds(INTERVAL_MS));
-      // reset clock
-      loop_start_time = clock.now();
 
-      // Publish data if data is valid
-      if (!(abs(vision_msg.position_body.x_m) < 0.0001 &&
+
+
+      /////////////////////////////////////////////////////////// POI
+      // check if vicon data is valid
+      if (abs(vision_msg.position_body.x_m) < 0.0001 &&
             abs(vision_msg.position_body.y_m) < 0.0001 &&
-            abs(vision_msg.position_body.z_m) < 0.0001)) {
-        vision.set_vision_position_estimate(vision_msg);
+            abs(vision_msg.position_body.z_m) < 0.0001) {
+        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Vicon data is invalid.");
+        continue;
       }
+
+      vision.set_vision_position_estimate(vision_msg);
 
       // telemetry
       auto pose_msg = raptor_interface::msg::Pose();
       auto vel_msg = raptor_interface::msg::Velocity();
-      auto acc_msg = raptor_interface::msg::Acceleration();
+      // auto acc_msg = raptor_interface::msg::Acceleration();
 
       const auto& pos_vel = telemetry.position_velocity_ned();
       const auto& attitude_euler = telemetry.attitude_euler();
-      const auto& imu = telemetry.imu();
+      // const auto& imu = telemetry.imu();
       
       pose_msg.x_m = pos_vel.position.north_m;
       pose_msg.y_m = - pos_vel.position.east_m;
@@ -622,14 +636,35 @@ int main(int argc, char *argv[])
       vel_msg.y_m_s = - pos_vel.velocity.east_m_s;
       vel_msg.z_m_s = - pos_vel.velocity.down_m_s;
 
-      acc_msg.x_m_s2 = imu.acceleration_frd.forward_m_s2;
-      acc_msg.y_m_s2 = - imu.acceleration_frd.right_m_s2;
-      acc_msg.z_m_s2 = - imu.acceleration_frd.down_m_s2;
+      // acc_msg.x_m_s2 = imu.acceleration_frd.forward_m_s2;
+      // acc_msg.y_m_s2 = - imu.acceleration_frd.right_m_s2;
+      // acc_msg.z_m_s2 = - imu.acceleration_frd.down_m_s2;
 
       node->publish_pose(pose_msg);
       node->publish_velocity(vel_msg);
-      node->publish_acceleration(acc_msg);
+      // node->publish_acceleration(acc_msg);
       rclcpp::spin_some(node);
-    }
-  }
+
+
+      // dev printers
+      // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
+      //     "Vicon position: [%f, %f, %f | %f, %f, %f]",
+      //     vision_msg.position_body.x_m,
+      //     vision_msg.position_body.y_m,
+      //     vision_msg.position_body.z_m,
+      //     vision_msg.angle_body.roll_rad,
+      //     vision_msg.angle_body.pitch_rad,
+      //     vision_msg.angle_body.yaw_rad);
+
+      // RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+      //     "PX4 position: [%f, %f, %f | %f, %f, %f]",
+      //     pose_msg.x_m,
+      //     pose_msg.y_m,
+      //     pose_msg.z_m,
+      //     pose_msg.roll_deg,
+      //     pose_msg.pitch_deg,
+      //     pose_msg.yaw_deg);
+
+    } // main loop end
+  } // connection loop end
 }
