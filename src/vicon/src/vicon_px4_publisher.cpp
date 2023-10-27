@@ -648,7 +648,7 @@ int main(int argc, char *argv[])
 
       // dev printers
       // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), 
-      //     "Vicon position: [%f, %f, %f | %f, %f, %f]",
+      //     "Vicon pose: [%f, %f, %f | %f, %f, %f]",
       //     vision_msg.position_body.x_m,
       //     vision_msg.position_body.y_m,
       //     vision_msg.position_body.z_m,
@@ -657,7 +657,7 @@ int main(int argc, char *argv[])
       //     vision_msg.angle_body.yaw_rad);
 
       // RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
-      //     "PX4 position: [%f, %f, %f | %f, %f, %f]",
+      //     "PX4 pose: [%f, %f, %f | %f, %f, %f]",
       //     pose_msg.x_m,
       //     pose_msg.y_m,
       //     pose_msg.z_m,
