@@ -120,7 +120,7 @@ std::shared_ptr<System> get_system(Mavsdk &mavsdk)
 ////////////////////////////////////////////////////////////////////////////////
 // parameters
 
-const int LOOP_RATE_HZ = 100;
+const int LOOP_RATE_HZ = 150;
 const int TELEMETRY_RATE_HZ = 100;
 // const int INTERVAL_MS = 1000. / LOOP_RATE_HZ;
 rclcpp::Rate loop_rate(LOOP_RATE_HZ);
@@ -664,6 +664,10 @@ int main(int argc, char *argv[])
       //     pose_msg.roll_deg,
       //     pose_msg.pitch_deg,
       //     pose_msg.yaw_deg);
+
+
+      // control loop rate
+      loop_rate.sleep();
 
     } // main loop end
   } // connection loop end
