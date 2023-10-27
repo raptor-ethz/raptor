@@ -465,10 +465,10 @@ int main(int argc, char *argv[])
       }
       
       // transform
-      message.y_m = -message.y_m;
-      message.z_m = message.z_m;
-      message.pitch_deg = -message.pitch_deg;
-      message.yaw_deg = -message.yaw_deg;
+      // message.y_m = -message.y_m;
+      // message.z_m = message.z_m;
+      // message.pitch_deg = -message.pitch_deg;
+      // message.yaw_deg = -message.yaw_deg;
 
       node->publish(message);
       // rclcpp::spin_some(node);

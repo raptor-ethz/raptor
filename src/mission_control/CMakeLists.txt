@@ -83,7 +83,8 @@ target_sources(grasp PUBLIC
   src/actions/arm.cpp
   src/actions/land.cpp
   src/actions/takeoff.cpp
-  src/actions/go_to_pos.cpp)
+  src/actions/go_to_pos.cpp
+  src/actions/set_gripper.cpp)
 ament_target_dependencies(grasp 
   rclcpp 
   rclcpp_action

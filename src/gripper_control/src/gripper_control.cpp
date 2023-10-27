@@ -24,6 +24,7 @@ Gripper::Gripper(const std::string &port) : Node("gripper_control") {
     "set_gripper", std::bind(&Gripper::setGripper, this, _1, _2));
 }
 
+// TODO LEFT ANGLE = FRONT
 void Gripper::setGripper(const std::shared_ptr<SetGripper::Request> request,
                           std::shared_ptr<SetGripper::Response> response)
 {

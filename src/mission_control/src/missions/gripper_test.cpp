@@ -5,10 +5,12 @@
 
 
 
-std::array<float, 3> home_position = {0.0, 0.0, 0.7};
-std::array<float, 3> home_position_low = {0.0, 0.0, 0.4};
+std::array<float, 3> home_position = {0.0, 0.0, 0.5};
+std::array<float, 3> home_position_low = {0.0, 0.0, 0.2};
 
-std::array<float, 3> target_position = {1.0, -1.0, 0.7};
+std::array<float, 3> target_position = {0.0, 0.5, 0.5};
+
+// NOTE: left angle = front
 
 
 int main(int argc, char *argv[])
@@ -20,6 +22,10 @@ int main(int argc, char *argv[])
   auto mission_control_node = std::make_shared<MissionControl>();
   if(!rclcpp::ok()) {mission_control_node->shutdown();}
   RCLCPP_INFO(mission_control_node->get_logger(), "Starting mission.");
+  
+  // TODO avoid error
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // wait a bit
+  mission_control_node->setGripper(90, 90); // open gripper
 
   // takeoff
   if(!mission_control_node->arm()) {mission_control_node->shutdown();}
@@ -27,6 +33,8 @@ int main(int argc, char *argv[])
 
   // mission
   if(!mission_control_node->go_to_pos(target_position, 0.0, 4.0, true)) {mission_control_node->shutdown();}
+  mission_control_node->setGripper(90, 90); // open gripper
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // wait a bit
   mission_control_node->setGripper(0, 0); // close gripper
   std::this_thread::sleep_for(std::chrono::milliseconds(2000)); // wait a bit
   mission_control_node->setGripper(90, 90); // open gripper again

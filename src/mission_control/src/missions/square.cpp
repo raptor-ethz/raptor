@@ -9,10 +9,10 @@ std::array<float, 3> home_position = {0.0, 0.0, 0.7};
 std::array<float, 3> home_position_low = {0.0, 0.0, 0.4};
 
 // small square
-std::array<float, 3> edge_1 = {-0.5, -2.0, 0.7};
-std::array<float, 3> edge_2 = {0.5, -2.0, 0.7};
-std::array<float, 3> edge_3 = {0.5, -1.0, 0.7};
-std::array<float, 3> edge_4 = {-0.5, -1.0, 0.7};
+std::array<float, 3> edge_1 = {-0.5, -0.5, 0.7};
+std::array<float, 3> edge_2 = {-0.5, 0.5, 0.7};
+std::array<float, 3> edge_3 = {0.5, 0.5, 0.7};
+std::array<float, 3> edge_4 = {0.5, -0.5, 0.7};
 
 // big square
 std::array<float, 3> edge_5 = {-0.5, -2.0, 1.0};
@@ -69,7 +69,7 @@ std::array<std::array<float, 3>, 9> small_big_square_3d = {
 
 
 
-auto waypoints = small_big_square_3d; // choose which square to fly
+auto waypoints = small_square; // choose which square to fly
 
 
 int main(int argc, char *argv[])
