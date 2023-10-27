@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
       unsigned int SubjectIndex = 0;
       for (unsigned int i = 0; i < SubjectCount; ++i)
       {
-        std::string SubjectName = MyClient.GetSubjectName(SubjectIndex).SubjectName;
+        std::string SubjectName = MyClient.GetSubjectName(i).SubjectName;
 
         if (SubjectName.compare(VICON_IDENTIFIER) == 0)
         {
