@@ -4,6 +4,8 @@ from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 from launch.conditions import IfCondition
+from ament_index_python.packages import get_package_share_directory
+import os
 
 
 def launch_setup(context, *args, **kwargs):
@@ -15,10 +17,16 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
+    pkg_spectacular_vio = FindPackageShare("spectacular_vio")
     rviz_node = Node(
         condition=IfCondition(LaunchConfiguration("use_rviz").perform(context)),
         package='rviz2', executable='rviz2', output='screen',
-        arguments=['--display-config', 'launch/spectacular.rviz']
+        arguments=[
+            '-d', PathJoinSubstitution([
+                FindPackageShare("spectacular_vio"),
+                'spectacular.rviz'
+            ])
+        ]
     )
 
     return [
