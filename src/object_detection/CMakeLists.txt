@@ -8,7 +8,7 @@ project(object_detection)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-find_package(cv_bridge REQUIRED)
+# find_package(cv_bridge REQUIRED)
 # ros custom
 find_package(raptor_interface REQUIRED)
 # external

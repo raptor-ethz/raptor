@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 
 import numpy as np
@@ -10,8 +11,13 @@ from realsense import RSCamera
 
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
+from message_filters import ApproximateTimeSynchronizer
+from message_filters import Subscriber
+
+
+import tqdm
 
 # image_hub = imagezmq.ImageHub()
 # while True:  # show streamed images until Ctrl-C
@@ -74,35 +80,55 @@ from cv_bridge import CvBridge
 class VideoReceiver(Node):
     def __init__(self):
         super().__init__('video_receiver')
-        self.color_subscription = self.create_subscription(
-            Image,
-            'color_images',
-            self.color_callback,
-            10)
-        self.depth_subscription = self.create_subscription(
-            Image,
-            'depth_images',
-            self.depth_callback,
-            10)
+        # self.color_subscription = self.create_subscription(
+        #     CompressedImage,
+        #     '/camera/color/image_raw/compressed',
+        #     self.color_callback,
+        #     1)
+        # self.depth_subscription = self.create_subscription(
+        #     CompressedImage,
+        #     '/camera/depth/image_rect_raw/compressed',
+        #     self.depth_callback,
+        #     1)
+        self.color_sub = Subscriber(
+            self,
+            CompressedImage,
+            '/camera/color/image_raw/compressed')
+        self.depth_sub = Subscriber(
+            self,
+            CompressedImage,
+            '/camera/depth/image_rect_raw/compressed')
         self.bridge = CvBridge()
         self.delays = []
         self.logger = Logger()
+        self.color_timer = tqdm.tqdm(total=1)
+        self.depth_timer = tqdm.tqdm(total=1)
 
-    def color_callback(self, msg):
+        ts = ApproximateTimeSynchronizer([self.color_sub, self.depth_sub], queue_size=10, slop=0.1, allow_headerless=True)
+        ts.registerCallback(self.callback)
+
+    def callback(self, color_msg, depth_msg):
         # Convert the ROS Image message to a CV Image
-        cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        # cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
-        print("Color image received")
+        np_arr = np.frombuffer(color_msg.data, np.uint8)
+        color = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        cv2.imshow('color', color)
+        cv2.waitKey(1)
+
+        # self.color_timer.update(1)
+        # print("Color and depth images received")
 
         # delay = (self.get_clock().now().nanoseconds() - msg.header.stamp.nanosec) / 1e9
         # print(msg.header)
         # print(f'Color image arrived with delay of {delay}')
 
-    def depth_callback(self, msg):
+    # def depth_callback(self, msg):
         # Convert the ROS Image message to a CV Image
-        cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+        # cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
 
-        print("Depth image received")
+        # self.depth_timer.update(1)
+        # print("Depth image received")
 
         # delay = (self.get_clock().now().nanoseconds() - msg.header.stamp.nanoseconds) / 1e9
         # print(f'Depth image arrived with delay of {delay}')

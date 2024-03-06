@@ -31,7 +31,7 @@ from message_filters import ApproximateTimeSynchronizer, Subscriber
 
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
 from raptor_interface.msg import Detection, Pose
 
@@ -64,12 +64,12 @@ class DetectionNode(Node):
         self.starting_time = time.time()
         self.color_sub = Subscriber(
             self,
-            Image,
-            '/camera/color/image_raw')
+            CompressedImage,
+            '/color_compressed')
         self.depth_sub = Subscriber(
             self,
-            Image,
-            '/camera/depth/image_rect_raw')
+            CompressedImage,
+            '/depth_compressed')
         self.publisher = self.create_publisher(Detection, 'detection', 10)
         # The receiver for the image frames sent over the local network
         # self.receiver = VideoReceiver()
@@ -155,8 +155,14 @@ class DetectionNode(Node):
 
         # print("Image message received")
 
-        frame = self.bridge.imgmsg_to_cv2(frame, desired_encoding='passthrough')
-        depth_frame = self.bridge.imgmsg_to_cv2(depth_frame, desired_encoding='passthrough')
+        # frame = self.bridge.imgmsg_to_cv2(frame, desired_encoding='passthrough')
+        frame_arr = np.frombuffer(frame.data, np.uint8)
+        frame = cv2.imdecode(frame_arr, cv2.IMREAD_COLOR)
+        # frame = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)  
+
+        # depth_frame = self.bridge.imgmsg_to_cv2(depth_frame, desired_encoding='passthrough')
+        depth_arr = np.frombuffer(depth_frame.data, np.uint8)
+        depth_frame = cv2.imdecode(depth_arr, cv2.IMREAD_ANYDEPTH)
 
         # Write the RGB frame to the output without annotations        
         # self.output_raw.write(frame)
