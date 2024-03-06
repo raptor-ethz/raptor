@@ -17,7 +17,6 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    pkg_spectacular_vio = FindPackageShare("spectacular_vio")
     rviz_node = Node(
         condition=IfCondition(LaunchConfiguration("use_rviz").perform(context)),
         package='rviz2', executable='rviz2', output='screen',
